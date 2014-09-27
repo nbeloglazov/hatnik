@@ -6,5 +6,5 @@
   (:use [jayq.core :only [$]]))
 
 (om/root widget/form-view state/app-state
-         {:target (. js/document (getElementById "iModalContent"))})
+         {:target (. js/document (getElementById "iModalDialog"))})
 

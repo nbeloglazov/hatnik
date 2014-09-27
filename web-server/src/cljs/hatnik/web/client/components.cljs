@@ -26,6 +26,15 @@
   (dom/p nil
          (get action "type")))
 
+(defn test-action [id]
+  (js/alert (str "Add new action for project id " id)))
+
+
+(defn add-new-action [project-id]
+  (dom/a #js {:className "btn btn-default"
+              :onClick #(test-action project-id)}
+         "Add new action"))
+
 
 (defn actions-table [id actions]
   (let [rendered 
@@ -36,9 +45,9 @@
     (apply dom/div #js {:className "row"}
            (concat rendered
                    [(dom/div #js {:className "col-md-4"} 
-                             (dom/p nil "Add new Action"))]))))                   
+                             (add-new-action id))]))))                   
 
-(defn project-header [id project]
+(defn project-header [project]
   (dom/div #js {:className "project-header"}
    (dom/p nil (get project "name"))
    (dom/span #js {:className "glyphicon glyphicon-pencil project-header-button"})))
@@ -51,7 +60,7 @@
        (map 
         (fn [prj]
           (accordion-panel
-           :header (project-header (get prj "id") prj)
+           :header (project-header prj)
            :body (actions-table (get prj "id") (get prj "actions"))
            :body-id (str "__" (get prj "name"))))
         (:projects data))))))

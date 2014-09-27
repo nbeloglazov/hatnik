@@ -12,8 +12,12 @@
 
 (defn create-user [email]
   (timbre/info "Creating new user" email)
-  {:email email
-   :id (stg/create-user! @stg/storage email)})
+  (let [id (stg/create-user! @stg/storage email)]
+    (timbre/info "Create default project for user")
+    (stg/create-project! @stg/storage {:name "Default"
+                                       :user-id id})
+    {:email email
+     :id id}))
 
 (defn github-login [code state]
   (let [resp (client/post "https://github.com/login/oauth/access_token"

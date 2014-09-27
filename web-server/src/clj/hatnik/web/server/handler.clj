@@ -3,10 +3,12 @@
             [compojure.core :refer :all]
             [compojure.handler :as handler]
             [compojure.route :as route]
+
             [hatnik.web.server.renderer :as renderer]
             [hatnik.web.server.projects :refer [projects-api]]
             [hatnik.web.server.actions :refer [actions-api]]
             [hatnik.web.server.login :refer [login-api]]
+
             [ring.middleware.json :as json]
             [ring.adapter.jetty :refer [run-jetty]]
             [ring.middleware.stacktrace :as stacktrace]))
@@ -28,7 +30,8 @@
 (def app
   (-> #'app-routes
       dump-request
-      handler/site
+      (handler/site {:session {:cookie-attrs {:max-age 3600
+                                              :http-only true}}})
       (json/wrap-json-body {:keywords? true})
       json/wrap-json-response
       stacktrace/wrap-stacktrace))

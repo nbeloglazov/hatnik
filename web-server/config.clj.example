@@ -6,4 +6,8 @@
          :port 27017
          :db "hatnik"
          :drop? false ; if true - clears existing db
-         }}
+         }
+
+ :enable-force-login false ; if true, enabled /api/force-login method that
+                           ; logins by email without any authorization
+                           }

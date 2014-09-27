@@ -4,8 +4,8 @@
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/clojurescript "0.0-2356"]
                  [compojure "1.1.8"]
-                 [om "0.7.3"]
-                 [racehub/om-bootstrap "0.3.0"]]
+                 [racehub/om-bootstrap "0.3.0"]
+                 [om "0.7.3"]]
 
   :plugins [[lein-ring "0.8.11"]
             [lein-cljsbuild "1.0.3"]]

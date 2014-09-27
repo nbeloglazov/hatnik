@@ -13,6 +13,7 @@
             [hatnik.db.storage :as stg]
             [hatnik.db.memory-storage :refer [create-memory-storage]]
             [hatnik.db.mongo-storage :refer [create-mongo-storage]]
+            [hatnik.versions :as ver]
 
             [ring.util.response :as resp]
             [ring.middleware.json :as json]
@@ -34,10 +35,10 @@
                      (create-mongo-storage (:mongo config)))))
   (timbre/info "Initialisation finished."))
 
-(defn library-version [group artifact]
+(defn library-version [library]
   (resp/response
    {:result :ok
-    :version "1.6.0"}))
+    :version (ver/latest-release library)}))
 
 (defn wrap-authenticated-only [handler]
   (fn [req]
@@ -56,7 +57,7 @@
            (context "/actions" []
                     (wrap-authenticated-only actions-api))
            login-api
-           (GET "/library-version" [group artifact] (library-version group artifact)))
+           (GET "/library-version" [library] (library-version library)))
   (route/resources "/")
   (route/not-found "Not Found"))
 

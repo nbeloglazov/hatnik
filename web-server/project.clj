@@ -10,6 +10,7 @@
                  [tentacles "0.2.5"]
                  [com.taoensso/timbre "3.3.1"]
                  [com.novemberain/monger "2.0.0"]
+                 [ancient-clj "0.1.10"]
 
                  ; ClojureScript
                  [org.clojure/clojurescript "0.0-2356"]

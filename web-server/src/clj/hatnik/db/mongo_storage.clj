@@ -28,6 +28,9 @@
   (get-user [storage email]
     (norm-id (mc/find-one-as-map db users {:email email})))
 
+  (get-user-by-id [storage id]
+    (norm-id (mc/find-map-by-id db users (to-object-id id))))
+
   (create-user! [storage email]
     (if-let [user (get-user storage email)]
       (:id user)
@@ -40,6 +43,9 @@
   (get-projects [storage user-id]
     (->> (mc/find-maps db projects {:user-id user-id})
          (map norm-id)))
+
+  (get-project [storage id]
+    (norm-id (mc/find-map-by-id db projects (to-object-id id))))
 
   (create-project! [storage data]
     (-> (mc/insert-and-return db projects data)

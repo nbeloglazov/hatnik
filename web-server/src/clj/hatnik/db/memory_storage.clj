@@ -13,6 +13,11 @@
          (filter #(= email (:email %)))
          first))
 
+  (get-user-by-id [storage id]
+    (->> (:users @atom)
+         (filter #(= id (:id %)))
+         first))
+
   (create-user! [storage email]
     (if-let [user (get-user storage email)]
       (:id user)
@@ -26,6 +31,11 @@
   (get-projects [storage user-id]
     (->> (:projects @atom)
          (filter #(= user-id (:user-id %)))))
+
+  (get-project [storage id]
+    (->> (:projects @atom)
+         (filter #(= id (:id %)))
+         first))
 
   (create-project! [storage data]
     (let [id (next-id)]

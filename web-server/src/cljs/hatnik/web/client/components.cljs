@@ -22,3 +22,31 @@
                     (dom/div #js {:className "panel-body"}
                              body))))
 
+(defn render-action [action]
+  (dom/p nil
+         (get action "type")))
+
+(defn actions-table [actions]
+  (let [rendered 
+        (map (fn [action]
+               (dom/div #js {:className "col-md-4"}
+                        (render-action action)))
+             actions)]
+    (apply dom/div #js {:className "row"}
+           (concat rendered
+                   [(dom/div #js {:className "col-md-4"} 
+                             (dom/p nil "Add new Action"))]))))                   
+
+
+(defn project-list [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (apply dom/div nil
+       (map 
+        (fn [prj]
+          (accordion-panel
+           :header (get prj "name")
+           :body (actions-table (get prj "actions"))
+           :body-id (str "__" (get prj "name"))))
+        (:projects data))))))

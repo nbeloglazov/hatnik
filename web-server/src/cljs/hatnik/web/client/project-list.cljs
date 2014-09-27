@@ -8,20 +8,7 @@
   (atom {:projects []}))
 
 
-(defn project-list-widget [data owner]
-  (reify
-    om/IRender
-    (render [this]
-      (apply dom/div nil
-       (map 
-        (fn [prj]
-          (widget/accordion-panel
-           :header (get prj "name")
-           :body (dom/p nil "This project is good.")
-           :body-id (str "__" (get prj "name"))))
-        (:projects data))))))
-
-(om/root project-list-widget app-state
+(om/root widget/project-list app-state
          {:target (. js/document (getElementById "iProjectList"))})
 
 

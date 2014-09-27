@@ -1,6 +1,6 @@
 ### Hatnik
 
-Hatnik is a web app which aims to help you to track library releases. The idea is pretty simple: setup actions to be performed once some library is released. Action consists of 2 parts: library to watch and an instruction to perform. Example: send email to me@nbeloglazov.com once when org.clojure/clojurescript releases. Pla to support following actions: email, github issue, github pull request, change wiki on github. Initially we're going to support only email and add others if we have enough time during the contest.
+Hatnik is a web app which aims to help you to track library releases. The idea is pretty simple: setup actions to be performed once some library is released. Action consists of 2 parts: library to watch and an instruction to perform. Example: send email to my@email.com once when org.clojure/clojurescript releases. Pla to support following actions: email, github issue, github pull request, change wiki on github. Initially we're going to support only email and add others if we have enough time during the contest.
 
 #### Actions
 

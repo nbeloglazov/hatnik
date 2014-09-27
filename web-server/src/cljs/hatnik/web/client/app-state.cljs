@@ -18,3 +18,8 @@
          action-type))
 
 
+(defn add-new-project [id name]
+  (swap! app-state
+         assoc :projects
+         (into [{"id" id "name" name}]
+               (:projects @app-state))))

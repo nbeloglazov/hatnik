@@ -12,6 +12,7 @@
             [hatnik.config :refer [config]]
             [hatnik.db.storage :as stg]
             [hatnik.db.memory-storage :refer [create-memory-storage]]
+            [hatnik.db.mongo-storage :refer [create-mongo-storage]]
 
             [ring.util.response :as resp]
             [ring.middleware.json :as json]
@@ -21,7 +22,16 @@
 (defn initialise []
   (timbre/info "Initialisation started.")
   (timbre/set-level! (:log-level config))
-  (reset! stg/storage (create-memory-storage))
+  (reset! stg/storage
+          (case (:db config)
+            :memory (do
+                      (timbre/info "Using memory db")
+                      (create-memory-storage))
+            :mongo (do
+                     (timbre/info "Using mongo db"
+                                  (select-keys (:mongo config)
+                                               [:host :port :db :drop?]))
+                     (create-mongo-storage (:mongo config)))))
   (timbre/info "Initialisation finished."))
 
 (defn library-version [group artifact]

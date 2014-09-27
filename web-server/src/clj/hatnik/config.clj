@@ -1,10 +1,13 @@
 (ns hatnik.config)
 
 (def default-config
-  {:log-level :info})
+  {:log-level :info
+   :db :memory})
 
 (def config-file "config.clj")
 
 (def config
-  (try (read-string (slurp config-file))
-       (catch Exception e default-config)))
+  (merge
+   default-config
+   (try (read-string (slurp config-file))
+        (catch Exception e {}))))

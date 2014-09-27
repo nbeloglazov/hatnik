@@ -1,2 +1,13 @@
 {:github-id "GITHUB_CLIENT_ID"
- :github-secret "GITHUB_CLIENT_SECRET"}
+ :github-secret "GITHUB_CLIENT_SECRET"
+ :log-level :debug ; default is :info
+ :db :mongo ; or :memory
+ :mongo {:host "localhost"
+         :port 27017
+         :db "hatnik"
+         :drop? false ; if true - clears existing db
+         }
+
+ :enable-force-login false ; if true, enabled /api/force-login method that
+                           ; logins by email without any authorization
+                           }

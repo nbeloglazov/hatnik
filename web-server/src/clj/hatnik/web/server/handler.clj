@@ -3,7 +3,8 @@
             [compojure.handler :as handler]
             [compojure.route :as route]
             [hiccup.core :as hc]
-            [clojure.data.json :as json]))
+            [clojure.data.json :as json]
+            [hatnik.web.server.example-data :as ex-data]))
 
 (defn page-html-head []
   (hc/html
@@ -29,18 +30,13 @@
 
     [:script {:src "/js/jquery-2.1.1.min.js"}]    
     [:script {:src "/js/bootstrap.min.js"}]
+    [:script {:src "http://fb.me/react-0.11.1.js"}]
     [:script {:src "/gen/js/hatnik.js"}]]))
-
-(defn get-projects [req]
-  [{:name "foo"
-    :actions [1 2 3 4 5]}
-   {:name "baz"
-    :actions ["a" 123 23521 2345]}])
 
 
 (defroutes app-routes
   (GET "/" [] core-page)
-  (GET "/projects" req (json/write-str (get-projects req)))
+  (GET "/projects" req (json/write-str ex-data/project-response))
   (route/resources "/")
   (route/not-found "Not Found"))
 

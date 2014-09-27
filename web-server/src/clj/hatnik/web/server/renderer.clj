@@ -23,6 +23,11 @@
 
      [:div#iProjectList.panel-group "Loading..."]]
 
+    [:div#iModal.modal.fade
+     [:div.modal-dialog
+      [:div#iModalContent.modal-content
+       ]]]
+
     [:script {:src "/js/jquery-2.1.1.min.js"}]    
     [:script {:src "/js/bootstrap.min.js"}]
     [:script {:src "http://fb.me/react-0.11.1.js"}]

@@ -31,5 +31,5 @@
         data (js->clj json)]
     (when (= "ok" (get data "result"))
       (swap! app-state
-             assoc :user
-             {"email" (get data "email")}))))
+             assoc-in [:user :email]
+             (get data "email")))))

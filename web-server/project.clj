@@ -6,6 +6,8 @@
                  [ring "1.3.1"]
                  [compojure "1.1.8"]
                  [ring/ring-json "0.3.1"]
+                 [clj-http "1.0.0"]
+                 [tentacles "0.2.5"]
 
                  ; CLojureScript
                  [org.clojure/clojurescript "0.0-2356"]

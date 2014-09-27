@@ -1,9 +1,14 @@
 (defproject hatnik.web "0.1.0-SNAPSHOT"
   :description "FIXME: write description"
   :url "http://example.com/FIXME"
-  :dependencies [[org.clojure/clojure "1.6.0"]
-                 [org.clojure/clojurescript "0.0-2356"]
+  :dependencies [; Clojure
+                 [org.clojure/clojure "1.6.0"]
+                 [ring "1.3.1"]
                  [compojure "1.1.8"]
+                 [ring/ring-json "0.3.1"]
+
+                 ; CLojureScript
+                 [org.clojure/clojurescript "0.0-2356"]
                  [racehub/om-bootstrap "0.3.0"]
                  [om "0.7.3"]]
 

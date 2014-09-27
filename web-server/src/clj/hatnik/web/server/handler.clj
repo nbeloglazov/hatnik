@@ -2,43 +2,35 @@
   (:require [compojure.core :refer :all]
             [compojure.handler :as handler]
             [compojure.route :as route]
-            [hiccup.core :as hc]
-            [clojure.data.json :as json]
-            [hatnik.web.server.example-data :as ex-data]))
-
-(defn page-html-head []
-  (hc/html
-   [:head
-    [:title "Hatnik"]
-    [:link {:rel "stylesheet" :href "/css/bootstrap.min.css"}]]))
-
-
-(defn page-header [])
-
-(defn core-page [req]
-  (hc/html
-   (page-html-head)
-   
-   [:body
-    (page-header)
-
-    [:div.container
-     [:div.page-header
-      [:h2 "Project list"]]
-
-     [:div#iProjectList.panel-group "Loading..."]]
-
-    [:script {:src "/js/jquery-2.1.1.min.js"}]    
-    [:script {:src "/js/bootstrap.min.js"}]
-    [:script {:src "http://fb.me/react-0.11.1.js"}]
-    [:script {:src "/gen/js/hatnik.js"}]]))
-
+            [hatnik.web.server.example-data :as ex-data]
+            [hatnik.web.server.renderer :as renderer]
+            [ring.util.response :as resp]
+            [ring.middleware.json :as json]
+            [ring.adapter.jetty :refer [run-jetty]]
+            [ring.middleware.stacktrace :as stacktrace]))
 
 (defroutes app-routes
-  (GET "/" [] core-page)
-  (GET "/projects" req (json/write-str ex-data/project-response))
+  (GET "/" [] renderer/core-page)
+  (GET "/projects" [] (resp/response ex-data/project-response))
   (route/resources "/")
   (route/not-found "Not Found"))
 
+(defn dump-request [handler]
+  (fn [req]
+    (clojure.pprint/pprint req)
+    (handler req)))
+
 (def app
-  (handler/site app-routes))
+  (-> #'app-routes
+      dump-request
+      handler/site
+      (json/wrap-json-body {:keywords? true})
+      json/wrap-json-response
+      stacktrace/wrap-stacktrace))
+
+(comment
+
+   (def server (run-jetty #(app %) {:port 8080 :join? false}))
+
+   (.stop server)
+)

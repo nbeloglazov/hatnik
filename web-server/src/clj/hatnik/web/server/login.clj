@@ -4,9 +4,15 @@
             [compojure.core :refer :all]
             [clj-http.client :as client]
             [hatnik.config :refer [config]]
-            [tentacles.users :as github]))
+            [tentacles.users :as github]
+            [hatnik.db.storage :as stg]))
 
 ; https://github.com/login/oauth/authorize?scope=user:email&client_id=f850785344ec6d812ab2
+
+(defn create-user [email]
+  (timbre/info "Creating new user" email)
+  {:email email
+   :id (stg/create-user! @stg/storage email)})
 
 (defn github-login [code state]
   (let [resp (client/post "https://github.com/login/oauth/access_token"
@@ -28,12 +34,14 @@
                   "emails:" emails
                   "selected email:" email)
     (if email
-      (assoc response :session {:email email})
+      (let [user (or (stg/get-user @stg/storage email)
+                     (create-user email))]
+       (assoc response :session {:user user}))
       response)))
 
 (defn current-user [req]
   (resp/response
-   (if-let [email (-> req :session :email)]
+   (if-let [email (-> req :session :user :email)]
      {:result :ok
       :logged-in? true
       :email email}

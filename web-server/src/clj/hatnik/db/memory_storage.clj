@@ -1,6 +1,5 @@
 (ns hatnik.db.memory-storage
-  (:require [hatnik.db.storage :refer :all])
-  )
+  (:require [hatnik.db.storage :refer :all]))
 
 (deftype MemoryStorage [atom next-id]
 

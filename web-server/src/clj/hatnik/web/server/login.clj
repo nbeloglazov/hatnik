@@ -6,7 +6,8 @@
             [clj-http.client :as client]
             [tentacles.users :as github]
             [hatnik.config :refer [config]]
-            [hatnik.db.storage :as stg]))
+            [hatnik.db.storage :as stg]
+            [hatnik.web.server.dummy-data :as dd]))
 
 ; https://github.com/login/oauth/authorize?scope=user:email&client_id=f850785344ec6d812ab2
 
@@ -46,10 +47,14 @@
 
 (defn force-login [email]
   (if (:enable-force-login config)
-    (let [user (or (stg/get-user @stg/storage email)
-                   (create-user email))]
+    (if-let [user (stg/get-user @stg/storage email)]
       (-> (resp/response {:result :ok})
-          (assoc :session {:user user})))
+          (assoc :session {:user user}))
+      (let [id (stg/create-user! @stg/storage email)]
+        (dd/create-dummy-data id)
+        (-> (resp/response {:result :ok})
+            (assoc :session {:user {:email email
+                                    :id id}}))))
     (not-found ":(")))
 
 (defn current-user [req]

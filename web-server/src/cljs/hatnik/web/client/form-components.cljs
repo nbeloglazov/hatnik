@@ -1,6 +1,7 @@
 (ns hatnik.web.client.form-components
   (:require [om.core :as om :include-macros true]
-            [om.dom :as dom :include-macros true]))
+            [om.dom :as dom :include-macros true]
+            [hatnik.web.client.z-actions :as action]))
 
 (defn project-adding-from [data]
   (dom/div 
@@ -64,7 +65,8 @@
 
 (defn email-action-footer [data]
   (dom/div nil
-           (dom/button #js {:className "btn btn-primary"} "Submit")
+           (dom/button #js {:className "btn btn-primary"
+                            :onClick #(action/send-new-email-action (:current-project data))} "Submit")
            (dom/button #js {:className "btn btn-default"} "Test")))
 
 (def action-form-footers
@@ -76,4 +78,4 @@
     (render [this]
       (apply 
        (get action-form-footers (:form-type data))
-       []))))
+       [data]))))

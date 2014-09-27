@@ -3,7 +3,8 @@
 (def app-state 
   (atom {:projects []
          :form-type :email-action
-         :user {}}))
+         :user {}
+         :current-project nil}))
 
 (defn update-projects-list [reply]
   (let [json (.getResponseJson (.-target reply))
@@ -17,6 +18,10 @@
   (swap! app-state
          assoc :form-type
          action-type))
+
+(defn set-current-project [id]
+  (swap! app-state 
+         assoc :current-project id))
 
 
 (defn add-new-project [id name]
@@ -33,3 +38,6 @@
       (swap! app-state
              assoc-in [:user :email]
              (get data "email")))))
+
+(defn update-project-actions [action]
+  (.log js/console action))

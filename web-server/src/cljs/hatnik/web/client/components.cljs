@@ -31,12 +31,13 @@
   (dom/div nil
            (dom/p nil
                   (str
-                   (get action "artifact")
+                   (get action "library")
                    " - "
                    (get action "type")))))
 
 (defn add-action [id]
   (state/set-form-type :email-action)
+  (state/set-current-project id)
   (.modal ($ :#iModal)))
 
 
@@ -49,12 +50,12 @@
 (defn actions-table [id actions]
   (let [rendered 
         (map (fn [action]
-               (dom/div #js {:className "col-sm-6 col-md-4 col-lg-2"}
+               (dom/div #js {:className "col-sm-12 col-md-6 col-lg-4"}
                         (render-action id action)))
              actions)]
     (apply dom/div #js {:className "row"}
            (concat rendered
-                   [(dom/div #js {:className "col-sm-6 col-md-4 col-lg-2"} 
+                   [(dom/div #js {:className "col-sm-12 col-md-6 col-lg-4"} 
                              (add-new-action id))]))))   
 
 (defn project-header-menu-button [project]

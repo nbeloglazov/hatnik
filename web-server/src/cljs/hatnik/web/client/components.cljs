@@ -48,12 +48,12 @@
 (defn actions-table [id actions]
   (let [rendered 
         (map (fn [action]
-               (dom/div #js {:className "col-md-4"}
+               (dom/div #js {:className "col-sm-6 col-md-4 col-lg-2"}
                         (render-action id action)))
              actions)]
     (apply dom/div #js {:className "row"}
            (concat rendered
-                   [(dom/div #js {:className "col-md-4"} 
+                   [(dom/div #js {:className "col-sm-6 col-md-4 col-lg-2"} 
                              (add-new-action id))]))))                   
 
 (defn project-header [project]

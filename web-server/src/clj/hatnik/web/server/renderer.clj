@@ -21,13 +21,37 @@
     [:div.container
      [:div.page-header
       [:h2 "Project list"]]
+     
+     [:div.row      
+      [:div.col-md-2
+       [:a.btn.btn-success 
+        {:href "#" 
+         :onclick "$('#iModalProject').modal()"} "Create new"]]
+      [:div.col-md-10]]
+     [:div
+      [:p ""]]
 
      [:div#iProjectList.panel-group "Loading..."]]
 
     [:div#iModal.modal.fade
+     [:div#iModalDialog.modal-dialog
+      [:div.modal-content
+       [:div#iActionFormHeader.modal-header]
+       [:div#iActionFormBody.modal-body]
+       [:div#iActionFormFooter.modal-footer]]]]
+
+    [:div#iModalProject.modal.fade
      [:div.modal-dialog
-      [:div#iModalContent.modal-content
-       ]]]
+      [:div.modal-content
+       [:div.modal-header
+        [:h4.modal-title "Creating a new project"]]
+       [:div.modal-body
+        [:form
+         [:input#project-name-input.form-control 
+          {:type "text"
+           :placeholder "Project name"}]]]
+      [:div.modal-footer
+        [:button.btn.btn-primary "Create"]]]]]
 
     [:script {:src "/js/jquery-2.1.1.min.js"}]    
     [:script {:src "/js/bootstrap.min.js"}]

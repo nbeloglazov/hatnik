@@ -31,6 +31,19 @@
        [:div#iActionFormBody.modal-body]
        [:div#iActionFormFooter.modal-footer]]]]
 
+    [:div#iModalProject.modal.fade
+     [:div.modal-dialog
+      [:div.modal-content
+       [:div.modal-header
+        [:h4.modal-title "Creating a new project"]]
+       [:div.modal-body
+        [:form
+         [:input#project-name-input.form-control 
+          {:type "text"
+           :placeholder "Project name"}]]]
+      [:div.modal-footer
+        [:button.btn.btn-primary "Create"]]]]]
+
     [:script {:src "/js/jquery-2.1.1.min.js"}]    
     [:script {:src "/js/bootstrap.min.js"}]
     [:script {:src "http://fb.me/react-0.11.1.js"}]

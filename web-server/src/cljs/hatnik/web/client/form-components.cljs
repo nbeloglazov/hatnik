@@ -62,7 +62,7 @@
 
 (defn email-action-form-body [data]
   (dom/form 
-   #js {:className "email-action-form"}
+   #js {:id "email-action-form"}
    (dom/div #js {:className "form-group"}
             (dom/label #js {:for "artifact-input"} "Artifact")
             (dom/input #js {:type "text"

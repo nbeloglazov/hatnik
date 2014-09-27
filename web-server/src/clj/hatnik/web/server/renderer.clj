@@ -21,6 +21,15 @@
     [:div.container
      [:div.page-header
       [:h2 "Project list"]]
+     
+     [:div.row      
+      [:div.col-md-2
+       [:a.btn.btn-success 
+        {:href "#" 
+         :onclick "$('#iModalProject').modal()"} "Create new"]]
+      [:div.col-md-10]]
+     [:div
+      [:p ""]]
 
      [:div#iProjectList.panel-group "Loading..."]]
 

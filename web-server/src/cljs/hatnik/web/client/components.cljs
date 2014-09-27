@@ -5,7 +5,7 @@
   (:use [jayq.core :only [$]]))
 
 
-(defn accordion-panel [& {:keys [body-id header body open] :or {:open true}}]
+(defn accordion-panel [& {:keys [body-id header body]}]
   (dom/div 
    #js {:className "panel panel-default"}
    (dom/div 
@@ -17,27 +17,23 @@
                     {:data-parent "#accrodion"
                      :data-toggle "collapse"
                      :href (str "#" body-id)} header))))
-           (dom/div #js {:className (if open 
-                                      "panel-collapse collapse in"
-                                      "panel-collapse collapse")
+           (dom/div #js {:className "panel-collapse collapse in"
                          :id body-id}
                     (dom/div #js {:className "panel-body"}
                              body))))
 
 (defn render-action [project-id action]
-  (dom/p nil
-         (str
-          (get action "artifact")
-          " - "
-          (get action "type"))))
+  (dom/div nil
+           (dom/p nil
+                  (str
+                   (get action "artifact")
+                   " - "
+                   (get action "type")))))
 
 (defn add-action [id]
   (state/set-form-type :email-action)
   (.modal ($ :#iModal)))
 
-(defn add-project []
-  (state/set-form-type :project-action)
-  (.modal ($ :#iModal)))
 
 (defn add-new-action [project-id]
   (dom/a #js {:className "btn btn-default"
@@ -57,9 +53,13 @@
                              (add-new-action id))]))))                   
 
 (defn project-header [project]
-  (dom/div #js {:className "project-header"}
-   (dom/p nil (get project "name"))
-   (dom/span #js {:className "glyphicon glyphicon-pencil project-header-button"})))
+  (dom/div #js {:className "row"}
+   (dom/div 
+    #js {:className "col-sm-2 col-md-1 col-lg-1"} 
+    (dom/p nil (get project "name")))
+   (dom/div #js {:className "col-sm-2 col-md-1 col-lg-1 pull-right"}
+            (dom/span
+             #js {:className "glyphicon glyphicon-pencil pull-right"}))))
 
 (defn project-list [data owner]
   (reify

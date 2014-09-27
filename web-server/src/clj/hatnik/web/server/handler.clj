@@ -3,15 +3,19 @@
             [compojure.core :refer :all]
             [compojure.handler :as handler]
             [compojure.route :as route]
+            [taoensso.timbre :as timbre]
 
             [hatnik.web.server.renderer :as renderer]
             [hatnik.web.server.projects :refer [projects-api]]
             [hatnik.web.server.actions :refer [actions-api]]
             [hatnik.web.server.login :refer [login-api]]
+            [hatnik.config :refer [config]]
 
             [ring.middleware.json :as json]
             [ring.adapter.jetty :refer [run-jetty]]
             [ring.middleware.stacktrace :as stacktrace]))
+
+(timbre/set-level! (:log-level config))
 
 (defroutes app-routes
   (GET "/" [] renderer/core-page)
@@ -24,8 +28,10 @@
 
 (defn dump-request [handler]
   (fn [req]
-    (clojure.pprint/pprint req)
-    (handler req)))
+    (timbre/debug "Request:" req)
+    (let [resp (handler req)]
+      (timbre/debug "Response:" resp)
+      resp)))
 
 (def app
   (-> #'app-routes

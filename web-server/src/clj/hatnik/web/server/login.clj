@@ -1,5 +1,6 @@
 (ns hatnik.web.server.login
   (:require [ring.util.response :as resp]
+            [taoensso.timbre :as timbre]
             [compojure.core :refer :all]
             [clj-http.client :as client]
             [hatnik.config :refer [config]]
@@ -22,19 +23,13 @@
                            :when (:primary entry)]
                        (:email entry)))
         response (resp/redirect "/")]
-    (println "Email found: " email emails)
+    (timbre/debug "Github login."
+                  "resp:" resp
+                  "emails:" emails
+                  "selected email:" email)
     (if email
       (assoc response :session {:email email})
       response)))
-
-;  (client/get "http://localhost:8080/api/projects" {:as :json})
-
-#_(client/post "https://github.com/login/oauth/access_token"
-                          {:form-params {:client_id (:github-id config)
-                                         :client_secret (:github-secret config)
-                                         :code "b0d0a3e3fca4ea77fab1"}
-                           :content-type :json
-                           :accept :json})
 
 (defn current-user [req]
   (resp/response

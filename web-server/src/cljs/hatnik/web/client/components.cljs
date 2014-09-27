@@ -22,23 +22,23 @@
                     (dom/div #js {:className "panel-body"}
                              body))))
 
-(defn render-action [action]
+(defn render-action [project-id action]
   (dom/p nil
          (get action "type")))
 
 
-(defn actions-table [actions]
+(defn actions-table [id actions]
   (let [rendered 
         (map (fn [action]
                (dom/div #js {:className "col-md-4"}
-                        (render-action action)))
+                        (render-action id action)))
              actions)]
     (apply dom/div #js {:className "row"}
            (concat rendered
                    [(dom/div #js {:className "col-md-4"} 
                              (dom/p nil "Add new Action"))]))))                   
 
-(defn project-header [project]
+(defn project-header [id project]
   (dom/div #js {:className "project-header"}
    (dom/p nil (get project "name"))
    (dom/span #js {:className "glyphicon glyphicon-pencil project-header-button"})))
@@ -51,7 +51,7 @@
        (map 
         (fn [prj]
           (accordion-panel
-           :header (project-header prj)
-           :body (actions-table (get prj "actions"))
+           :header (project-header (get prj "id") prj)
+           :body (actions-table (get prj "id") (get prj "actions"))
            :body-id (str "__" (get prj "name"))))
         (:projects data))))))

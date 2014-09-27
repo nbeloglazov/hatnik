@@ -1,5 +1,6 @@
 (ns hatnik.web.server.handler
-  (:require [compojure.core :refer :all]
+  (:require clojure.pprint
+            [compojure.core :refer :all]
             [compojure.handler :as handler]
             [compojure.route :as route]
             [hatnik.web.server.example-data :as ex-data]

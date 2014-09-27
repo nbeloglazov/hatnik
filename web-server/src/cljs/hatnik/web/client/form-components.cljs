@@ -43,10 +43,70 @@
             (dom/h4 #js {:className "modal-title"}
                     "Add project"))))
 
-(defn form-view [data owner]
+
+;; For selecting action form header
+
+(def action-forms-headers 
+  {:email-action "Add email notification"})
+
+(defn action-form-header [data owner]
   (reify
     om/IRender
     (render [this]
-      (if (= :email-action (:form-type data))
-        (email-action-form data)
-        (project-adding-from data)))))
+      (dom/h4 #js {:className "modal-title"}
+              (get action-forms-headers
+                   (:form-type data))))))
+
+
+;; For selecting action form body
+
+(defn email-action-form-body [data]
+  (dom/form 
+   #js {:className "email-action-form"}
+   (dom/div #js {:className "form-group"}
+            (dom/label #js {:for "artifact-input"} "Artifact")
+            (dom/input #js {:type "text"
+                            :className "form-control"
+                            :id "artifact-input"
+                            :placeholder "Artifact name"}))
+   (dom/div #js {:className "form-group"}
+            (dom/label #js {:for "emain-input"} "Email")
+            (dom/input #js {:type "email"
+                            :className "form-control"
+                            :id "emain-input"
+                            :placeholder "Artifact"})
+            (dom/div #js {:className "form-group"}
+                     (dom/label #js {:for "emain-body-input"} "Email body")
+                     (dom/textarea #js {:cols "40"
+                                        :className "form-control"
+                                        :id "emain-body-input"}
+                                   "Library release: {{LIBRARY}} {{VERSION}}")))))
+
+(def action-form-bodys 
+  {:email-action email-action-form-body})
+
+(defn action-form-body [data body]
+  (reify
+    om/IRender
+    (render [this]
+      (apply 
+       (get action-form-bodys (:form-type data))
+       []))))
+
+;; For selecting footer
+
+(defn email-action-footer [data]
+  (dom/div nil
+           (dom/button #js {:className "btn btn-primary"} "Submit")
+           (dom/button #js {:className "btn btn-default"} "Test")))
+
+(def action-form-footers
+  {:email-action email-action-footer})
+
+(defn action-form-footer [data body]
+  (reify
+    om/IRender
+    (render [this]
+      (apply 
+       (get action-form-footers (:form-type data))
+       []))))

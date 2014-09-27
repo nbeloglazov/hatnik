@@ -5,6 +5,12 @@
             [hatnik.web.client.app-state :as state])
   (:use [jayq.core :only [$]]))
 
-(om/root widget/form-view state/app-state
-         {:target (. js/document (getElementById "iModalDialog"))})
+(om/root widget/action-form-header state/app-state
+         {:target (. js/document (getElementById "iActionFormHeader"))})
+
+(om/root widget/action-form-body state/app-state
+         {:target (. js/document (getElementById "iActionFormBody"))})
+
+(om/root widget/action-form-footer state/app-state
+         {:target (. js/document (getElementById "iActionFormFooter"))})
 

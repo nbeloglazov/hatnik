@@ -25,7 +25,11 @@
      [:div#iProjectList.panel-group "Loading..."]]
 
     [:div#iModal.modal.fade
-     [:div#iModalDialog.modal-dialog]]
+     [:div#iModalDialog.modal-dialog
+      [:div.modal-content
+       [:div#iActionFormHeader.modal-header]
+       [:div#iActionFormBody.modal-body]
+       [:div#iActionFormFooter.modal-footer]]]]
 
     [:script {:src "/js/jquery-2.1.1.min.js"}]    
     [:script {:src "/js/bootstrap.min.js"}]

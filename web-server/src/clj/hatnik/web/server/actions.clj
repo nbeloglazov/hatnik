@@ -10,7 +10,7 @@
 (defn create-action [user data]
   (let [version (ver/latest-release (:library data))
         action (assoc data
-                 :latest-processed-version version)
+                 :last-processed-version version)
         id (stg/create-action! @stg/storage (:id user) action)]
    (resp/response
     (if id
@@ -23,7 +23,7 @@
 (defn update-action [user id data]
   (let [version (ver/latest-release (:library data))
         action (assoc data
-                 :latest-processed-version version)]
+                 :last-processed-version version)]
     (stg/update-action! @stg/storage (:id user) id action)
     (resp/response
      {:result :ok

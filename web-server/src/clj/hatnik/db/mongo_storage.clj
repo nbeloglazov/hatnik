@@ -7,6 +7,7 @@
 
 (def users "users")
 (def projects "projects")
+(def actions "actions")
 
 (defn norm-id [map]
   (if map
@@ -14,6 +15,11 @@
         (rename-keys {:_id :id})
         (update-in [:id] str))
     map))
+
+(defn has-project? [db user-id project-id]
+  (not (nil? (mc/find-one db projects
+                          {:_id (to-object-id project-id)
+                           :user-id user-id}))))
 
 (deftype MongoStorage [db]
 
@@ -48,7 +54,32 @@
   (delete-project! [storage user-id id]
     (mc/remove db projects {:_id (to-object-id id)
                             :user-id user-id}))
-)
+
+
+  hatnik.db.storage.ActionStorage
+  (get-actions [storage user-id project-id]
+    (if (has-project? db user-id project-id)
+      (->> (mc/find-maps db actions {:project-id project-id})
+           (map norm-id))))
+
+  (create-action! [storage user-id data]
+    (if (has-project? db user-id (:project-id data))
+      (-> (mc/insert-and-return db actions data)
+          norm-id
+          :id)
+      nil))
+
+  (update-action! [storage user-id id data]
+    (let [id (to-object-id id)]
+     (when-let [action (mc/find-map-by-id db actions id)]
+       (when (has-project? db user-id (:project-id action))
+         (mc/update-by-id db actions id data)))))
+
+  (delete-action! [storage user-id id]
+    (let [id (to-object-id id)]
+     (when-let [action (mc/find-map-by-id db actions id)]
+       (when (has-project? db user-id (:project-id action))
+         (mc/remove-by-id db actions id))))))
 
 (defn create-mongo-storage [{:keys [host port db drop?]}]
   (let [conn (mg/connect {:host host

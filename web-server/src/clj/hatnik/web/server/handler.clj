@@ -39,11 +39,22 @@
    {:result :ok
     :version "1.6.0"}))
 
+(defn wrap-authenticated-only [handler]
+  (fn [req]
+    (if (-> req :session :user)
+      (handler req)
+      (do (timbre/debug "Unauthorized request")
+          {:status 401
+           :body {:result "error"
+                  :message "Not authenticated"}}))))
+
 (defroutes app-routes
   (GET "/" [] renderer/core-page)
   (context "/api" []
-           (context "/projects" [] projects-api)
-           (context "/actions" [] actions-api)
+           (context "/projects" []
+                    (wrap-authenticated-only projects-api))
+           (context "/actions" []
+                    (wrap-authenticated-only actions-api))
            login-api
            (GET "/library-version" [group artifact] (library-version group artifact)))
   (route/resources "/")

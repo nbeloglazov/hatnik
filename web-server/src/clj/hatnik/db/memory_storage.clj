@@ -1,6 +1,9 @@
 (ns hatnik.db.memory-storage
   (:require [hatnik.db.storage :refer :all]))
 
+(defn has-project? [storage user-id project-id]
+  (some #(= project-id (:id %)) (get-projects storage user-id)))
+
 (deftype MemoryStorage [atom next-id]
 
 
@@ -46,7 +49,43 @@
            (fn [projects]
              (remove #(and (= (:user-id %) user-id)
                            (= (:id %) id))
-                     projects)))))
+                     projects))))
+
+
+  hatnik.db.storage.ActionStorage
+  (get-actions [storage user-id project-id]
+    (if (has-project? storage user-id project-id)
+      (->> (:actions @atom)
+           (filter #(= (:project-id %) project-id)))
+      []))
+
+  (create-action! [storage user-id data]
+    (if (has-project? storage user-id (:project-id data))
+      (let [id (next-id)]
+        (swap! atom update-in [:actions] conj (assoc data
+                                                :id id))
+        id)
+      nil))
+
+  (update-action! [storage user-id id data]
+    (swap! atom update-in [:actions]
+           (fn [actions]
+             (map (fn [action]
+                    (if (and (= (:id action) id)
+                             (has-project? storage user-id
+                                           (:project-id action)))
+                      (assoc data
+                        :id id)
+                      action))
+                  actions))))
+
+  (delete-action! [storage user-id id]
+    (swap! atom update-in [:actions]
+           (fn [actions]
+             (remove #(and (= (:id %) id)
+                           (has-project? storage user-id
+                                         (:project-id %)))
+                     actions)))))
 
 
 (defn create-memory-storage []

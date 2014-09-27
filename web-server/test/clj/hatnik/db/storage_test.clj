@@ -97,3 +97,66 @@
               :user-id user2
               :id id3}})
         "Bar project should not change")))
+
+(defn test-action-storage [storage]
+  (let [user1 (s/create-user! storage "user1")
+        user2 (s/create-user! storage "user2")
+        proj1 (s/create-project! storage {:name "Project 1" :user-id user1})
+        proj2 (s/create-project! storage {:name "Project 2" :user-id user2})]
+
+    (is (empty? (s/get-actions storage user1 proj1))
+        "Initially no actions for project 1")
+    (is (empty? (s/get-actions storage user2 proj2))
+        "Initially no actions for project 2")
+
+    (let [act1 (s/create-action! storage user1 {:some-data "123"
+                                                :project-id proj1})
+          act2 (s/create-action! storage user2 {:some-data "111"
+                                                :project-id proj2})
+
+          ; Try to create project for another user
+          act3 (s/create-action! storage user1 {:some-data "I hacked you"
+                                                :project-id proj2})]
+      (is (= (set (s/get-actions storage user1 proj1))
+             #{{:some-data "123"
+                :project-id proj1
+                :id act1}})
+          "Project 1 should have single action.")
+      (is (= (set (s/get-actions storage user2 proj2))
+             #{{:some-data "111"
+                :project-id proj2
+                :id act2}})
+          "Project 2 should have single action")
+      (is (empty? (s/get-actions storage user1 proj2))
+          "User1 should not have access to project2.")
+
+      ; Updates
+      (s/update-action! storage user1 act1 {:project-id proj1
+                                            :some-data "new data"})
+      (is (= (set (s/get-actions storage user1 proj1))
+             #{{:some-data "new data"
+                :project-id proj1
+                :id act1}})
+          "Action for project1 should be updated.")
+
+      ; Illegal update
+      (s/update-action! storage user1 act2 {:project-id proj2
+                                            :some-data "I hacked your action"})
+      (is (= (set (s/get-actions storage user2 proj2))
+             #{{:some-data "111"
+                :project-id proj2
+                :id act2}})
+          "Actions for project2 should not be changed")
+
+      ; Delete
+      (s/delete-action! storage user1 act1)
+      (is (empty? (s/get-actions storage user1 proj1))
+          "The only action in project1 should be deleted")
+
+      ; Illegal delete
+      (s/delete-action! storage user1 act2)
+      (is (= (set (s/get-actions storage user2 proj2))
+             #{{:some-data "111"
+                :project-id proj2
+                :id act2}})
+          "Actions for project2 should not be changed"))))

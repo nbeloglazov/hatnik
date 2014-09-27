@@ -14,3 +14,6 @@
 
 (deftest mongo-storage-implements-project-storage
   (st-test/test-project-storage (ms/create-mongo-storage config)))
+
+(deftest mongo-storage-implements-action-storage
+  (st-test/test-action-storage (ms/create-mongo-storage config)))

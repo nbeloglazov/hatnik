@@ -1,0 +1,99 @@
+(ns hatnik.db.storage-test
+  (:require [clojure.test :refer :all]
+            [hatnik.db.storage :as s]))
+
+
+(def foo-email "foo@email.com")
+(def bar-email "bar@email.com")
+
+(defn test-user-storage [storage]
+  (is (every? nil? (map #(s/get-user storage %)
+                        [foo-email bar-email]))
+      "Storage should be empty")
+
+  (let [foo-id (s/create-user! storage foo-email)
+        foo-id-2 (s/create-user! storage foo-email)
+        bar-id (s/create-user! storage bar-email)]
+
+    (is (= (s/get-user storage foo-email)
+           {:id foo-id
+            :email foo-email})
+        "Foo should match.")
+    (is (= (s/get-user storage bar-email)
+           {:id bar-id
+            :email bar-email})
+        "Bar should match.")
+
+    (is (not= foo-id bar-id) "id should be different")
+    (is (= foo-id foo-id-2) "Multiple creation should return same user.")))
+
+(def user1 "user1")
+(def user2 "user2")
+
+(defn test-project-storage [storage]
+  (is (and (empty? (s/get-projects storage user1))
+           (empty? (s/get-projects storage user2)))
+      "Initial storage should be empty")
+
+  (let [id1 (s/create-project! storage {:name "Foo project"
+                                        :user-id user1})
+        id2 (s/create-project! storage {:name "Foo project 2"
+                                        :user-id user1})
+        id3 (s/create-project! storage {:name "Bar project"
+                                        :user-id user2})]
+
+    (is (= (set (s/get-projects storage user1))
+           #{{:name "Foo project"
+              :user-id user1
+              :id id1}
+             {:name "Foo project 2"
+              :user-id user1
+              :id id2}})
+        "Projects for user 1 should match")
+
+    (is (= (set (s/get-projects storage user2))
+           #{{:name "Bar project"
+              :user-id user2
+              :id id3}})
+        "Projects for user 2 should match")
+
+    (is (= 3 (count (distinct [id1 id2 id3])))
+        "All ids are different")
+
+                                        ; Updating project
+    (s/update-project! storage user1 id1 {:name "Just project"
+                                          :user-id user1})
+    (is (= (set (s/get-projects storage user1))
+           #{{:name "Just project"
+              :user-id user1
+              :id id1}
+             {:name "Foo project 2"
+              :user-id user1
+              :id id2}})
+        "'Foo project' should have changed to 'Bar project'")
+
+    ; Trying to update someone elses project
+    (s/update-project! storage user1 id3 {:name "I hacked you!"
+                                          :user-id user2})
+
+    (is (= (set (s/get-projects storage user2))
+           #{{:name "Bar project"
+              :user-id user2
+              :id id3}})
+        "Bar project should not change")
+
+    ; Deleting project
+    (s/delete-project! storage user1 id1)
+    (is (= (set (s/get-projects storage user1))
+           #{{:name "Foo project 2"
+              :user-id user1
+              :id id2}})
+        "'Just project' should have been deleted")
+
+    ; Trying to delete someon elses project
+    (s/delete-project! storage user1 id3)
+    (is (= (set (s/get-projects storage user2))
+           #{{:name "Bar project"
+              :user-id user2
+              :id id3}})
+        "Bar project should not change")))

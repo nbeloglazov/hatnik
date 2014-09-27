@@ -10,13 +10,19 @@
             [hatnik.web.server.actions :refer [actions-api]]
             [hatnik.web.server.login :refer [login-api]]
             [hatnik.config :refer [config]]
+            [hatnik.db.storage :as stg]
+            [hatnik.db.memory-storage :refer [create-memory-storage]]
 
             [ring.util.response :as resp]
             [ring.middleware.json :as json]
             [ring.adapter.jetty :refer [run-jetty]]
             [ring.middleware.stacktrace :as stacktrace]))
 
-(timbre/set-level! (:log-level config))
+(defn initialise []
+  (timbre/info "Initialisation started.")
+  (timbre/set-level! (:log-level config))
+  (reset! stg/storage (create-memory-storage))
+  (timbre/info "Initialisation finished."))
 
 (defn library-version [group artifact]
   (resp/response
@@ -51,7 +57,9 @@
 
 (comment
 
-   (def server (run-jetty #(app %) {:port 8080 :join? false}))
+   (do
+     (def server (run-jetty #(app %) {:port 8080 :join? false}))
+     (initialise))
 
    (.stop server)
 )

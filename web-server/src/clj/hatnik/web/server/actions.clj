@@ -47,8 +47,7 @@
   (let [url (str "http://" (-> config :worker-server :host)
                  ":" (-> config :worker-server :port)
                  "/test-action")
-        resp (->> {:form-params (assoc data
-                                  :user user)
+        resp (->> {:form-params (restrict-email-to-be-current data user)
                    :content-type :json
                    :accept :json
                    :as :json}

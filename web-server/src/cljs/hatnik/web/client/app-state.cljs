@@ -2,7 +2,8 @@
 
 (def app-state 
   (atom {:projects []
-         :form-type :email-action}))
+         :form-type :email-action
+         :user {}}))
 
 (defn update-projects-list [reply]
   (let [json (.getResponseJson (.-target reply))
@@ -23,3 +24,12 @@
          assoc :projects
          (into [{"id" id "name" name}]
                (:projects @app-state))))
+
+
+(defn update-user-data [reply]
+  (let [json (.getResponseJson (.-target reply))
+        data (js->clj json)]
+    (when (= "ok" (get data "result"))
+      (swap! app-state
+             assoc :user
+             {"email" (get data "email")}))))

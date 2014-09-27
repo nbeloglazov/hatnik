@@ -1,7 +1,6 @@
 (ns hatnik.web.client.z-actions
   (:require [jayq.core :as jq]
-            [hatnik.web.client.app-state :as state])
-  (:use [jayq.core :only [$]]))
+            [hatnik.web.client.app-state :as state]))
 
 (defn create-new-project-callback [name reply]
   (let [resp (js->clj reply)]

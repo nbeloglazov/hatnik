@@ -11,9 +11,9 @@
                  [com.taoensso/timbre "3.3.1"]
                  [com.novemberain/monger "2.0.0"]
 
-                 ; CLojureScript
+                 ; ClojureScript
                  [org.clojure/clojurescript "0.0-2356"]
-                 [racehub/om-bootstrap "0.3.0"]
+                 [jayq "2.5.2"]
                  [om "0.7.3"]]
 
   :plugins [[lein-ring "0.8.11"]

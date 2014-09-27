@@ -1,6 +1,8 @@
 (ns hatnik.web.client.components
   (:require [om.core :as om :include-macros true]
-            [om.dom :as dom :include-macros true]))
+            [om.dom :as dom :include-macros true]
+            [hatnik.web.client.app-state :as state])
+  (:use [jayq.core :only [$]]))
 
 
 (defn accordion-panel [& {:keys [body-id header body open] :or {:open true}}]
@@ -24,15 +26,22 @@
 
 (defn render-action [project-id action]
   (dom/p nil
-         (get action "type")))
+         (str
+          (get action "artifact")
+          " - "
+          (get action "type"))))
 
-(defn test-action [id]
-  (js/alert (str "Add new action for project id " id)))
+(defn add-action [id]
+  (state/set-form-type :email-action)
+  (.modal ($ :#iModal)))
 
+(defn add-project []
+  (state/set-form-type :project-action)
+  (.modal ($ :#iModal)))
 
 (defn add-new-action [project-id]
   (dom/a #js {:className "btn btn-default"
-              :onClick #(test-action project-id)}
+              :onClick #(add-action project-id)}
          "Add new action"))
 
 
@@ -64,3 +73,4 @@
            :body (actions-table (get prj "id") (get prj "actions"))
            :body-id (str "__" (get prj "name"))))
         (:projects data))))))
+

@@ -22,11 +22,11 @@
 
   :source-paths ["src/clj"]
 
-  :cljsbuild 
+  :cljsbuild
   {:builds
    [{:source-paths ["src/cljs"]
-     :compiler 
+     :compiler
      {:output-to "resources/public/gen/js/hatnik.js"
       :optimizations :whitespace
-      :pretty-print true}}]   
+      :pretty-print true}}]
    })

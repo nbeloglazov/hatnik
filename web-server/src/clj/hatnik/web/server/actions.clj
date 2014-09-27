@@ -10,10 +10,16 @@
 (defn get-user [req]
   (-> req :session :user))
 
+(defn restrict-email-to-be-current [action user]
+  (if (:address action)
+    (assoc action :address (:email user))
+    action))
+
 (defn create-action [user data]
   (let [version (ver/latest-release (:library data))
-        action (assoc data
-                 :last-processed-version version)
+        action (-> data
+                   (assoc :last-processed-version version)
+                   (restrict-email-to-be-current user))
         id (stg/create-action! @stg/storage (:id user) action)]
    (resp/response
     (if id
@@ -25,8 +31,9 @@
 
 (defn update-action [user id data]
   (let [version (ver/latest-release (:library data))
-        action (assoc data
-                 :last-processed-version version)]
+        action (-> data
+                   (assoc :last-processed-version version)
+                   (restrict-email-to-be-current user))]
     (stg/update-action! @stg/storage (:id user) id action)
     (resp/response
      {:result :ok

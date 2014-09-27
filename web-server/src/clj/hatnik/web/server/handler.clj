@@ -67,7 +67,6 @@
 (defn dump-request [handler]
   (fn [req]
     (timbre/debug "Request:" req)
-    (timbre/debug "Request body: " (body-string req))
     (let [resp (handler req)]
       (timbre/debug "Response:" resp)
       resp)))

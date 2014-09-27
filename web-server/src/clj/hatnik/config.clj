@@ -2,7 +2,9 @@
 
 (def default-config
   {:log-level :info
-   :db :memory})
+   :db :memory
+   :worker-server {:host "localhost"
+                   :port 5734}})
 
 (def config-file "config.clj")
 

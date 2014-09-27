@@ -14,13 +14,16 @@
             [hatnik.db.memory-storage :refer [create-memory-storage]]
             [hatnik.db.mongo-storage :refer [create-mongo-storage]]
             [hatnik.versions :as ver]
+            [hatnik.worker.handler :as worker]
 
+            [ring.util.request :refer [body-string]]
             [ring.util.response :as resp]
             [ring.middleware.json :as json]
             [ring.adapter.jetty :refer [run-jetty]]
             [ring.middleware.stacktrace :as stacktrace]))
 
 (defn initialise []
+  (worker/start)
   (timbre/info "Initialisation started.")
   (timbre/set-level! (:log-level config))
   (reset! stg/storage

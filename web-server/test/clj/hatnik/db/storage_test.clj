@@ -24,6 +24,13 @@
             :email bar-email})
         "Bar should match.")
 
+    (is (= (s/get-user-by-id storage foo-id)
+           {:id foo-id
+            :email foo-email}))
+    (is (= (s/get-user-by-id storage bar-id)
+           {:id bar-id
+            :email bar-email}))
+
     (is (not= foo-id bar-id) "id should be different")
     (is (= foo-id foo-id-2) "Multiple creation should return same user.")))
 
@@ -56,6 +63,16 @@
               :user-id user2
               :id id3}})
         "Projects for user 2 should match")
+
+    ; Get by id
+    (is (= (s/get-project storage id1)
+           {:name "Foo project"
+            :user-id user1
+            :id id1}))
+    (is (= (s/get-project storage id2)
+           {:name "Foo project 2"
+            :user-id user1
+            :id id2}))
 
     (is (= 3 (count (distinct [id1 id2 id3])))
         "All ids are different")

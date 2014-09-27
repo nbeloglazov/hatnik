@@ -1,16 +1,25 @@
 (ns hatnik.web.server.actions
   (:require [ring.util.response :as resp]
             [compojure.core :refer :all]
+            [clj-http.client :as client]
+
             [hatnik.versions :as ver]
-            [hatnik.db.storage :as stg]))
+            [hatnik.db.storage :as stg]
+            [hatnik.config :refer [config]]))
 
 (defn get-user [req]
   (-> req :session :user))
 
+(defn restrict-email-to-be-current [action user]
+  (if (:address action)
+    (assoc action :address (:email user))
+    action))
+
 (defn create-action [user data]
   (let [version (ver/latest-release (:library data))
-        action (assoc data
-                 :last-processed-version version)
+        action (-> data
+                   (assoc :last-processed-version version)
+                   (restrict-email-to-be-current user))
         id (stg/create-action! @stg/storage (:id user) action)]
    (resp/response
     (if id
@@ -22,8 +31,9 @@
 
 (defn update-action [user id data]
   (let [version (ver/latest-release (:library data))
-        action (assoc data
-                 :last-processed-version version)]
+        action (-> data
+                   (assoc :last-processed-version version)
+                   (restrict-email-to-be-current user))]
     (stg/update-action! @stg/storage (:id user) id action)
     (resp/response
      {:result :ok
@@ -34,8 +44,20 @@
   (resp/response {:result :ok}))
 
 (defn test-action [user data]
-  (resp/response {:result :error
-                  :message "Not implemented yet"}))
+  (let [url (str "http://" (-> config :worker-server :host)
+                 ":" (-> config :worker-server :port)
+                 "/test-action")
+        resp (->> {:form-params (assoc data
+                                  :user user)
+                   :content-type :json
+                   :accept :json
+                   :as :json}
+                  (client/post url)
+                  :body)]
+    (if (= (:result resp) "ok")
+      (resp/response {:result :ok})
+      (resp/response {:result :error
+                      :message "Couldn't test action"}))))
 
 (defroutes actions-api
   (POST "/" req (create-action (get-user req) (:body req)))

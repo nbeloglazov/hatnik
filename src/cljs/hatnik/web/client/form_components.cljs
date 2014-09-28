@@ -42,11 +42,13 @@
    (get action-forms-headers (:form-type data))
    [data]))
 
-
 ;; For selecting action form body
 
 (defn email-action-form-body [data artifact template]
-  (dom/form 
+  (js/setTimeout (fn [] (set! (.-value (.getElementById js/document "artifact-input"))
+                              artifact))
+                 100)
+  (dom/form
    #js {:id "email-action-form"}
    (dom/div #js {:className "form-group has-warning"
                  :id "artifact-input-group"}
@@ -54,8 +56,7 @@
             (dom/input #js {:type "text"
                             :className "form-control"
                             :id "artifact-input"
-                            :placeholder "e.g. org.clojure/clojure"
-                            :value (:email-artifact-value data)}))
+                            :placeholder "e.g. org.clojure/clojure"}))
    (dom/div #js {:className "form-group"}
             (dom/label #js {:for "emain-input"} "Email")
             (dom/input #js {:type "email"

@@ -77,3 +77,31 @@
 
       (ajax "/api/actions/test" "POST" data (fn [e])))))
 
+
+(defn update-email-action-callback [data reply]
+  (let [resp (js->clj reply)]
+    (if (= "ok" (get resp "result"))
+      (state/update-all-view)
+      (js/alert "Action don't updated!"))))
+
+(defn update-email-action [project-id action-id]
+    (let [artifact (get-data-from-input "artifact-input")
+        email (get-data-from-input "emain-input")
+        email-body (get-data-from-input "emain-body-input")
+        data {:project-id project-id
+              :type "email"
+              :address email
+              :template email-body
+              :library artifact}]
+    (if (or
+         (= "" artifact)
+         (= "" email)
+         (= "" email-body))
+      (js/alert "Wrong data! Check out fields!")
+
+      (do
+        (.modal ($ :#iModal) "hide")
+        (ajax 
+         (str "/api/actions/" action-id) "POST" 
+         data #(update-email-action-callback data %))))))
+

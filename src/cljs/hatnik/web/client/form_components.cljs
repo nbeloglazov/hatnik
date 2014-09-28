@@ -79,7 +79,9 @@
   (dom/div 
    nil
    (dom/button #js {:className "btn btn-primary pull-left"
-                    :onClick #(action/send-new-email-action (:current-project @data))} "Update")
+                    :onClick #(action/update-email-action 
+                               (:current-project @data)
+                               (get (deref (:current-action @data)) "id"))} "Update")
    (dom/button #js {:className "btn btn-default"
                     :onClick #(action/test-new-email-action (:current-project @data))} "Test")))
 

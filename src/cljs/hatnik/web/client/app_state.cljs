@@ -45,5 +45,8 @@
              assoc-in [:user :email]
              (get data "email")))))
 
+(defn update-all-view []
+  (.send goog.net.XhrIo "/api/projects" update-projects-list) )
+
 (defn update-project-actions [action]
   (.send goog.net.XhrIo "/api/projects" update-projects-list))

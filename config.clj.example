@@ -17,4 +17,9 @@
          :user "GMAIL_ACCOUNT"
          :ssl true
          :pass "ACCOUNT_PASS"
-         :from "GMAIL_ACCOUNT"}}
+         :from "GMAIL_ACCOUNT"}
+
+ :quartz {:initial-delay-in-seconds 60
+          :interval-in-seconds 600}
+
+ }

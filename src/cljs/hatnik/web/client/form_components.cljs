@@ -51,8 +51,12 @@
                                         :id "emain-body-input"}
                                    "Library release: {{LIBRARY}} {{VERSION}}")))))
 
-(defn email-edit-action [data]  
-  (email-action-form-body data))
+(defn email-edit-action [data]
+  (let [artifact-input (.getElementById js/document "artifact-input")
+        email-body-input (.getElementById js/document "emain-body-input")]
+    (set! (.-value artifact-input) (get (:current-action data) "library"))
+    (set! (.-value email-body-input) (get (:current-action data) "template"))
+    (email-action-form-body data)))
 
 (def action-form-bodys 
   {:email-action email-action-form-body

@@ -60,3 +60,30 @@
                   :async false
                   :success #(create-new-email-action-callback data %)})))))
 
+
+(defn test-new-email-action [project-id]
+  (let [artifact (get-data-from-input "artifact-input")
+        email (get-data-from-input "emain-input")
+        email-body (get-data-from-input "emain-body-input")
+        data {:project-id project-id
+              :type "email"
+              :address email
+              :template email-body
+              :library artifact
+              :version "NEW-VERSION"
+              :previous-version "OLD-VERSION"}]
+    (if (or
+         (= "" artifact)
+         (= "" email)
+         (= "" email-body))
+      (js/alert "Wrong data! Check out fields!")
+
+      (jq/ajax "/api/actions/test"
+               {:type "POST"
+                :data (.stringify js/JSON 
+                                  (clj->js data))
+                :contentType "application/json"
+                :dataType "json"
+                :async false
+                :success (fn [e])}))))
+

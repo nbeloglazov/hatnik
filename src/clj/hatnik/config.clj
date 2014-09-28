@@ -1,4 +1,5 @@
-(ns hatnik.config)
+(ns hatnik.config
+  (:require [taoensso.timbre :as timbre]))
 
 (def default-config
   {:log-level :info
@@ -12,4 +13,6 @@
   (merge
    default-config
    (try (read-string (slurp config-file))
-        (catch Exception e {}))))
+        (catch Exception e
+          (timbre/error "Error while parsing config")
+          {}))))

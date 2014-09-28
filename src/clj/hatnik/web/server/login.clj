@@ -68,6 +68,8 @@
 
 (defn logout []
   (assoc (resp/response {:result :ok})
+    :headers {"Location" "/"}
+    :status 302
     :session nil))
 
 (defroutes login-api

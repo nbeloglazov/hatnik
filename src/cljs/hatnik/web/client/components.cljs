@@ -9,22 +9,22 @@
 
 
 (defn accordion-panel [& {:keys [body-id header button body]}]
-  (dom/div 
+  (dom/div
    #js {:className "panel panel-default panel-primary"}
-   (dom/div 
+   (dom/div
     #js {:className "panel-heading"}
-    (dom/div 
-     nil     
-     (dom/h4 
+    (dom/div
+     nil
+     (dom/h4
       #js {:className "panel-title"}
       (dom/div #js {:className "row"}
                (dom/div #js {:className "col-sm-8 col-md-8 col-lg-8"}
-                        (dom/a 
+                        (dom/a
                          #js {:data-parent "#accrodion"
                               :data-toggle "collapse"
                               :href (str "#" body-id)}
                          header))
-               (dom/div 
+               (dom/div
                 #js {:className "col-sm-2 col-md-1 col-lg-1 pull-right"}
                 button)))))
    (dom/div #js {:className "panel-collapse collapse in"
@@ -43,8 +43,8 @@
                    (state/set-current-project project-id)
                    (state/set-current-action action)
                    (.modal ($ :#iModal)))
-        :className "panel panel-default"}
-   (dom/div 
+        :className "panel panel-default action"}
+   (dom/div
     #js {:className "panel-body bg-success"}
             (render-action-type (get action "type"))
             (str " "
@@ -58,34 +58,34 @@
 
 
 (defn add-new-action [project-id]
-  (dom/div #js {:className "panel panel-default panel-info"
-              :onClick #(add-action project-id)}
+  (dom/div #js {:className "panel panel-default panel-info action"
+                :onClick #(add-action project-id)}
            (dom/div #js {:className "panel-body bg-info"}
-                    (dom/span #js {:className "glyphicon glyphicon-plus"})     
+                    (dom/span #js {:className "glyphicon glyphicon-plus"})
                     " Add action")))
 
 
 (defn actions-table [id actions]
-  (let [rendered 
+  (let [rendered
         (map (fn [action]
                (dom/div #js {:className "col-sm-12 col-md-6 col-lg-4 prj-list-item"}
                         (render-action id action)))
              actions)]
     (apply dom/div #js {:className "row"}
            (concat rendered
-                   [(dom/div #js {:className "col-sm-12 col-md-6 col-lg-4 prj-list-item"} 
-                             (add-new-action id))]))))   
+                   [(dom/div #js {:className "col-sm-12 col-md-6 col-lg-4 prj-list-item"}
+                             (add-new-action id))]))))
 
 (defn project-menu [project]
   (let [project-name-input (.getElementById js/document "project-name-edit-input")]
-    (set! (.-value project-name-input) 
+    (set! (.-value project-name-input)
           (get @project "name"))
     (state/set-current-project (get @project "id"))
     (.modal ($ :#iModalProjectMenu))))
 
 (defn project-header-menu-button [project]
   (dom/div #js {:className "dropdown"}
-           (dom/button 
+           (dom/button
             #js {:className "btn btn-default"
                  :type "button"
                  :onClick #(project-menu project)}
@@ -96,7 +96,7 @@
     om/IRender
     (render [this]
       (apply dom/div nil
-       (map 
+       (map
         (fn [prj]
           (accordion-panel
            :header (dom/div #js {:className "bg-primary"} (get prj "name"))

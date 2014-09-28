@@ -49,11 +49,11 @@
   (dom/form 
    #js {:id "email-action-form"}
    (dom/div #js {:className "form-group"}
-            (dom/label #js {:for "artifact-input"} "Artifact")
+            (dom/label #js {:for "artifact-input"} "Library")
             (dom/input #js {:type "text"
                             :className "form-control"
                             :id "artifact-input"
-                            :placeholder "Artifact name"}))
+                            :placeholder "e.g. org.clojure/clojure"}))
    (dom/div #js {:className "form-group"}
             (dom/label #js {:for "emain-input"} "Email")
             (dom/input #js {:type "email"
@@ -68,10 +68,16 @@
                                         :id "emain-body-input"}
                                    template)))))
 
+(def default-email-template
+  (str "Hello there\n\n"
+       "{{library}} {{version}} has been released! "
+       "Previous version was {{previous-version}}\n\n"
+       "Your Hatnik"))
+
 (defn email-create-action-body [data]
   (let [artifact-input (.getElementById js/document "artifact-input")
         email-body-input (.getElementById js/document "emain-body-input")]
-    (email-action-form-body data "" "Library release: {{LIBRARY}} {{VERSION}}")))
+    (email-action-form-body data "" default-email-template)))
 
 (defn email-edit-action [data]
   (let [artifact-input (.getElementById js/document "artifact-input")

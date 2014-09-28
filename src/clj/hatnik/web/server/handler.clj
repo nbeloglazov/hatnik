@@ -85,6 +85,15 @@
       (monger-store (mg/get-db conn db) "sessions"))
     (memory-store)))
 
+(defn wrap-exceptions [handler]
+  (fn [req]
+    (try
+      (handler req)
+      (catch Exception e
+        (timbre/error e)
+        (resp/response {:result :error
+                        :message "Something bad happened on server"})))))
+
 (def app
   (-> #'app-routes
       dump-request
@@ -92,9 +101,9 @@
                                               :max-age (* 60 60 24 14)
                                               :http-only true}
                                :store (get-session-store)}})
+      wrap-exceptions
       (json/wrap-json-body {:keywords? true})
-      json/wrap-json-response
-      stacktrace/wrap-stacktrace))
+      json/wrap-json-response))
 
 (comment
 

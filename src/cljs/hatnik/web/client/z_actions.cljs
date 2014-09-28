@@ -19,7 +19,7 @@
                               (clj->js data))
             :contentType "application/json"
             :dataType "json"
-            :async false
+            :async true
             :success callback}))
 
 (defn create-new-project-callback [name reply]
@@ -72,8 +72,8 @@
               :address email
               :template email-body
               :library artifact
-              :version "NEW-VERSION"
-              :previous-version "OLD-VERSION"}]
+              :version "2.3.4"
+              :previous-version "1.2.3"}]
     (if (or
          (= "" artifact)
          (= "" email)

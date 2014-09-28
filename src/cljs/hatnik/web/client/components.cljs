@@ -63,11 +63,19 @@
                    [(dom/div #js {:className "col-sm-12 col-md-6 col-lg-4"} 
                              (add-new-action id))]))))   
 
+(defn project-menu [project]
+  (let [project-name-input (.getElementById js/document "project-name-edit-input")]
+    (set! (.-value project-name-input) 
+          (get @project "name"))
+    (state/set-current-project (get @project "id"))
+    (.modal ($ :#iModalProjectMenu))))
+
 (defn project-header-menu-button [project]
   (dom/div #js {:className "dropdown"}
            (dom/button 
             #js {:className "btn btn-default"
-                 :type "button"}
+                 :type "button"
+                 :onClick #(project-menu project)}
             (dom/span #js {:className "glyphicon glyphicon-pencil pull-right"}))))
 
 (defn project-header [project]

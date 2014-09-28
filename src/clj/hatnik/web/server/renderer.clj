@@ -6,7 +6,9 @@
   (hc/html
    [:head
     [:title "Hatnik"]
-    [:link {:rel "stylesheet" :href "/css/bootstrap.min.css"}]]))
+    [:link {:rel "stylesheet" :href "/css/bootstrap.min.css"}]
+    [:style {:type "text/css"}
+     ".prj-list-item {margin-top: 10px;}"]]))
 
 
 (def github-link

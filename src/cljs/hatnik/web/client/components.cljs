@@ -10,7 +10,7 @@
 
 (defn accordion-panel [& {:keys [body-id header body]}]
   (dom/div 
-   #js {:className "panel panel-default"}
+   #js {:className "panel panel-default panel-primary"}
    (dom/div 
     #js {:className "panel-heading"}
     (dom/div 
@@ -27,18 +27,23 @@
             (dom/div #js {:className "panel-body"}
                      body))))
 
+(defn render-action-type [a-type]
+  (when (= "email" a-type)
+    (dom/span #js {:className "glyphicon glyphicon-envelope"})))
+
 (defn render-action [project-id action]
-  (dom/div 
+  (dom/div
    #js {:onClick (fn []
                    (state/set-form-type :email-edit-action)
                    (state/set-current-project project-id)
                    (state/set-current-action action)
-                   (.modal ($ :#iModal)))}
-           (dom/p nil
-                  (str
-                   (get action "library")
-                   " - "
-                   (get action "type")))))
+                   (.modal ($ :#iModal)))
+        :className "panel panel-default"}
+   (dom/div #js {:className "panel-body"}
+            (render-action-type (get action "type"))
+            (str " "
+                 (get action "library")
+                 ": " (get action "last-processed-version")))))
 
 (defn add-action [id]
   (state/set-form-type :email-action)
@@ -47,20 +52,21 @@
 
 
 (defn add-new-action [project-id]
-  (dom/a #js {:className "btn btn-default"
+  (dom/div #js {:className "panel panel-default panel-info"
               :onClick #(add-action project-id)}
-         "Add new action"))
+           (dom/div #js {:className "panel-body"}
+                    "Add new action")))
 
 
 (defn actions-table [id actions]
   (let [rendered 
         (map (fn [action]
-               (dom/div #js {:className "col-sm-12 col-md-6 col-lg-4"}
+               (dom/div #js {:className "col-sm-12 col-md-6 col-lg-4 prj-list-item"}
                         (render-action id action)))
              actions)]
     (apply dom/div #js {:className "row"}
            (concat rendered
-                   [(dom/div #js {:className "col-sm-12 col-md-6 col-lg-4"} 
+                   [(dom/div #js {:className "col-sm-12 col-md-6 col-lg-4 prj-list-item"} 
                              (add-new-action id))]))))   
 
 (defn project-menu [project]

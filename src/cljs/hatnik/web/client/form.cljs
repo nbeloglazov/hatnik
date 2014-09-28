@@ -14,3 +14,14 @@
 (om/root widget/action-form-footer state/app-state
          {:target (. js/document (getElementById "iActionFormFooter"))})
 
+
+;; Keyboard actions
+
+;; Hidden modal by ESC
+(.keydown ($ js/document) 
+           (fn [e]
+             (when (= 27 (.-keyCode e))
+               (.modal ($ :#iModal) "hide")
+               (.modal ($ :#iModalProject) "hide")
+               (.modal ($ :#iModalProjectMenu) "hide"))))
+

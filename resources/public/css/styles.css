@@ -29,3 +29,12 @@
 .about ol ol li {
     list-style-type: lower-alpha;
 }
+
+#emain-input {
+    margin-bottom: 10px;
+}
+
+#emain-body-input {
+    height: 150px;
+    resize: vertical;
+}

@@ -66,7 +66,7 @@
 (defn email-action-footer [data]
   (dom/div nil
            (dom/button #js {:className "btn btn-primary"
-                            :onClick #(action/send-new-email-action (:current-project data))} "Submit")
+                            :onClick #(action/send-new-email-action (:current-project @data))} "Submit")
            (dom/button #js {:className "btn btn-default"} "Test")))
 
 (def action-form-footers

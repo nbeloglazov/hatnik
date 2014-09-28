@@ -40,4 +40,4 @@
              (get data "email")))))
 
 (defn update-project-actions [action]
-  (.log js/console action))
+  (.send goog.net.XhrIo "/api/projects" update-projects-list))

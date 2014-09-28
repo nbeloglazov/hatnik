@@ -33,14 +33,14 @@
 
      [:div#iProjectList.panel-group "Loading..."]]
 
-    [:div#iModal.modal.fade
+    [:div#iModal.modal.fade {:data-keyboard "true"}
      [:div#iModalDialog.modal-dialog
       [:div.modal-content
        [:div#iActionFormHeader.modal-header]
        [:div#iActionFormBody.modal-body]
        [:div#iActionFormFooter.modal-footer]]]]
 
-    [:div#iModalProject.modal.fade
+    [:div#iModalProject.modal.fade {:data-keyboard "true"}
      [:div.modal-dialog
       [:div.modal-content
        [:div.modal-header

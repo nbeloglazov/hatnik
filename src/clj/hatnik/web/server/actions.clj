@@ -16,28 +16,34 @@
     action))
 
 (defn create-action [user data]
-  (let [version (ver/latest-release (:library data))
-        action (-> data
-                   (assoc :last-processed-version version)
-                   (restrict-email-to-be-current user))
-        id (stg/create-action! @stg/storage (:id user) action)]
-   (resp/response
-    (if id
-      {:result :ok
-       :id id
-       :last-processed-version version}
-      {:result :error
-       :message "Couldn't create action."}))))
+  (if-let [version (ver/latest-release (:library data))]
+    (let [action (-> data
+                     (assoc :last-processed-version version)
+                     (restrict-email-to-be-current user))
+          id (stg/create-action! @stg/storage (:id user) action)]
+      (resp/response
+       (if id
+         {:result :ok
+          :id id
+          :last-processed-version version}
+         {:result :error
+          :message "Couldn't create action."})))
+    (resp/response
+     {:result :error
+      :message (str "Uknown library: " (:library data))})))
 
 (defn update-action [user id data]
-  (let [version (ver/latest-release (:library data))
-        action (-> data
-                   (assoc :last-processed-version version)
-                   (restrict-email-to-be-current user))]
-    (stg/update-action! @stg/storage (:id user) id action)
+  (if-let [version (ver/latest-release (:library data))]
+    (let [action (-> data
+                     (assoc :last-processed-version version)
+                     (restrict-email-to-be-current user))]
+      (stg/update-action! @stg/storage (:id user) id action)
+      (resp/response
+       {:result :ok
+        :last-processed-version version}))
     (resp/response
-     {:result :ok
-      :last-processed-version version})))
+     {:result :error
+      :message (str "Uknown library: " (:library data)) })))
 
 (defn delete-action [user id]
   (stg/delete-action! @stg/storage (:id user) id)

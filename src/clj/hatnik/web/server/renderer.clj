@@ -5,7 +5,7 @@
   (hc/html
    [:head
     [:title "Hatnik"]
-    [:link {:rel "stylesheet" :href "/css/bootstrap.min.css"}]]]))
+    [:link {:rel "stylesheet" :href "/css/bootstrap.min.css"}]]))
 
 
 (defn page-header []
@@ -56,6 +56,8 @@
            :placeholder "Project name"}]]]
       [:div.modal-footer
         [:button.btn.btn-primary {:onClick "hatnik.web.client.z_actions.send_new_project_request()"} "Create"]]]]]
+
+
 
     [:script {:src "/js/jquery-2.1.1.min.js"}]    
     [:script {:src "/js/bootstrap.min.js"}]

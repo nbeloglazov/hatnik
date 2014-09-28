@@ -12,7 +12,7 @@
                            ; logins by email without any authorization
 
  :email {:host "smtp.gmail.com"
-         :user "GMAIL_ACCOUNT
+         :user "GMAIL_ACCOUNT"
          :ssl true
          :pass "ACCOUNT_PASS"
          :from "GMAIL_ACCOUNT"}}

@@ -109,9 +109,8 @@
 
       [:script {:src "/js/jquery-2.1.1.min.js"}]    
       [:script {:src "/js/bootstrap.min.js"}]
-      [:script {:src "http://fb.me/react-0.11.1.js"}]
+      [:script {:src "/js/react.min.js"}]
       
       (when user
-        [:script {:src "/gen/js/hatnik.js"}])
-])))
+        [:script {:src "/gen/js/hatnik.js"}])])))
 

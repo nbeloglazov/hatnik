@@ -47,6 +47,9 @@
      [{:source-paths ["src/cljs"]
        :compiler
        {:output-to "resources/public/gen/js/hatnik.js"
-        :optimizations :whitespace
-        :pretty-print true}}]
+        :optimizations :advanced
+        :externs ["externs/jquery-1.9.js"
+                  "externs/hatnik.js"
+                  "react/externs/react.js"]
+        :pretty-print false}}]
      }}})

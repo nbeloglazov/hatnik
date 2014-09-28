@@ -34,7 +34,7 @@
       (state/update-all-view))))
 
 
-(defn send-new-project-request []
+(defn ^:export send-new-project-request []
   (let [name (.-value (.getElementById js/document "project-name-input"))]
     (if (= "" name)
       (js/alert "Project name must be not empty!")
@@ -117,7 +117,7 @@
    {} (wrap-error-alert
        #(common-update-callback "Action don't deleted!" {} %))))
 
-(defn delete-project []
+(defn ^:export delete-project []
   (let [project-id (:current-project (deref state/app-state))]
     (.modal ($ :#iModalProjectMenu) "hide")
     (ajax
@@ -125,7 +125,7 @@
      {} (wrap-error-alert 
          #(common-update-callback "Project don't deleted!" {} %)))))
 
-(defn update-project []
+(defn ^:export update-project []
   (let [project-id (:current-project (deref state/app-state))
         new-name (get-data-from-input "project-name-edit-input")]
     (.modal ($ :#iModalProjectMenu) "hide")

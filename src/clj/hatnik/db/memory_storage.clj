@@ -69,6 +69,9 @@
            (filter #(= (:project-id %) project-id)))
       []))
 
+  (get-actions [storage]
+    (:actions @atom))
+
   (create-action! [storage user-id data]
     (if (has-project? storage user-id (:project-id data))
       (let [id (next-id)]

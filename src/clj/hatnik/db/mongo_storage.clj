@@ -68,6 +68,10 @@
       (->> (mc/find-maps db actions {:project-id project-id})
            (map norm-id))))
 
+  (get-actions [storage]
+    (->> (mc/find-maps db actions)
+         (map norm-id)))
+
   (create-action! [storage user-id data]
     (if (has-project? db user-id (:project-id data))
       (-> (mc/insert-and-return db actions data)

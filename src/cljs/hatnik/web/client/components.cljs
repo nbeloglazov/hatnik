@@ -103,6 +103,6 @@
           (accordion-panel
            :header (project-header prj)
            :body (actions-table (get prj "id") (get prj "actions"))
-           :body-id (str "__" (get prj "name"))))
+           :body-id (str "__PrjList" (get prj "id"))))
         (:projects data))))))
 

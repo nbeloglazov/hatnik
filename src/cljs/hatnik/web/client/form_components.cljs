@@ -54,7 +54,8 @@
             (dom/input #js {:type "text"
                             :className "form-control"
                             :id "artifact-input"
-                            :placeholder "e.g. org.clojure/clojure"}))
+                            :placeholder "e.g. org.clojure/clojure"
+                            :value (:email-artifact-value data)}))
    (dom/div #js {:className "form-group"}
             (dom/label #js {:for "emain-input"} "Email")
             (dom/input #js {:type "email"

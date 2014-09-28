@@ -6,7 +6,8 @@
          :user {}
          :current-project nil
          :current-action nil
-         :email-form-timer false}))
+         :email-form-timer false
+         :email-artifact-value ""}))
 
 (defn update-projects-list [reply]
   (let [json (.getResponseJson (.-target reply))

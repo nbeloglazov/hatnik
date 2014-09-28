@@ -38,3 +38,7 @@
     height: 150px;
     resize: vertical;
 }
+
+#iProjectList .action {
+    cursor: pointer;
+}

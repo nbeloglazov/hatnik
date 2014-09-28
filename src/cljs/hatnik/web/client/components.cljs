@@ -28,7 +28,12 @@
                      body))))
 
 (defn render-action [project-id action]
-  (dom/div nil
+  (dom/div 
+   #js {:onClick (fn []
+                   (state/set-form-type :email-edit-action)
+                   (state/set-current-project project-id)
+                   (state/set-current-action action)
+                   (.modal ($ :#iModal)))}
            (dom/p nil
                   (str
                    (get action "library")

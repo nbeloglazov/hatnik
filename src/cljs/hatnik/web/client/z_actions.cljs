@@ -12,18 +12,22 @@
       (state/add-new-project (get resp "id") name)
       (js/alert (str "Sorry. Project " name " can't be created.")))))
 
+
+(defn ajax [url type data callback]
+  (jq/ajax url
+           {:type type
+            :data (.stringify js/JSON 
+                              (clj->js data))
+            :contentType "application/json"
+            :dataType "json"
+            :async false
+            :success callback}))
+
 (defn send-new-project-request []
   (let [name (.-value (.getElementById js/document "project-name-input"))]
     (if (= "" name)
       (js/alert "Project name must be not empty!")
-        (jq/ajax "/api/projects" 
-                 {:type "POST"
-                  :data (.stringify js/JSON 
-                                    (clj->js {:name name}))
-                  :contentType "application/json"
-                  :dataType "json"
-                  :async false
-                  :success #(create-new-project-callback name %)}))))
+      (ajax  "/api/projects" "POST" {:name name} #(create-new-project-callback name %)))))
 
 (defn create-new-email-action-callback [data reply]
   (let [resp (js->clj reply)]
@@ -51,14 +55,7 @@
 
       (do
         (.modal ($ :#iModal) "hide")
-        (jq/ajax "/api/actions"
-                 {:type "POST"
-                  :data (.stringify js/JSON 
-                                    (clj->js data))
-                  :contentType "application/json"
-                  :dataType "json"
-                  :async false
-                  :success #(create-new-email-action-callback data %)})))))
+        (ajax "/api/actions" "POST" data #(create-new-email-action-callback data %))))))
 
 
 (defn test-new-email-action [project-id]
@@ -78,12 +75,5 @@
          (= "" email-body))
       (js/alert "Wrong data! Check out fields!")
 
-      (jq/ajax "/api/actions/test"
-               {:type "POST"
-                :data (.stringify js/JSON 
-                                  (clj->js data))
-                :contentType "application/json"
-                :dataType "json"
-                :async false
-                :success (fn [e])}))))
+      (ajax "/api/actions/test" "POST" data (fn [e])))))
 

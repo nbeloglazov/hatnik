@@ -14,7 +14,8 @@
 ;; For selecting action form header
 
 (def action-forms-headers 
-  {:email-action "Add email notification"})
+  {:email-action "Add email notification"
+   :email-edit-action "Edit email notification"})
 
 (defn action-form-header [data owner]
   (reify
@@ -50,8 +51,12 @@
                                         :id "emain-body-input"}
                                    "Library release: {{LIBRARY}} {{VERSION}}")))))
 
+(defn email-edit-action [data]  
+  (email-action-form-body data))
+
 (def action-form-bodys 
-  {:email-action email-action-form-body})
+  {:email-action email-action-form-body
+   :email-edit-action email-edit-action})
 
 (defn action-form-body [data body]
   (reify
@@ -65,13 +70,22 @@
 
 (defn email-action-footer [data]
   (dom/div nil
-           (dom/button #js {:className "btn btn-primary"
+           (dom/button #js {:className "btn btn-primary pull-left"
                             :onClick #(action/send-new-email-action (:current-project @data))} "Submit")
            (dom/button #js {:className "btn btn-default"
                             :onClick #(action/test-new-email-action (:current-project @data))} "Test")))
 
+(defn email-edit-footer [data]
+  (dom/div 
+   nil
+   (dom/button #js {:className "btn btn-primary pull-left"
+                    :onClick #(action/send-new-email-action (:current-project @data))} "Update")
+   (dom/button #js {:className "btn btn-default"
+                    :onClick #(action/test-new-email-action (:current-project @data))} "Test")))
+
 (def action-form-footers
-  {:email-action email-action-footer})
+  {:email-action email-action-footer
+   :email-edit-action email-edit-footer})
 
 (defn action-form-footer [data body]
   (reify

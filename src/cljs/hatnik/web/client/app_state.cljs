@@ -4,7 +4,8 @@
   (atom {:projects []
          :form-type :email-action
          :user {}
-         :current-project nil}))
+         :current-project nil
+         :current-action nil}))
 
 (defn update-projects-list [reply]
   (let [json (.getResponseJson (.-target reply))
@@ -22,6 +23,11 @@
 (defn set-current-project [id]
   (swap! app-state 
          assoc :current-project id))
+
+(defn set-current-action [action]
+  (swap! app-state
+         assoc :current-action
+         action))
 
 
 (defn add-new-project [id name]

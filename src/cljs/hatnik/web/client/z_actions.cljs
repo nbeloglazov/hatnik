@@ -86,13 +86,13 @@
 
 (defn update-email-action [project-id action-id]
     (let [artifact (get-data-from-input "artifact-input")
-        email (get-data-from-input "emain-input")
-        email-body (get-data-from-input "emain-body-input")
-        data {:project-id project-id
-              :type "email"
-              :address email
-              :template email-body
-              :library artifact}]
+          email (get-data-from-input "emain-input")
+          email-body (get-data-from-input "emain-body-input")
+          data {:project-id project-id
+                :type "email"
+                :address email
+                :template email-body
+                :library artifact}]
     (if (or
          (= "" artifact)
          (= "" email)
@@ -102,6 +102,6 @@
       (do
         (.modal ($ :#iModal) "hide")
         (ajax 
-         (str "/api/actions/" action-id) "POST" 
+         (str "/api/actions/" action-id) "PUT" 
          data #(update-email-action-callback data %))))))
 

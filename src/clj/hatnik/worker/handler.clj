@@ -15,15 +15,15 @@
   (timbre/info "Running test action for user" (:user action))
   (let [project (stg/get-project @stg/storage (:project-id action))
         user (stg/get-user-by-id @stg/storage (:user-id project))
-        result (w/perform-action action user
-                                 {:library (:library action)
-                                  :version (:version action)
-                                  :previous-version (:previous-version action)
-                                  :project (:name project)})]
-    (if result
+        error (w/perform-action action user
+                                {:library (:library action)
+                                 :version (:version action)
+                                 :previous-version (:previous-version action)
+                                 :project (:name project)})]
+    (if error
       (resp/response
        {:result :error
-        :message result})
+        :message error})
       (resp/response
        {:result :ok}))))
 

@@ -5,7 +5,9 @@
   {:log-level :info
    :db :memory
    :worker-server {:host "localhost"
-                   :port 5734}})
+                   :port 5734}
+
+   :enable-actions true})
 
 (def config-file "config.clj")
 

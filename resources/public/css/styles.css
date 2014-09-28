@@ -1,0 +1,31 @@
+.prj-list-item {
+    margin-top: 10px;
+}
+
+.about {
+    font-size: 17px;
+}
+
+.separator {
+    border-top: 1px solid #eee;
+}
+
+.actions li {
+    margin-bottom: 15px;
+}
+
+.actions .label {
+    margin-left: 10px;
+}
+
+.about .unavailable {
+    color: #999;
+}
+
+.use-cases li {
+    margin: 10px 0px;
+}
+
+.about ol ol li {
+    list-style-type: lower-alpha;
+}

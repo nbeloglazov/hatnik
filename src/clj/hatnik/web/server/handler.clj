@@ -14,7 +14,8 @@
             [hatnik.db.memory-storage :refer [create-memory-storage]]
             [hatnik.db.mongo-storage :refer [create-mongo-storage]]
             [hatnik.versions :as ver]
-            [hatnik.worker.handler :as worker]
+            [hatnik.worker.handler :as worker-handler]
+            [hatnik.worker.worker :as worker]
 
             [ring.util.request :refer [body-string]]
             [ring.util.response :as resp]
@@ -23,8 +24,9 @@
             [ring.middleware.stacktrace :as stacktrace]))
 
 (defn initialise []
-  (worker/start)
   (timbre/info "Initialisation started.")
+  (worker-handler/start)
+  (worker/initialise-and-start-job)
   (timbre/set-level! (:log-level config))
   (reset! stg/storage
           (case (:db config)

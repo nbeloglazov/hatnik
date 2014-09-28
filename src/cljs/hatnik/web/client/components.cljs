@@ -34,7 +34,7 @@
 
 (defn render-action-type [a-type]
   (when (= "email" a-type)
-    (dom/span #js {:className "glyphicon glyphicon-envelope"})))
+    (dom/span #js {:className "glyphicon glyphicon-envelope action-type"})))
 
 (defn render-action [project-id action]
   (dom/div
@@ -47,9 +47,11 @@
    (dom/div
     #js {:className "panel-body bg-success"}
             (render-action-type (get action "type"))
-            (str " "
-                 (get action "library")
-                 ": " (get action "last-processed-version")))))
+            (dom/span #js {:className "action-info"}
+             (dom/div #js {:className "library-name"}
+                      (get action "library"))
+             (dom/div #js {:className "version"}
+                      (get action "last-processed-version"))))))
 
 (defn add-action [id]
   (state/set-form-type :email-action)
@@ -58,7 +60,7 @@
 
 
 (defn add-new-action [project-id]
-  (dom/div #js {:className "panel panel-default panel-info action"
+  (dom/div #js {:className "panel panel-default panel-info action add-action"
                 :onClick #(add-action project-id)}
            (dom/div #js {:className "panel-body bg-info"}
                     (dom/span #js {:className "glyphicon glyphicon-plus"})

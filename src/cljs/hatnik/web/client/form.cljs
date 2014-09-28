@@ -33,13 +33,20 @@
       (.addClass ($ :#artifact-input-group) "has-success")
       (.addClass ($ :#artifact-input-group) "has-error"))))
 
+(def timeout-id (atom nil))
 
-(.keyup 
+(.keyup
  ($ :#artifact-input)
  (fn [e]
-   (.removeClass 
-    ($ :#artifact-input-group) 
+   (.removeClass
+    ($ :#artifact-input-group)
     "has-warning has-success has-error")
-   (action/get-library
-    (.-value (.getElementById js/document "artifact-input"))
-    update-email-artifact-status)))
+   (when-let [id @timeout-id]
+     (js/clearTimeout id))
+   (let [check-library (fn []
+                         (reset! timeout-id nil)
+                         (action/get-library
+                          (.-value (.getElementById js/document "artifact-input"))
+                          update-email-artifact-status))]
+    (reset! timeout-id
+            (js/setTimeout check-library 300)))))

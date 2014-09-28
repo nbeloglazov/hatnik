@@ -38,7 +38,7 @@
           [{:source-paths ["src/cljs"]
             :compiler
             {:output-to "resources/public/gen/js/hatnik.js"
-             :optimizations :whitespace
+             :optimizations :simple
              :pretty-print true}}]
           }}
    :release 

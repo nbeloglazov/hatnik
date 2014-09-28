@@ -39,7 +39,8 @@
                    (state/set-current-action action)
                    (.modal ($ :#iModal)))
         :className "panel panel-default"}
-   (dom/div #js {:className "panel-body"}
+   (dom/div 
+    #js {:className "panel-body bg-success"}
             (render-action-type (get action "type"))
             (str " "
                  (get action "library")
@@ -54,8 +55,9 @@
 (defn add-new-action [project-id]
   (dom/div #js {:className "panel panel-default panel-info"
               :onClick #(add-action project-id)}
-           (dom/div #js {:className "panel-body"}
-                    "Add new action")))
+           (dom/div #js {:className "panel-body bg-info"}
+                    (dom/span #js {:className "glyphicon glyphicon-plus"})     
+                    " Add new action")))
 
 
 (defn actions-table [id actions]

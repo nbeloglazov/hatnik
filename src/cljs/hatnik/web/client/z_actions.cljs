@@ -133,3 +133,9 @@
      {:name new-name} 
      (wrap-error-alert #(common-update-callback "Project don't renamed!" {} %)))))
 
+
+(defn get-library [library callback]
+  (ajax
+   (str "/api/library-version?library=" library) "GET"
+   {} callback))
+

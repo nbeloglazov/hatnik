@@ -48,7 +48,8 @@
 (defn email-action-form-body [data artifact template]
   (dom/form 
    #js {:id "email-action-form"}
-   (dom/div #js {:className "form-group"}
+   (dom/div #js {:className "form-group has-warning"
+                 :id "artifact-input-group"}
             (dom/label #js {:for "artifact-input"} "Library")
             (dom/input #js {:type "text"
                             :className "form-control"

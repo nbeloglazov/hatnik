@@ -26,3 +26,20 @@
                (.modal ($ :#iModalProject) "hide")
                (.modal ($ :#iModalProjectMenu) "hide"))))
 
+
+(defn update-email-artifact-status [reply]
+  (let [data (js->clj reply)]
+    (if (= "ok" (get data "result"))
+      (.addClass ($ :#artifact-input-group) "has-success")
+      (.addClass ($ :#artifact-input-group) "has-error"))))
+
+
+(.keyup 
+ ($ :#artifact-input)
+ (fn [e]
+   (.removeClass 
+    ($ :#artifact-input-group) 
+    "has-warning has-success has-error")
+   (action/get-library
+    (.-value (.getElementById js/document "artifact-input"))
+    update-email-artifact-status)))

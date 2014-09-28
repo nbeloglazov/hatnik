@@ -5,7 +5,8 @@
          :form-type :email-action
          :user {}
          :current-project nil
-         :current-action nil}))
+         :current-action nil
+         :email-form-timer false}))
 
 (defn update-projects-list [reply]
   (let [json (.getResponseJson (.-target reply))
@@ -50,3 +51,14 @@
 
 (defn update-project-actions [action]
   (.send goog.net.XhrIo "/api/projects" update-projects-list))
+
+
+(defn get-email-form-timer []
+  (:email-form-timer @app-state))
+
+(defn set-email-form-timer [callback time]
+  (let [timer (get-email-form-timer)]
+    (when timer (js/clearIntervar timer))
+    (swap! app-state
+           assoc :email-form-timer
+           (js/setTimeout callback time))))

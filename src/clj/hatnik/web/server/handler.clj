@@ -44,9 +44,13 @@
   (timbre/info "Initialisation finished."))
 
 (defn library-version [library]
-  (resp/response
-   {:result :ok
-    :version (ver/latest-release library)}))
+  (if-let [version (ver/latest-release library)]
+    (resp/response
+     {:result :ok
+      :version version})
+    (resp/response
+     {:result :error
+      :message (str "Library " library " not found")})))
 
 (defn wrap-authenticated-only [handler]
   (fn [req]

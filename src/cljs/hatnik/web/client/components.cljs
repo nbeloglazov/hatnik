@@ -8,7 +8,7 @@
   (js/alert "Hoooo!"))
 
 
-(defn accordion-panel [& {:keys [body-id header body]}]
+(defn accordion-panel [& {:keys [body-id header button body]}]
   (dom/div 
    #js {:className "panel panel-default panel-primary"}
    (dom/div 
@@ -17,11 +17,16 @@
      nil     
      (dom/h4 
       #js {:className "panel-title"}
-      (dom/a 
-       #js {:data-parent "#accrodion"
-            :data-toggle "collapse"
-            :href (str "#" body-id)}
-       header))))
+      (dom/div #js {:className "row"}
+               (dom/div #js {:className "col-sm-8 col-md-8 col-lg-8"}
+                        (dom/a 
+                         #js {:data-parent "#accrodion"
+                              :data-toggle "collapse"
+                              :href (str "#" body-id)}
+                         header))
+               (dom/div 
+                #js {:className "col-sm-2 col-md-1 col-lg-1 pull-right"}
+                button)))))
    (dom/div #js {:className "panel-collapse collapse in"
                  :id body-id}
             (dom/div #js {:className "panel-body"}
@@ -86,15 +91,6 @@
                  :onClick #(project-menu project)}
             (dom/span #js {:className "glyphicon glyphicon-pencil pull-right"}))))
 
-(defn project-header [project]
-  (dom/div #js {:className "row"}
-   (dom/div 
-    #js {:className "col-sm-8 col-md-8 col-lg-8"} 
-    (dom/p nil (get project "name")))
-   (dom/div 
-    #js {:className "col-sm-2 col-md-1 col-lg-1 pull-right"}
-    (project-header-menu-button project))))
-
 (defn project-list [data owner]
   (reify
     om/IRender
@@ -103,7 +99,8 @@
        (map 
         (fn [prj]
           (accordion-panel
-           :header (project-header prj)
+           :header (dom/p nil (get prj "name"))
+           :button (project-header-menu-button prj)
            :body (actions-table (get prj "id") (get prj "actions"))
            :body-id (str "__PrjList" (get prj "id"))))
         (:projects data))))))

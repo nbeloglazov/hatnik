@@ -24,9 +24,8 @@
 
 (defn common-update-callback [msg data reply]
   (let [resp (js->clj reply)]
-    (if (= "ok" (get resp "result"))
-      (state/update-all-view)
-      (js/alert msg))))
+    (when (= "ok" (get resp "result"))
+      (state/update-all-view))))
 
 (defn create-new-project-callback [name reply]
   (let [resp (js->clj reply)]

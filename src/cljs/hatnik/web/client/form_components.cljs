@@ -45,7 +45,7 @@
 
 ;; For selecting action form body
 
-(defn email-action-form-body [data]
+(defn email-action-form-body [data artifact template]
   (dom/form 
    #js {:id "email-action-form"}
    (dom/div #js {:className "form-group"}
@@ -53,7 +53,8 @@
             (dom/input #js {:type "text"
                             :className "form-control"
                             :id "artifact-input"
-                            :placeholder "Artifact name"}))
+                            :placeholder "Artifact name"
+                            :value artifact}))
    (dom/div #js {:className "form-group"}
             (dom/label #js {:for "emain-input"} "Email")
             (dom/input #js {:type "email"
@@ -66,17 +67,21 @@
                      (dom/textarea #js {:cols "40"
                                         :className "form-control"
                                         :id "emain-body-input"}
-                                   "Library release: {{LIBRARY}} {{VERSION}}")))))
+                                   template)))))
+
+(defn email-create-action-body [data]
+  (let [artifact-input (.getElementById js/document "artifact-input")
+        email-body-input (.getElementById js/document "emain-body-input")]
+    (email-action-form-body data "" "Library release: {{LIBRARY}} {{VERSION}}")))
 
 (defn email-edit-action [data]
   (let [artifact-input (.getElementById js/document "artifact-input")
         email-body-input (.getElementById js/document "emain-body-input")]
-    (set! (.-value artifact-input) (get (:current-action data) "library"))
-    (set! (.-value email-body-input) (get (:current-action data) "template"))
-    (email-action-form-body data)))
+    (email-action-form-body data (get (:current-action data) "library")
+                            (get (:current-action data) "template"))))
 
 (def action-form-bodys 
-  {:email-action email-action-form-body
+  {:email-action email-create-action-body
    :email-edit-action email-edit-action})
 
 (defn action-form-body [data body]

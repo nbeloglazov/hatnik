@@ -121,6 +121,8 @@
         proj1 (s/create-project! storage {:name "Project 1" :user-id user1})
         proj2 (s/create-project! storage {:name "Project 2" :user-id user2})]
 
+    (is (empty? (s/get-actions storage))
+        "Initially storage should be empty")
     (is (empty? (s/get-actions storage user1 proj1))
         "Initially no actions for project 1")
     (is (empty? (s/get-actions storage user2 proj2))
@@ -146,6 +148,13 @@
           "Project 2 should have single action")
       (is (empty? (s/get-actions storage user1 proj2))
           "User1 should not have access to project2.")
+      (is (= (set (s/get-actions storage))
+             #{{:some-data "123"
+                :project-id proj1
+                :id act1}
+               {:some-data "111"
+                :project-id proj2
+                :id act2}}))
 
       ; Updates
       (s/update-action! storage user1 act1 {:project-id proj1
@@ -176,4 +185,10 @@
              #{{:some-data "111"
                 :project-id proj2
                 :id act2}})
-          "Actions for project2 should not be changed"))))
+          "Actions for project2 should not be changed")
+
+      (is (= (set (s/get-actions storage))
+             #{{:some-data "111"
+                :project-id proj2
+                :id act2}})
+          "In the end only action2 should be present"))))

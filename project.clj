@@ -25,18 +25,28 @@
 
   :ring {:handler hatnik.web.server.handler/app
          :init hatnik.web.server.handler/initialise}
-  :profiles
-  {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
-                        [ring-mock "0.1.5"]]}}
 
   :source-paths ["src/clj"]
   :test-paths ["test/clj"]
 
-  :cljsbuild
-  {:builds
-   [{:source-paths ["src/cljs"]
-     :compiler
-     {:output-to "resources/public/gen/js/hatnik.js"
-      :optimizations :whitespace
-      :pretty-print true}}]
-   })
+  :profiles
+  {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
+                        [ring-mock "0.1.5"]]
+
+         :cljsbuild
+         {:builds
+          [{:source-paths ["src/cljs"]
+            :compiler
+            {:output-to "resources/public/gen/js/hatnik.js"
+             :optimizations :whitespace
+             :pretty-print true}}]
+          }}
+   :release 
+   {:cljsbuild
+    {:builds
+     [{:source-paths ["src/cljs"]
+       :compiler
+       {:output-to "resources/public/gen/js/hatnik.js"
+        :optimizations :whitespace
+        :pretty-print true}}]
+     }}})

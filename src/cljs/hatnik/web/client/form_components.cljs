@@ -13,17 +13,34 @@
 
 ;; For selecting action form header
 
-(def action-forms-headers 
-  {:email-action "Add email notification"
-   :email-edit-action "Edit email notification"})
-
-(defn action-form-header [data owner]
+(defn email-action-form-header [data]
   (reify
     om/IRender
     (render [this]
       (dom/h4 #js {:className "modal-title"}
-              (get action-forms-headers
-                   (:form-type data))))))
+              "Add email notification"))))
+
+(defn email-update-header [data]
+  (reify
+    om/IRender
+    (render [this]
+      (dom/div 
+       nil
+       (dom/h4 #js {:className "modal-title"}
+               "Edit email notification"
+       (dom/button #js {:className "btn btn-danger pull-right"
+                        :onClick #(action/delete-action 
+                                   (get (deref (:current-action @data)) "id"))} 
+                   "Delete"))))))
+
+(def action-forms-headers 
+  {:email-action email-action-form-header
+   :email-edit-action email-update-header})
+
+(defn action-form-header [data owner]
+  (apply
+   (get action-forms-headers (:form-type data))
+   [data]))
 
 
 ;; For selecting action form body
@@ -86,9 +103,6 @@
                     :onClick #(action/update-email-action 
                                (:current-project @data)
                                (get (deref (:current-action @data)) "id"))} "Update")
-   (dom/button #js {:className "btn btn-danger pull-center"
-                    :onClick #(action/delete-action 
-                               (get (deref (:current-action @data)) "id"))} "Delete")
    (dom/button #js {:className "btn btn-default"
                     :onClick #(action/test-new-email-action (:current-project @data))} "Test")))
 

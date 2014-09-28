@@ -41,4 +41,41 @@
 
 #iProjectList .action {
     cursor: pointer;
+    height: 75px;
+    color: #444;
+}
+
+.action .panel-body {
+    height: 100%;
+}
+
+.action .action-type, .action .action-info {
+    height: 100%;
+    float: left;
+}
+
+.action .action-type {
+    font-size: 20px;
+    padding-top: 4px;
+}
+
+.action .action-info {
+    margin-left: 10px;
+}
+
+.action .library-name {
+    font-size: 20px;
+}
+
+.action .version {
+    font-size: 15px;
+}
+
+.add-action {
+    font-size: 20px;
+}
+
+.action.add-action .panel-body {
+    padding-top: 23px;
+    text-align: center;
 }

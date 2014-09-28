@@ -1,7 +1,8 @@
 (ns hatnik.worker.email-action
   (:require [postal.core :as p]
             [hatnik.config :refer [config]]
-            [clojure.string :as cstr]))
+            [clojure.string :as cstr]
+            [taoensso.timbre :as timbre]))
 
 (defn fill-template [template variables]
   (clojure.string/replace template #"\{\{([a-zA-Z-]+)\}\}"
@@ -26,11 +27,22 @@
                         (:library variables)
                         (:version variables))
         body (fill-template (:template action) variables)]
-    (send-email (:address action) subject body)))
+    (try
+      (send-email (:address action) subject body)
+      nil
+      (catch Exception e
+        (timbre/error e "Couldn't sent email"
+                      "Settings: "(:email config)
+                      "Address:" (:address action)
+                      "Subject:" subject
+                      "Body:" body)
+        "Couldn't send email."))))
 
 (comment
   (perform {:template "Library {{library}} released {{version}}"
-            :address "me@nbeloglazov.com"}
+            :address "nikelandjelo@gmail.com"}
            {}
-           {:library "quil"
-            :version "2.2.0"}))
+           {:library "Meee"
+            :version "2.2.0"})
+
+  )

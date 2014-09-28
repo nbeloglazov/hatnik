@@ -56,7 +56,7 @@
     (if (= (:result resp) "ok")
       (resp/response {:result :ok})
       (resp/response {:result :error
-                      :message "Couldn't test action"}))))
+                      :message (:message resp)}))))
 
 (defroutes actions-api
   (POST "/" req (create-action (get-user req) (:body req)))

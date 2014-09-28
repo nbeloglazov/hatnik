@@ -12,6 +12,7 @@
                  [com.novemberain/monger "2.0.0"]
                  [ancient-clj "0.1.10"]
                  [com.draines/postal "1.11.1"]
+                 [version-clj "0.1.0"]
 
                  ; ClojureScript
                  [org.clojure/clojurescript "0.0-2356"]

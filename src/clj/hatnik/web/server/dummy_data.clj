@@ -10,8 +10,8 @@
                                               :type :email
                                               :template "Hey {{LIBRARY}} released. New version {{VERSION}}."
                                               :address "nikelandjelo@gmail.com"
-                                              :library "org.clojure/clojure"
-                                              :last-processed-version "1.6.0"})))
+                                              :library "com.nbeloglazov/hatnik-test-lib"
+                                              :last-processed-version "0.0.9"})))
 
 (defn create-quil-project [user-id]
   (let [proj-id (stg/create-project! @stg/storage {:name "Quil"

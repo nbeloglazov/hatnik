@@ -113,3 +113,10 @@
    {} #(common-update-callback "Action don't deleted!" {} %)))
 
 
+
+(defn delete-project []
+  (js/alert "DELETE PROJECT"))
+
+(defn update-project []
+  (js/alert "UPDATE PROJECT"))
+

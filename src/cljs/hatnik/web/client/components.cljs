@@ -62,7 +62,7 @@
               :onClick #(add-action project-id)}
            (dom/div #js {:className "panel-body bg-info"}
                     (dom/span #js {:className "glyphicon glyphicon-plus"})     
-                    " Add new action")))
+                    " Add action")))
 
 
 (defn actions-table [id actions]

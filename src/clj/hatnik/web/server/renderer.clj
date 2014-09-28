@@ -9,16 +9,21 @@
     [:link {:rel "stylesheet" :href "/css/hatnik.css"}]]))
 
 
-(defn page-header [])
+(defn page-header []
+  [:nav.navbar.navbar-default {:role "navigation"}
+   [:div#navbarCollapse.collapse.navbar-collapse
+    [:ul.nav.navbar-nav.navbar-right
+     [:li
+      [:a.btn "Login via GitHub"]]]]])
 
 (defn core-page [req]
   (hc/html
    (page-html-head)
    
    [:body
-    (page-header)
 
     [:div.container
+     (page-header)
      [:div.page-header
       [:h2 "Project list"]]
      

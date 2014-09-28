@@ -73,7 +73,7 @@
 (defn project-header [project]
   (dom/div #js {:className "row"}
    (dom/div 
-    #js {:className "col-sm-2 col-md-1 col-lg-1"} 
+    #js {:className "col-sm-8 col-md-8 col-lg-8"} 
     (dom/p nil (get project "name")))
    (dom/div 
     #js {:className "col-sm-2 col-md-1 col-lg-1 pull-right"}

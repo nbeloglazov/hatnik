@@ -78,11 +78,11 @@
       (ajax "/api/actions/test" "POST" data (fn [e])))))
 
 
-(defn update-email-action-callback [data reply]
+(defn common-update-callback [msg data reply]
   (let [resp (js->clj reply)]
     (if (= "ok" (get resp "result"))
       (state/update-all-view)
-      (js/alert "Action don't updated!"))))
+      (js/alert msg))))
 
 (defn update-email-action [project-id action-id]
     (let [artifact (get-data-from-input "artifact-input")
@@ -103,5 +103,13 @@
         (.modal ($ :#iModal) "hide")
         (ajax 
          (str "/api/actions/" action-id) "PUT" 
-         data #(update-email-action-callback data %))))))
+         data #(common-update-callback "Action don't updated!" data %))))))
+
+
+(defn delete-action [action-id]
+  (.modal ($ :#iModal) "hide")
+  (ajax 
+   (str "/api/actions/" action-id) "DELETE"
+   {} #(common-update-callback "Action don't deleted!" {} %)))
+
 

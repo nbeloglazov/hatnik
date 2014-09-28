@@ -82,6 +82,9 @@
                     :onClick #(action/update-email-action 
                                (:current-project @data)
                                (get (deref (:current-action @data)) "id"))} "Update")
+   (dom/button #js {:className "btn btn-danger pull-center"
+                    :onClick #(action/delete-action 
+                               (get (deref (:current-action @data)) "id"))} "Delete")
    (dom/button #js {:className "btn btn-default"
                     :onClick #(action/test-new-email-action (:current-project @data))} "Test")))
 

@@ -4,6 +4,8 @@
             [compojure.handler :as handler]
             [compojure.route :as route]
             [taoensso.timbre :as timbre]
+            [monger.ring.session-store :refer [monger-store]]
+            [monger.core :as mg]
 
             [hatnik.web.server.renderer :as renderer]
             [hatnik.web.server.projects :refer [projects-api]]
@@ -21,6 +23,7 @@
             [ring.util.response :as resp]
             [ring.middleware.json :as json]
             [ring.adapter.jetty :refer [run-jetty]]
+            [ring.middleware.session.memory :refer [memory-store]]
             [ring.middleware.stacktrace :as stacktrace]))
 
 (defn initialise []
@@ -73,11 +76,22 @@
       (timbre/debug "Response:" resp)
       resp)))
 
+(defn get-session-store []
+  (if (= (:db config) :mongo)
+    (let [{:keys [host port db drop?]} (:mongo config)
+          conn (mg/connect {:host host
+                            :port port})]
+      (when drop? (mg/drop-db conn db))
+      (monger-store (mg/get-db conn db) "sessions"))
+    (memory-store)))
+
 (def app
   (-> #'app-routes
       dump-request
-      (handler/site {:session {:cookie-attrs {:max-age 3600
-                                              :http-only true}}})
+      (handler/site {:session {:cookie-attrs {; 2 weeks
+                                              :max-age (* 60 60 24 14)
+                                              :http-only true}
+                               :store (get-session-store)}})
       (json/wrap-json-body {:keywords? true})
       json/wrap-json-response
       stacktrace/wrap-stacktrace))

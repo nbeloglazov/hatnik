@@ -29,6 +29,8 @@
   (resp/response {:result :ok}))
 
 (defn delete-project [user id]
+  (doseq [action (stg/get-actions @stg/storage (:id user) id)]
+    (stg/delete-action! @stg/storage (:id user) (:id action)))
   (stg/delete-project! @stg/storage (:id user) id)
   (resp/response {:result :ok}))
 

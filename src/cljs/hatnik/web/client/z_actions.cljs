@@ -6,12 +6,11 @@
 (defn get-data-from-input [id]
   (.-value (.getElementById js/document id)))
 
-(defn create-new-project-callback [name reply]
-  (let [resp (js->clj reply)]
-    (if (= "ok" (get resp "result"))
-      (state/add-new-project (get resp "id") name)
-      (js/alert (str "Sorry. Project " name " can't be created.")))))
-
+(defn wrap-error-alert [callback]
+  (fn [reply]
+    (let [resp (js->clj reply)]
+      (when (= "error" (get resp "result")) (js/alert (get resp "message")))
+      (callback reply))))
 
 (defn ajax [url type data callback]
   (jq/ajax url
@@ -20,8 +19,14 @@
                               (clj->js data))
             :contentType "application/json"
             :dataType "json"
-            :async false
+            :async true
             :success callback}))
+
+(defn create-new-project-callback [name reply]
+  (let [resp (js->clj reply)]
+    (when (= "ok" (get resp "result"))
+      (state/add-new-project (get resp "id") name))))
+
 
 (defn send-new-project-request []
   (let [name (.-value (.getElementById js/document "project-name-input"))]
@@ -31,11 +36,10 @@
 
 (defn create-new-email-action-callback [data reply]
   (let [resp (js->clj reply)]
-    (if (= "ok" (get resp "result"))
+    (when (= "ok" (get resp "result"))
       (state/update-project-actions (assoc data
                                       "id" (get resp "id")
-                                      "last-processed-version" (get rest "last-processed-version")))
-      (js/alert "Action don't created."))))
+                                      "last-processed-version" (get rest "last-processed-version"))))))
 
 
 (defn send-new-email-action [project-id]
@@ -55,7 +59,8 @@
 
       (do
         (.modal ($ :#iModal) "hide")
-        (ajax "/api/actions" "POST" data #(create-new-email-action-callback data %))))))
+        (ajax "/api/actions" "POST" data 
+              (wrap-error-alert #(create-new-email-action-callback data %)))))))
 
 
 (defn test-new-email-action [project-id]
@@ -67,15 +72,16 @@
               :address email
               :template email-body
               :library artifact
-              :version "NEW-VERSION"
-              :previous-version "OLD-VERSION"}]
+              :version "2.3.4"
+              :previous-version "1.2.3"}]
     (if (or
          (= "" artifact)
          (= "" email)
          (= "" email-body))
       (js/alert "Wrong data! Check out fields!")
 
-      (ajax "/api/actions/test" "POST" data (fn [e])))))
+      (ajax "/api/actions/test" "POST" data 
+            (wrap-error-alert (fn [e]))))))
 
 
 (defn common-update-callback [msg data reply]
@@ -103,14 +109,16 @@
         (.modal ($ :#iModal) "hide")
         (ajax 
          (str "/api/actions/" action-id) "PUT" 
-         data #(common-update-callback "Action don't updated!" data %))))))
+         data (wrap-error-alert
+               #(common-update-callback "Action don't updated!" data %)))))))
 
 
 (defn delete-action [action-id]
   (.modal ($ :#iModal) "hide")
   (ajax 
    (str "/api/actions/" action-id) "DELETE"
-   {} #(common-update-callback "Action don't deleted!" {} %)))
+   {} (wrap-error-alert
+       #(common-update-callback "Action don't deleted!" {} %))))
 
 
 
@@ -119,7 +127,8 @@
     (.modal ($ :#iModalProjectMenu) "hide")
     (ajax
      (str "/api/projects/" project-id) "DELETE"
-     {} #(common-update-callback "Project don't deleted!" {} %))))
+     {} (wrap-error-alert 
+         #(common-update-callback "Project don't deleted!" {} %)))))
 
 (defn update-project []
   (let [project-id (:current-project (deref state/app-state))
@@ -128,5 +137,5 @@
     (ajax
      (str "/api/projects/" project-id) "PUT"
      {:name new-name} 
-     #(common-update-callback "Project don't renamed!" {} %))))
+     (wrap-error-alert #(common-update-callback "Project don't renamed!" {} %)))))
 

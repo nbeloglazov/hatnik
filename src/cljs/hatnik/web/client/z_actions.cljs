@@ -113,3 +113,20 @@
    {} #(common-update-callback "Action don't deleted!" {} %)))
 
 
+
+(defn delete-project []
+  (let [project-id (:current-project (deref state/app-state))]
+    (.modal ($ :#iModalProjectMenu) "hide")
+    (ajax
+     (str "/api/projects/" project-id) "DELETE"
+     {} #(common-update-callback "Project don't deleted!" {} %))))
+
+(defn update-project []
+  (let [project-id (:current-project (deref state/app-state))
+        new-name (get-data-from-input "project-name-edit-input")]
+    (.modal ($ :#iModalProjectMenu) "hide")
+    (ajax
+     (str "/api/projects/" project-id) "PUT"
+     {:name new-name} 
+     #(common-update-callback "Project don't renamed!" {} %))))
+

@@ -99,7 +99,7 @@
        (map 
         (fn [prj]
           (accordion-panel
-           :header (dom/p nil (get prj "name"))
+           :header (dom/div #js {:className "bg-primary"} (get prj "name"))
            :button (project-header-menu-button prj)
            :body (actions-table (get prj "id") (get prj "actions"))
            :body-id (str "__PrjList" (get prj "id"))))

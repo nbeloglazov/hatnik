@@ -77,6 +77,12 @@
 
       (ajax "/api/actions/test" "POST" data (fn [e])))))
 
+(defn wrap-error-alert [callback]
+  (fn [reply]
+    (let [resp (js->clj reply)]
+      (when (= "error" (get resp "result")) (js/alert (get resp "message")))
+      (callback reply))))
+
 
 (defn common-update-callback [msg data reply]
   (let [resp (js->clj reply)]
@@ -103,14 +109,16 @@
         (.modal ($ :#iModal) "hide")
         (ajax 
          (str "/api/actions/" action-id) "PUT" 
-         data #(common-update-callback "Action don't updated!" data %))))))
+         data (wrap-error-alert
+               #(common-update-callback "Action don't updated!" data %)))))))
 
 
 (defn delete-action [action-id]
   (.modal ($ :#iModal) "hide")
   (ajax 
    (str "/api/actions/" action-id) "DELETE"
-   {} #(common-update-callback "Action don't deleted!" {} %)))
+   {} (wrap-error-alert
+       #(common-update-callback "Action don't deleted!" {} %))))
 
 
 
@@ -119,7 +127,8 @@
     (.modal ($ :#iModalProjectMenu) "hide")
     (ajax
      (str "/api/projects/" project-id) "DELETE"
-     {} #(common-update-callback "Project don't deleted!" {} %))))
+     {} (wrap-error-alert 
+         #(common-update-callback "Project don't deleted!" {} %)))))
 
 (defn update-project []
   (let [project-id (:current-project (deref state/app-state))
@@ -128,5 +137,5 @@
     (ajax
      (str "/api/projects/" project-id) "PUT"
      {:name new-name} 
-     #(common-update-callback "Project don't renamed!" {} %))))
+     (wrap-error-alert #(common-update-callback "Project don't renamed!" {} %)))))
 

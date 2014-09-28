@@ -6,12 +6,11 @@
 (defn get-data-from-input [id]
   (.-value (.getElementById js/document id)))
 
-(defn create-new-project-callback [name reply]
-  (let [resp (js->clj reply)]
-    (if (= "ok" (get resp "result"))
-      (state/add-new-project (get resp "id") name)
-      (js/alert (str "Sorry. Project " name " can't be created.")))))
-
+(defn wrap-error-alert [callback]
+  (fn [reply]
+    (let [resp (js->clj reply)]
+      (when (= "error" (get resp "result")) (js/alert (get resp "message")))
+      (callback reply))))
 
 (defn ajax [url type data callback]
   (jq/ajax url
@@ -23,6 +22,12 @@
             :async false
             :success callback}))
 
+(defn create-new-project-callback [name reply]
+  (let [resp (js->clj reply)]
+    (when (= "ok" (get resp "result"))
+      (state/add-new-project (get resp "id") name))))
+
+
 (defn send-new-project-request []
   (let [name (.-value (.getElementById js/document "project-name-input"))]
     (if (= "" name)
@@ -31,11 +36,10 @@
 
 (defn create-new-email-action-callback [data reply]
   (let [resp (js->clj reply)]
-    (if (= "ok" (get resp "result"))
+    (when (= "ok" (get resp "result"))
       (state/update-project-actions (assoc data
                                       "id" (get resp "id")
-                                      "last-processed-version" (get rest "last-processed-version")))
-      (js/alert "Action don't created."))))
+                                      "last-processed-version" (get rest "last-processed-version"))))))
 
 
 (defn send-new-email-action [project-id]
@@ -55,7 +59,8 @@
 
       (do
         (.modal ($ :#iModal) "hide")
-        (ajax "/api/actions" "POST" data #(create-new-email-action-callback data %))))))
+        (ajax "/api/actions" "POST" data 
+              (wrap-error-alert #(create-new-email-action-callback data %)))))))
 
 
 (defn test-new-email-action [project-id]
@@ -75,13 +80,8 @@
          (= "" email-body))
       (js/alert "Wrong data! Check out fields!")
 
-      (ajax "/api/actions/test" "POST" data (fn [e])))))
-
-(defn wrap-error-alert [callback]
-  (fn [reply]
-    (let [resp (js->clj reply)]
-      (when (= "error" (get resp "result")) (js/alert (get resp "message")))
-      (callback reply))))
+      (ajax "/api/actions/test" "POST" data 
+            (wrap-error-alert (fn [e]))))))
 
 
 (defn common-update-callback [msg data reply]

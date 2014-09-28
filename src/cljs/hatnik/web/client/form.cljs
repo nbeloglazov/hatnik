@@ -26,9 +26,3 @@
                (.modal ($ :#iModalProject) "hide")
                (.modal ($ :#iModalProjectMenu) "hide"))))
 
-;; Submit new email action by Enter pressing
-(.keydown ($ :#iModal)
-          (fn [e]
-            (when (= 13 (.-keyCode e))
-              (action/send-new-email-action (:current-project (deref state/app-state))))))
-

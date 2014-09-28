@@ -1,5 +1,6 @@
 (ns hatnik.web.server.renderer
-  (:require [hiccup.core :as hc]))
+  (:require [hiccup.core :as hc])
+  (:use [hatnik.config :only [config]]))
 
 (defn page-html-head []
   (hc/html
@@ -8,12 +9,18 @@
     [:link {:rel "stylesheet" :href "/css/bootstrap.min.css"}]]))
 
 
+(def github-link
+  (str "https://github.com/login/oauth/authorize?"
+       "client_id=" (:github-id config)
+       "&scope=user:email"))
+
 (defn page-header []
   [:nav.navbar.navbar-default {:role "navigation"}
    [:div#navbarCollapse.collapse.navbar-collapse
     [:ul.nav.navbar-nav.navbar-right
      [:li
-      [:a.btn "Login via GitHub"]]]]])
+      [:a.btn 
+       {:href github-link} "Login via GitHub"]]]]])
 
 (defn core-page [req]
   (hc/html

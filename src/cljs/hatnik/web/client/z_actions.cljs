@@ -22,25 +22,30 @@
             :async true
             :success callback}))
 
+(defn common-update-callback [msg data reply]
+  (let [resp (js->clj reply)]
+    (if (= "ok" (get resp "result"))
+      (state/update-all-view)
+      (js/alert msg))))
+
 (defn create-new-project-callback [name reply]
   (let [resp (js->clj reply)]
     (when (= "ok" (get resp "result"))
-      (state/add-new-project (get resp "id") name))))
+      (state/update-all-view))))
 
 
 (defn send-new-project-request []
   (let [name (.-value (.getElementById js/document "project-name-input"))]
     (if (= "" name)
       (js/alert "Project name must be not empty!")
-      (ajax  "/api/projects" "POST" {:name name} #(create-new-project-callback name %)))))
+      (do
+        (.modal ($ :#iModalProject) "hide")
+        (ajax  "/api/projects" "POST" {:name name} #(create-new-project-callback name %))))))
 
 (defn create-new-email-action-callback [data reply]
   (let [resp (js->clj reply)]
     (when (= "ok" (get resp "result"))
-      (state/update-project-actions (assoc data
-                                      "id" (get resp "id")
-                                      "last-processed-version" (get rest "last-processed-version"))))))
-
+      (state/update-all-view))))
 
 (defn send-new-email-action [project-id]
   (let [artifact (get-data-from-input "artifact-input")
@@ -83,13 +88,6 @@
       (ajax "/api/actions/test" "POST" data 
             (wrap-error-alert (fn [e]))))))
 
-
-(defn common-update-callback [msg data reply]
-  (let [resp (js->clj reply)]
-    (if (= "ok" (get resp "result"))
-      (state/update-all-view)
-      (js/alert msg))))
-
 (defn update-email-action [project-id action-id]
     (let [artifact (get-data-from-input "artifact-input")
           email (get-data-from-input "emain-input")
@@ -112,15 +110,12 @@
          data (wrap-error-alert
                #(common-update-callback "Action don't updated!" data %)))))))
 
-
 (defn delete-action [action-id]
   (.modal ($ :#iModal) "hide")
   (ajax 
    (str "/api/actions/" action-id) "DELETE"
    {} (wrap-error-alert
        #(common-update-callback "Action don't deleted!" {} %))))
-
-
 
 (defn delete-project []
   (let [project-id (:current-project (deref state/app-state))]

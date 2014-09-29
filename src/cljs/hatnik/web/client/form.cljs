@@ -40,6 +40,7 @@
    (.removeClass 
     ($ :#artifact-input-group) 
     "has-warning has-success has-error")
+   
    (action/get-library
-    (.-value (.getElementById js/document "artifact-input"))
-    update-email-artifact-status)))
+      (.-value (.getElementById js/document "artifact-input"))
+      update-email-artifact-status)))

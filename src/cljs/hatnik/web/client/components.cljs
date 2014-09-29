@@ -43,9 +43,7 @@
                    (state/set-form-type :email-edit-action)
                    (state/set-current-project project-id)
                    (state/set-current-action action)
-                   (swap! state/app-state
-                          assoc :email-artifact-value
-                          name)
+                   (reset! state/email-artifact-value name)
                    (.modal ($ :#iModal)))
         :className "panel panel-default action"}
    (dom/div
@@ -60,9 +58,7 @@
 (defn add-action [id]
   (state/set-form-type :email-action)
   (state/set-current-project id)
-  (swap! state/app-state
-         assoc :email-artifact-value
-         "")
+  (reset! state/email-artifact-value "")
   (.modal ($ :#iModal)))
 
 

@@ -22,11 +22,11 @@
 
 (defn check-library-and-perform-actions [library actions]
   (timbre/info "Checking library" library)
-  (let [ver (ver/latest-release library)]
+  (when-let [ver (ver/latest-release library)]
     (timbre/info "Latest version" library "is" ver)
     (doseq [action actions
             :when (and (= (:library action) library)
-                       (not= ver (:last-processed-version action)))]
+                       (ver/first-newer? ver (:last-processed-version action)))]
       (let [proj (stg/get-project @stg/storage (:project-id action))
             user (stg/get-user-by-id @stg/storage (:user-id proj))
             error (perform-action action user

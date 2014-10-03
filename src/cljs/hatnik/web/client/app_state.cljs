@@ -6,8 +6,9 @@
          :user {}
          :current-project nil
          :current-action nil
-         :email-form-timer false
-         :email-artifact-value ""}))
+         :email-form-timer false}))
+
+(def email-artifact-value (atom ""))
 
 (defn update-projects-list [reply]
   (let [json (.getResponseJson (.-target reply))
@@ -59,7 +60,7 @@
 
 (defn set-email-form-timer [callback time]
   (let [timer (get-email-form-timer)]
-    (when timer (js/clearIntervar timer))
+    (when timer (js/clearInterval timer))
     (swap! app-state
            assoc :email-form-timer
            (js/setTimeout callback time))))

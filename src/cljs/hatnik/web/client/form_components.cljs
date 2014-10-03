@@ -1,7 +1,8 @@
 (ns hatnik.web.client.form-components
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [hatnik.web.client.z-actions :as action]))
+            [hatnik.web.client.z-actions :as action]
+            [hatnik.web.client.app-state :as state]))
 
 (defn project-adding-from [data]
   (dom/div 
@@ -44,10 +45,10 @@
 
 ;; For selecting action form body
 
+(defn input-handle [e]
+  (reset! state/email-artifact-value (.. e -target -value)))
+
 (defn email-action-form-body [data artifact template]
-  (js/setTimeout (fn [] (set! (.-value (.getElementById js/document "artifact-input"))
-                              artifact))
-                 100)
   (dom/form
    #js {:id "email-action-form"}
    (dom/div #js {:className "form-group has-warning"
@@ -56,7 +57,9 @@
             (dom/input #js {:type "text"
                             :className "form-control"
                             :id "artifact-input"
-                            :placeholder "e.g. org.clojure/clojure"}))
+                            :placeholder "e.g. org.clojure/clojure"
+                            :onChange input-handle
+                            :value (deref state/email-artifact-value)}))
    (dom/div #js {:className "form-group"}
             (dom/label #js {:for "emain-input"} "Email")
             (dom/input #js {:type "email"

@@ -19,3 +19,5 @@ lein ring server 8080
 ```
 
 By default app uses in-memory DB. You can change settings by creating `config.clj` file in root folder. Check [config.clj.example](https://github.com/clojurecup2014/hatnik/blob/master/config.clj.example) for available options.
+
+When registering a Github application for your own application, the URI of the "Application callback URL" is /api/github.

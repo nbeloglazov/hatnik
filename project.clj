@@ -14,6 +14,7 @@
                  [com.draines/postal "1.11.1"]
                  [version-clj "0.1.0"]
                  [clojurewerkz/quartzite "1.3.0"]
+                 [prismatic/schema "0.3.0"]
 
                  ; ClojureScript
                  [org.clojure/clojurescript "0.0-2356"]

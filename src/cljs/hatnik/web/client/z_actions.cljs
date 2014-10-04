@@ -78,9 +78,7 @@
               :type "email"
               :address email
               :template email-body
-              :library artifact
-              :version "2.3.4"
-              :previous-version "1.2.3"}]
+              :library artifact}]
     (if (or
          (= "" artifact)
          (= "" email)

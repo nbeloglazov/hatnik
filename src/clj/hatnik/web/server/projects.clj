@@ -1,16 +1,25 @@
 (ns hatnik.web.server.projects
   (:require [ring.util.response :as resp]
             [compojure.core :refer :all]
-            [hatnik.db.storage :as stg]))
 
-(defn get-user [req]
+            [hatnik.db.storage :as stg]
+            [hatnik.web.server.schema :as s]))
+
+(defn get-user
+  "Retrieves user from the request map. Assumes that user logged in and
+  session exists."
+  [req]
   (-> req :session :user))
 
-(defn load-actions [user-id project]
+(defn load-actions
+  "Loads all actions for the given project and assoc them to the project."
+  [user-id project]
   (let [actions (stg/get-actions @stg/storage user-id (:id project))]
     (assoc project :actions actions)))
 
-(defn all-projects [user]
+(defn all-projects
+  "Returns all projects together with actions for the user."
+  [user]
   (let [projects (->> (stg/get-projects @stg/storage (:id user))
                       (map #(dissoc % :user-id))
                       (map #(load-actions (:id user) %)))]
@@ -18,7 +27,9 @@
      {:result :ok
       :projects projects})))
 
-(defn create-project [user data]
+(defn create-project
+  "Creates project from given data. Returns the id of the new project."
+  [user data]
   (let [project (assoc data :user-id (:id user))
         id (stg/create-project! @stg/storage project)]
     (resp/response {:result :ok :id id})))
@@ -36,6 +47,13 @@
 
 (defroutes projects-api
   (GET "/" req (all-projects (get-user req)))
-  (POST "/" req (create-project (get-user req) (:body req)))
-  (PUT "/:id" [id :as req] (update-project (get-user req) id (:body req)))
+
+  (POST "/" req
+        (s/ensure-valid s/Project (:body req)
+                        (create-project (get-user req) (:body req))))
+
+  (PUT "/:id" [id :as req]
+       (s/ensure-valid s/Project (:body req)
+                       (update-project (get-user req) id (:body req))))
+
   (DELETE "/:id" [id :as req] (delete-project (get-user req) id)))

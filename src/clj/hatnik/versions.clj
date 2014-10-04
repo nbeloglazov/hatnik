@@ -2,13 +2,13 @@
   (:require [ancient-clj.core :as anc]
             [version-clj.core :as ver-comp]))
 
-(defn- snapshot? [[full parts]]
-  (-> full .toLowerCase (.contains "snapshot")))
+(defn- snapshot? [version]
+  (-> version .toLowerCase (.contains "snapshot")))
 
 (defn latest-release [library]
   (->> (anc/versions! library)
+       (map :version-string)
        (remove snapshot?)
-       last
        first))
 
 (defn first-newer? [version-a version-b]

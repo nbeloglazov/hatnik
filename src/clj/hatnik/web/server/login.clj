@@ -11,9 +11,9 @@
 
 ; https://github.com/login/oauth/authorize?scope=user:email&client_id=f850785344ec6d812ab2
 
-(defn create-user [email]
+(defn create-user [email user-token]
   (timbre/info "Creating new user" email)
-  (let [id (stg/create-user! @stg/storage email)]
+  (let [id (stg/create-user! @stg/storage email user-token)]
     (timbre/info "Create default project for user")
     (stg/create-project! @stg/storage {:name "Default"
                                        :user-id id})
@@ -41,7 +41,7 @@
                   "selected email:" email)
     (if email
       (let [user (or (stg/get-user @stg/storage email)
-                     (create-user email))]
+                     (create-user email user-token))]
        (assoc response :session {:user user}))
       response)))
 
@@ -50,7 +50,7 @@
     (if-let [user (stg/get-user @stg/storage email)]
       (-> (resp/response {:result :ok})
           (assoc :session {:user user}))
-      (let [id (stg/create-user! @stg/storage email)]
+      (let [id (stg/create-user! @stg/storage email "dummy_token")]
         (dd/create-dummy-data id)
         (-> (resp/response {:result :ok})
             (assoc :session {:user {:email email

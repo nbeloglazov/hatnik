@@ -20,14 +20,14 @@
 
 (defn load-actions
   "Loads all actions for the given project and assoc them to the project."
-  [user-id project]
-  (let [actions (stg/get-actions @stg/storage user-id (:id project))]
+  [db user-id project]
+  (let [actions (stg/get-actions db user-id (:id project))]
     (assoc project :actions (map-by :id actions))))
 
 (defn all-projects
   "Returns all projects together with actions for the user."
-  [user]
-  (let [projects (->> (stg/get-projects @stg/storage (:id user))
+  [db user]
+  (let [projects (->> (stg/get-projects db (:id user))
                       (map #(dissoc % :user-id))
                       (map #(load-actions (:id user) %)))]
     (resp/response
@@ -36,31 +36,34 @@
 
 (defn create-project
   "Creates project from given data. Returns the id of the new project."
-  [user data]
+  [db user data]
   (let [project (assoc data :user-id (:id user))
-        id (stg/create-project! @stg/storage project)]
+        id (stg/create-project! db project)]
     (resp/response {:result :ok :id id})))
 
-(defn update-project [user id data]
+(defn update-project [db user id data]
   (let [project (assoc data :user-id (:id user))]
-    (stg/update-project! @stg/storage (:id user) id project))
+    (stg/update-project! db (:id user) id project))
   (resp/response {:result :ok}))
 
-(defn delete-project [user id]
-  (doseq [action (stg/get-actions @stg/storage (:id user) id)]
-    (stg/delete-action! @stg/storage (:id user) (:id action)))
-  (stg/delete-project! @stg/storage (:id user) id)
+(defn delete-project [db user id]
+  (doseq [action (stg/get-actions db (:id user) id)]
+    (stg/delete-action! db (:id user) (:id action)))
+  (stg/delete-project! db (:id user) id)
   (resp/response {:result :ok}))
 
-(defroutes projects-api
-  (GET "/" req (all-projects (get-user req)))
+(defn projects-api-routes
+  "Builes routes for acessing projects API."
+  [db]
+  (routes
+   (GET "/" req (all-projects db (get-user req)))
 
-  (POST "/" req
+   (POST "/" req
+         (s/ensure-valid s/Project (:body req)
+                         (create-project db (get-user req) (:body req))))
+
+   (PUT "/:id" [id :as req]
         (s/ensure-valid s/Project (:body req)
-                        (create-project (get-user req) (:body req))))
+                        (update-project db (get-user req) id (:body req))))
 
-  (PUT "/:id" [id :as req]
-       (s/ensure-valid s/Project (:body req)
-                       (update-project (get-user req) id (:body req))))
-
-  (DELETE "/:id" [id :as req] (delete-project (get-user req) id)))
+   (DELETE "/:id" [id :as req] (delete-project db (get-user req) id))))

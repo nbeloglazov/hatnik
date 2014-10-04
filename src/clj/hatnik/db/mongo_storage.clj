@@ -1,9 +1,11 @@
 (ns hatnik.db.mongo-storage
   (:require [hatnik.db.storage :refer :all]
+            [taoensso.timbre :as timbre]
             [monger.core :as mg]
             [monger.collection :as mc]
             [monger.conversion :refer [to-object-id]]
-            [clojure.set :refer [rename-keys]]))
+            [clojure.set :refer [rename-keys]]
+            [com.stuartsierra.component :as component]))
 
 (def users "users")
 (def projects "projects")
@@ -21,7 +23,7 @@
                           {:_id (to-object-id project-id)
                            :user-id user-id}))))
 
-(deftype MongoStorage [db]
+(defrecord MongoStorage [config connection db]
 
 
   hatnik.db.storage.UserStorage
@@ -89,19 +91,33 @@
     (let [id (to-object-id id)]
      (when-let [action (mc/find-map-by-id db actions id)]
        (when (has-project? db user-id (:project-id action))
-         (mc/remove-by-id db actions id))))))
+         (mc/remove-by-id db actions id)))))
 
-(defn create-mongo-storage [{:keys [host port db drop?]}]
-  (let [conn (mg/connect {:host host
-                          :port port})]
-    (when drop? (mg/drop-db conn db))
-    (MongoStorage. (mg/get-db conn db))))
+
+  component/Lifecycle
+  (start [storage]
+    (timbre/info "Starting MongoStorage component.")
+    (let [{:keys [host port db drop?]} config
+          conn (mg/connect {:host host
+                            :port port})]
+      (when drop? (mg/drop-db conn db))
+      (assoc storage
+        :connection conn
+        :db (mg/get-db conn db))))
+
+  (stop [storage]
+    (timbre/info "Stopping MongoStorage component.")
+    (mg/disconnect connection)
+    (assoc storage
+      :connection nil
+      :db nil)))
 
 (comment
 
-  (def st (create-mongo-storage {:host "localhost"
-                                 :port 27017
-                                 :db "test-me"}))
+  (def st (-> (map->MongoStorage {:config   {:host "localhost"
+                                             :port 27017
+                                             :db "test-me"}})
+              (component/start)))
 
   (get-user st "hello")
 

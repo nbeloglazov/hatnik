@@ -22,5 +22,3 @@ user. The version with single argument should never be used on web server.")
   (create-action! [storage user-id data] "Creates action. Returns id.")
   (update-action! [storage user-id id data] "Updates project.")
   (delete-action! [storage user-id id] "Deletes action."))
-
-(def storage (atom nil))

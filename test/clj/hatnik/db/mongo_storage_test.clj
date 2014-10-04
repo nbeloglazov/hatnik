@@ -1,7 +1,8 @@
 (ns hatnik.db.mongo-storage-test
   (:require [clojure.test :refer :all]
+            [com.stuartsierra.component :as component]
             [hatnik.db.storage-test :as st-test]
-            [hatnik.db.mongo-storage :as ms]))
+            [hatnik.db.mongo-storage :refer [map->MongoStorage]]))
 
 (def config
   {:host "localhost"
@@ -10,10 +11,22 @@
    :drop? true})
 
 (deftest mongo-storage-implements-user-storage
-  (st-test/test-user-storage (ms/create-mongo-storage config)))
+  (let [storage (-> {:config config}
+                    map->MongoStorage
+                    component/start)]
+    (st-test/test-user-storage storage)
+    (component/stop storage)))
 
 (deftest mongo-storage-implements-project-storage
-  (st-test/test-project-storage (ms/create-mongo-storage config)))
-
+  (let [storage (-> {:config config}
+                    map->MongoStorage
+                    component/start)]
+    (st-test/test-project-storage storage)
+    (component/stop storage))
+)
 (deftest mongo-storage-implements-action-storage
-  (st-test/test-action-storage (ms/create-mongo-storage config)))
+  (let [storage (-> {:config config}
+                    map->MongoStorage
+                    component/start)]
+    (st-test/test-action-storage storage)
+    (component/stop storage)))

@@ -15,7 +15,8 @@
                  [version-clj "0.1.0"]
                  [clojurewerkz/quartzite "1.3.0"]
                  [prismatic/schema "0.3.0"]
-
+                 [com.stuartsierra/component "0.2.2"]
+                 
                  ; ClojureScript
                  [org.clojure/clojurescript "0.0-2356"]
                  [jayq "2.5.2"]

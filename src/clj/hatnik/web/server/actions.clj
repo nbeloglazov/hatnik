@@ -26,12 +26,12 @@
 (defn create-action
   "Creates action for the given user and returns id of the created action.
   Response contains the latest library version."
-  [user data]
+  [db user data]
   (if-let [version (ver/latest-release (:library data))]
     (let [action (-> data
                      (assoc :last-processed-version version)
                      (restrict-email-to-be-current user))
-          id (stg/create-action! @stg/storage (:id user) action)]
+          id (stg/create-action! db (:id user) action)]
       (resp/response
        (if id
          {:result :ok
@@ -46,12 +46,12 @@
 (defn update-action
   "Updates action for given user and returns response containing the
   latest version of the library."
-  [user id data]
+  [db user id data]
   (if-let [version (ver/latest-release (:library data))]
     (let [action (-> data
                      (assoc :last-processed-version version)
                      (restrict-email-to-be-current user))]
-      (stg/update-action! @stg/storage (:id user) id action)
+      (stg/update-action! db (:id user) id action)
       (resp/response
        {:result :ok
         :last-processed-version version}))
@@ -61,15 +61,15 @@
 
 (defn delete-action
   "Deletes action for given user."
-  [user id]
-  (stg/delete-action! @stg/storage (:id user) id)
+  [db user id]
+  (stg/delete-action! db (:id user) id)
   (resp/response {:result :ok}))
 
 (defn test-action
   "Performs test action invocation."
-  [user data]
-  (let [url (str "http://" (-> config :worker-server :host)
-                 ":" (-> config :worker-server :port)
+  [user data worker-server]
+  (let [url (str "http://" (:host worker-server)
+                 ":" (:port worker-server)
                  "/test-action")
         data (assoc data
                :version "2.3.4"
@@ -85,17 +85,21 @@
       (resp/response {:result :error
                       :message (:message resp)}))))
 
-(defroutes actions-api
-  (POST "/" req
+(defn actions-api-routes
+  "Builds routes for acessing actions API."
+  [db config]
+  (routes
+   (POST "/" req
+         (s/ensure-valid s/Action (:body req)
+                         (create-action db (get-user req) (:body req))))
+
+   (PUT "/:id" [id :as req]
         (s/ensure-valid s/Action (:body req)
-                        (create-action (get-user req) (:body req))))
+                        (update-action db (get-user req) id (:body req))))
 
-  (PUT "/:id" [id :as req]
-       (s/ensure-valid s/Action (:body req)
-                       (update-action (get-user req) id (:body req))))
+   (DELETE "/:id" [id :as req] (delete-action db (get-user req) id))
 
-  (DELETE "/:id" [id :as req] (delete-action (get-user req) id))
-
-  (POST "/test" req
-        (s/ensure-valid s/Action (:body req)
-                        (test-action (get-user req) (:body req)))))
+   (POST "/test" req
+         (s/ensure-valid s/Action (:body req)
+                         (test-action (get-user req) (:body req)
+                                      (:worker-server config))))))

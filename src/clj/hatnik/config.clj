@@ -14,7 +14,7 @@
 
 (def config-file "config.clj")
 
-(def config
+(defn get-config []
   (merge
    default-config
    (try (read-string (slurp config-file))

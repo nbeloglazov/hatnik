@@ -1,10 +1,12 @@
 (ns hatnik.db.memory-storage
-  (:require [hatnik.db.storage :refer :all]))
+  (:require [hatnik.db.storage :refer :all]
+            [com.stuartsierra.component :as component]
+            [taoensso.timbre :as timbre]))
 
 (defn has-project? [storage user-id project-id]
   (some #(= project-id (:id %)) (get-projects storage user-id)))
 
-(deftype MemoryStorage [atom next-id]
+(defrecord MemoryStorage [atom next-id]
 
 
   hatnik.db.storage.UserStorage
@@ -98,22 +100,21 @@
              (remove #(and (= (:id %) id)
                            (has-project? storage user-id
                                          (:project-id %)))
-                     actions)))))
+                     actions))))
 
 
-(defn create-memory-storage []
-  (let [id (atom 0)
-        next-id #(str (swap! id inc))]
-    (MemoryStorage. (atom {:projects [] :users [] :actions []})
-                    next-id)))
+  component/Lifecycle
+  (start [storage]
+    (timbre/info "Starting MemoryStorage component.")
+    storage
+    (let [id (clojure.core/atom 0)
+          next-id #(str (swap! id inc))]
+      (assoc storage
+        :atom (clojure.core/atom {:projects [] :users [] :actions []})
+        :next-id next-id)))
 
-
-(comment
-
-  (def m (create-memory-storage))
-
-  (get-user m "hello")
-
-  (create-user! m "hello")
-
-  )
+  (stop [storage]
+    (timbre/info "Stopping MemoryStorage component.")
+    (assoc storage
+      :atom nil
+      :next-id nil)))

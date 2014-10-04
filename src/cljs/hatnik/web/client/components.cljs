@@ -71,7 +71,10 @@
 
 
 (defn actions-table [id actions]
-  (let [rendered
+  (let [actions (->> actions
+                     (sort-by first)
+                     (map second))
+        rendered
         (map (fn [action]
                (dom/div #js {:className "col-sm-12 col-md-6 col-lg-4 prj-list-item"}
                         (render-action id action)))
@@ -101,12 +104,15 @@
     om/IRender
     (render [this]
       (apply dom/div nil
-       (map
-        (fn [prj]
-          (accordion-panel
-           :header (dom/div #js {:className "bg-primary"} (get prj "name"))
-           :button (project-header-menu-button prj)
-           :body (actions-table (get prj "id") (get prj "actions"))
-           :body-id (str "__PrjList" (get prj "id"))))
-        (:projects data))))))
+       (let [projects (->> (:projects data)
+                           (sort-by first)
+                           (map second))]
+         (map
+          (fn [prj]
+            (accordion-panel
+             :header (dom/div #js {:className "bg-primary"} (get prj "name"))
+             :button (project-header-menu-button prj)
+             :body (actions-table (get prj "id") (get prj "actions"))
+             :body-id (str "__PrjList" (get prj "id"))))
+          projects))))))
 

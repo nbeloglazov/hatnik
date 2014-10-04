@@ -11,11 +11,18 @@
   [req]
   (-> req :session :user))
 
+(defn map-by
+  "Converts collection of maps to map of maps. Example:
+  (map-by :id [{:id 1 :a :b} {:id 3 :b :c}]) =>
+  {1 {:id 1 :a :b} 3 {:id 3 :b :c}}"
+  [key coll]
+  (into {} (map #(vector (% key) %) coll)))
+
 (defn load-actions
   "Loads all actions for the given project and assoc them to the project."
   [user-id project]
   (let [actions (stg/get-actions @stg/storage user-id (:id project))]
-    (assoc project :actions actions)))
+    (assoc project :actions (map-by :id actions))))
 
 (defn all-projects
   "Returns all projects together with actions for the user."
@@ -25,7 +32,7 @@
                       (map #(load-actions (:id user) %)))]
     (resp/response
      {:result :ok
-      :projects projects})))
+      :projects (map-by :id projects)})))
 
 (defn create-project
   "Creates project from given data. Returns the id of the new project."

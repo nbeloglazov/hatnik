@@ -18,6 +18,6 @@ lein cljsbuild once
 lein ring server 8080
 ```
 
-By default app uses in-memory DB. You can change settings by creating `config.clj` file in root folder. Check [config.clj.example](https://github.com/nbeloglazov/hatnik/blob/master/config.clj.example) for available options.
+By default app uses in-memory DB. You can change settings by creating `config.clj` file in root folder. Check [config.example.clj](https://github.com/nbeloglazov/hatnik/blob/master/config.example.clj) for available options.
 
 When registering a Github application for your own application, the URI of the "Application callback URL" is /api/github.

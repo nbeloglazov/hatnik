@@ -33,10 +33,10 @@
   (get-user-by-id [storage id]
     (norm-id (mc/find-map-by-id db users (to-object-id id))))
 
-  (create-user! [storage email]
+  (create-user! [storage email user-token]
     (if-let [user (get-user storage email)]
       (:id user)
-      (-> (mc/insert-and-return db users {:email email})
+      (-> (mc/insert-and-return db users {:email email :user-token user-token})
           norm-id
           :id)))
 
@@ -121,7 +121,7 @@
 
   (get-user st "hello")
 
-  (create-user! st "hello")
+  (create-user! st "hello" "token")
 
   (get-projects st "hello")
 

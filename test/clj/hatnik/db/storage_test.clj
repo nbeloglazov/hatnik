@@ -5,31 +5,37 @@
 
 (def foo-email "foo@email.com")
 (def bar-email "bar@email.com")
+(def foo-token "foo-token")
+(def bar-token "bar-token")
 
 (defn test-user-storage [storage]
   (is (every? nil? (map #(s/get-user storage %)
                         [foo-email bar-email]))
       "Storage should be empty")
 
-  (let [foo-id (s/create-user! storage foo-email)
-        foo-id-2 (s/create-user! storage foo-email)
-        bar-id (s/create-user! storage bar-email)]
+  (let [foo-id (s/create-user! storage foo-email foo-token)
+        foo-id-2 (s/create-user! storage foo-email foo-token)
+        bar-id (s/create-user! storage bar-email bar-token)]
 
     (is (= (s/get-user storage foo-email)
            {:id foo-id
-            :email foo-email})
+            :email foo-email
+            :user-token foo-token})
         "Foo should match.")
     (is (= (s/get-user storage bar-email)
            {:id bar-id
-            :email bar-email})
+            :email bar-email
+            :user-token bar-token})
         "Bar should match.")
 
     (is (= (s/get-user-by-id storage foo-id)
            {:id foo-id
-            :email foo-email}))
+            :email foo-email
+            :user-token foo-token}))
     (is (= (s/get-user-by-id storage bar-id)
            {:id bar-id
-            :email bar-email}))
+            :email bar-email
+            :user-token bar-token}))
 
     (is (not= foo-id bar-id) "id should be different")
     (is (= foo-id foo-id-2) "Multiple creation should return same user.")))
@@ -116,8 +122,8 @@
         "Bar project should not change")))
 
 (defn test-action-storage [storage]
-  (let [user1 (s/create-user! storage "user1")
-        user2 (s/create-user! storage "user2")
+  (let [user1 (s/create-user! storage "user1" "token1")
+        user2 (s/create-user! storage "user2" "token2")
         proj1 (s/create-project! storage {:name "Project 1" :user-id user1})
         proj2 (s/create-project! storage {:name "Project 2" :user-id user2})]
 

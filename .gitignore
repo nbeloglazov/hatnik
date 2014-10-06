@@ -4,3 +4,4 @@ pom.xml
 /config.clj
 resources/public/gen
 .lein-failures
+.lein-repl-history

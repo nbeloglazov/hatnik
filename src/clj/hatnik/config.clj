@@ -7,6 +7,8 @@
    :worker-server {:host "localhost"
                    :port 5734}
 
+    :web {:port 8080}
+
    :enable-actions true
 
    :quartz {:initial-delay-in-seconds 60

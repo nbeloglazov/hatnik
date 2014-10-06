@@ -8,6 +8,11 @@
          :drop? false ; if true - clears existing db
          }
 
+ :worker-server {:host "localhost"
+                 :port 5734}
+
+ :web {:port 8080}
+
  :enable-force-login false ; if true, enabled /api/force-login method that
                            ; logins by email without any authorization
 

@@ -9,12 +9,13 @@
   (let [db (case (:db config)
              :mongo (mon-stg/map->MongoStorage {:config (:mongo config)})
              :memory (mem-stg/create-memory-storage))]
-   (component/system-map
-    :config config
-    :db db
-    :worker-web-server (component/using
-                        (map->WorkerWebServer {:config (:worker-server config)})
-                        [:db]))))
+    (timbre/set-level! (:log-level config))
+    (component/system-map
+     :config config
+     :db db
+     :worker-web-server (component/using
+                         (map->WorkerWebServer {:config (:worker-server config)})
+                         [:db]))))
 
 (def system nil)
 

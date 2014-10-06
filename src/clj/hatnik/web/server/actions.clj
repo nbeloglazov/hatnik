@@ -5,7 +5,6 @@
 
             [hatnik.versions :as ver]
             [hatnik.db.storage :as stg]
-            [hatnik.config :refer [config]]
             [hatnik.web.server.schema :as s]))
 
 (defn get-user

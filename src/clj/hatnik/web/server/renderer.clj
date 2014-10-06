@@ -1,6 +1,5 @@
 (ns hatnik.web.server.renderer
-  (:require [hiccup.core :as hc])
-  (:use [hatnik.config :only [config]]))
+  (:require [hiccup.core :as hc]))
 
 (defn page-html-head []
   (hc/html
@@ -10,7 +9,7 @@
     [:link {:rel "stylesheet" :href "/css/styles.css"}]]))
 
 
-(def github-link
+(defn github-link [config]
   (str "https://github.com/login/oauth/authorize?"
        "client_id=" (:github-id config)
        "&scope=user:email"))
@@ -31,21 +30,21 @@
        [:h4.modal-title "Create a new project"]]
       [:div.modal-body
        [:form
-        [:input#project-name-input.form-control 
+        [:input#project-name-input.form-control
          {:type "text"
           :placeholder "Project name"}]]]
       [:div.modal-footer
        [:button.btn.btn-primary {:onClick "hatnik.web.client.z_actions.send_new_project_request()"} "Create"]]]]]
 
-   [:div#iModalProjectMenu.modal.fade 
+   [:div#iModalProjectMenu.modal.fade
     [:div.modal-dialog
      [:div.modal-content
       [:div.modal-header
        [:h4.modal-title "Project menu"]]
-      
+
       [:div.modal-body
        [:form
-        [:input#project-name-edit-input.form-control 
+        [:input#project-name-edit-input.form-control
          {:type "text"
           :placeholder "Project name"}]]]
 
@@ -57,7 +56,7 @@
         {:onClick "hatnik.web.client.z_actions.delete_project()"}
         "Delete"]]]]]))
 
-(defn page-menu [user]
+(defn page-menu [config user]
   [:nav.navbar.navbar-default {:role "navigation"}
    [:div.navbar-header
     [:a.navbar-brand {:href "/"} "Hatnik"]]
@@ -70,19 +69,19 @@
         [:a {:href "#"} (:email user)]]
        [:li
         [:a.btn {:href "/api/logout"} "Logout"]]]
-      
-                                        ; User don't log in
-      [:ul.nav.navbar-nav.navbar-right         
-       [:li
-        [:a.btn 
-         {:href github-link} "Login via GitHub"]]])]])
 
-(defn work-main-page [req]
+                                        ; User don't log in
+      [:ul.nav.navbar-nav.navbar-right
+       [:li
+        [:a.btn
+         {:href (github-link config)} "Login via GitHub"]]])]])
+
+(defn work-main-page []
   (hc/html
-   [:div.row      
+   [:div.row
     [:div.col-md-2
-     [:a.btn.btn-success 
-      {:href "#" 
+     [:a.btn.btn-success
+      {:href "#"
        :onclick "$('#iModalProject').modal()"} "Add project"]]
     [:div.col-md-10]]
 
@@ -138,26 +137,25 @@
      "have a place that lists the latest versions for selected libraries."]]
    ])
 
-(defn core-page [req]
-  (let [user (:user (:session req))]
-    (hc/html
-     (page-html-head)
-     
-     [:body
-      [:div.container
-       (page-menu user)       
-       
-       (if user 
-         (work-main-page req)
-         (about-page))]
+(defn core-page [config user]
+  (hc/html
+   (page-html-head)
 
-       (when user (modal-frames))
+   [:body
+    [:div.container
+     (page-menu config user)
 
-      [:script {:src "/js/jquery-2.1.1.min.js"}]    
-      [:script {:src "/js/bootstrap.min.js"}]
-      [:script {:src "/js/react.min.js"}]
-      [:script {:src "/js/jquery.bootstrap-growl.min.js"}]
-      
-      (when user
-        [:script {:src "/gen/js/hatnik.js"}])])))
+     (if user
+       (work-main-page)
+       (about-page))]
+
+    (when user (modal-frames))
+
+    [:script {:src "/js/jquery-2.1.1.min.js"}]
+    [:script {:src "/js/bootstrap.min.js"}]
+    [:script {:src "/js/react.min.js"}]
+    [:script {:src "/js/jquery.bootstrap-growl.min.js"}]
+
+    (when user
+      [:script {:src "/gen/js/hatnik.js"}])]))
 

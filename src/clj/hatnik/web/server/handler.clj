@@ -49,7 +49,7 @@
                       (projects-api-routes db)))
             (context "/actions" []
                      (wrap-authenticated-only
-                      (actions-api-routes db)))
+                      (actions-api-routes db config)))
             (login-api-routes db config)
             (GET "/library-version" [library] (library-version library)))
    (route/resources "/")
@@ -82,13 +82,13 @@
         (resp/response {:result :error
                         :message "Something bad happened on server"})))))
 
-(defn wrap [routes]
+(defn wrap [config routes]
   (-> routes
       dump-request
       (handler/site {:session {:cookie-attrs {; 2 weeks
                                               :max-age (* 60 60 24 14)
                                               :http-only true}
-                               :store (get-session-store)}})
+                               :store (get-session-store config)}})
       wrap-exceptions
       (json/wrap-json-body {:keywords? true})
       json/wrap-json-response))
@@ -100,10 +100,11 @@
     (let [port (-> config :web :port)]
      (timbre/info "Starting WebServer on port" port)
      (assoc component
-       :server (run-jetty (wrap (app-routes db config)) {:port port
-                                                         :join? false}))))
+       :server (run-jetty (wrap config (app-routes db config))
+                          {:port port :join? false}))))
 
   (stop [component]
     (timbre/info "Stopping WebServer")
-    (.stop (:server component))
+    (when-let [server (:server component)]
+      (.stop server))
     (assoc component :server nil)))

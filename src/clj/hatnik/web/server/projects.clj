@@ -29,7 +29,7 @@
   [db user]
   (let [projects (->> (stg/get-projects db (:id user))
                       (map #(dissoc % :user-id))
-                      (map #(load-actions (:id user) %)))]
+                      (map #(load-actions db (:id user) %)))]
     (resp/response
      {:result :ok
       :projects (map-by :id projects)})))

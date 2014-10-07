@@ -59,7 +59,7 @@
     (-> (resp/response {:result :ok})
         (assoc :session {:user user}))
     (let [id (stg/create-user! db email "dummy_token")]
-      (dd/create-dummy-data id)
+      (dd/create-dummy-data db id)
       (-> (resp/response {:result :ok})
           (assoc :session {:user {:email email
                                   :id id}})))))

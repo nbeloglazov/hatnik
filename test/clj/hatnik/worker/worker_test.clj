@@ -2,51 +2,62 @@
   (:require [clojure.test :refer :all]
             [hatnik.worker.worker :refer :all]
             [hatnik.db.storage :as stg]
-            [hatnik.db.memory-storage :refer [create-memory-storage]]
-            [hatnik.versions :as ver]))
+            [hatnik.db.memory-storage :refer [map->MemoryStorage]]
+            [hatnik.versions :as ver]
+            [com.stuartsierra.component :as component]))
 
-(defn prepare-db-fixture [f]
-  (reset! stg/storage (create-memory-storage))
-  (let [user-id (stg/create-user! @stg/storage "me@email.com")
-        project-id (stg/create-project! @stg/storage {:name "Default"
-                                                      :user-id user-id})]
-    (stg/create-action! @stg/storage user-id {:project-id project-id
+(defn get-db []
+  (let [db (component/start (map->MemoryStorage {}))
+        user-id (stg/create-user! db "me@email.com" "token")
+        project-id (stg/create-project! db {:name "Default"
+                                            :user-id user-id})]
+    (stg/create-action! db user-id {:project-id project-id
                                               :type "email"
                                               :library "foo-library"
                                               :last-processed-version "1.0.0"})
-    (stg/create-action! @stg/storage user-id {:project-id project-id
+    (stg/create-action! db user-id {:project-id project-id
                                               :type "email"
                                               :library "foo-library"
-                                              :last-processed-version "0.9.0"}))
-  (f))
-
-(use-fixtures :each prepare-db-fixture)
+                                              :last-processed-version "0.9.0"})
+    db))
 
 (deftest test-check-library-and-perform-actions-correct
-  (with-redefs [ver/latest-release (constantly "2.0.0")]
-    (check-library-and-perform-actions "foo-library" (stg/get-actions @stg/storage)))
-  (doseq [action (stg/get-actions @stg/storage)]
-    (is (= (:last-processed-version action) "2.0.0"))))
+  (let [db (get-db)]
+   (with-redefs [ver/latest-release (constantly "2.0.0")]
+     (check-library-and-perform-actions "foo-library" (stg/get-actions db)
+                                        db perform-action-disabled {}))
+   (doseq [action (stg/get-actions db)]
+     (is (= (:last-processed-version action) "2.0.0")))
+
+   (component/stop db)))
 
 (deftest test-check-library-and-perform-actions-new-version-is-smaller
-  (let [actions (stg/get-actions @stg/storage)
+  (let [db (get-db)
+        actions (stg/get-actions db)
         actions-by-id (into {}
                             (map #(vector (:id %) %) actions))]
     (with-redefs [ver/latest-release (constantly "0.5.0")]
-      (check-library-and-perform-actions "foo-library" actions))
-    (doseq [action (stg/get-actions @stg/storage)]
+      (check-library-and-perform-actions "foo-library" actions
+                                         db perform-action-disabled {}))
+    (doseq [action (stg/get-actions db)]
       (is (= (:last-processed-version action)
-             (:last-processed-version (actions-by-id (:id action))))))))
+             (:last-processed-version (actions-by-id (:id action))))))
+
+    (component/stop db)))
 
 (deftest test-check-library-and-perform-actions-new-version-is-null
-  (let [actions (stg/get-actions @stg/storage)
+  (let [db (get-db)
+        actions (stg/get-actions db)
         actions-by-id (into {}
                             (map #(vector (:id %) %) actions))]
     (with-redefs [ver/latest-release (constantly nil)]
-      (check-library-and-perform-actions "foo-library" actions))
-    (doseq [action (stg/get-actions @stg/storage)]
+      (check-library-and-perform-actions "foo-library" actions
+                                         db perform-action-disabled {}))
+    (doseq [action (stg/get-actions db)]
       (is (= (:last-processed-version action)
-             (:last-processed-version (actions-by-id (:id action))))))))
+             (:last-processed-version (actions-by-id (:id action))))))
+
+    (component/stop db)))
 
 
 

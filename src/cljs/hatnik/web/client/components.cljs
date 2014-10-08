@@ -37,13 +37,15 @@
     (dom/span #js {:className "glyphicon glyphicon-envelope action-type"})))
 
 (defn render-action [project-id action]
-  (let [name (get action "library")]
+  (let [name (get action "library")
+        template (get action "template")]
   (dom/div
    #js {:onClick (fn []
                    (state/set-form-type :email-edit-action)
                    (state/set-current-project project-id)
                    (state/set-current-action action)
                    (state/set-current-artifact-value name)
+                   (state/set-current-email-template template)
                    (.modal ($ :#iModal)))
         :className "panel panel-default action"}
    (dom/div
@@ -59,6 +61,7 @@
   (state/set-form-type :email-action)
   (state/set-current-project id)
   (state/set-current-artifact-value "")
+  (state/set-current-email-template state/default-email-template)
   (.modal ($ :#iModal)))
 
 

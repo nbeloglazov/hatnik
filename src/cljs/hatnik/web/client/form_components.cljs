@@ -49,7 +49,10 @@
 (defn input-handle [e]
   (state/set-current-artifact-value (.. e -target -value)))
 
-(defn email-action-form-body [data artifact template]
+(defn email-template-handle [e]
+  (state/set-current-email-template (.. e -target -value)))
+
+(defn email-action-form-body [data]
   (dom/form
    #js {:id "email-action-form"}
    (dom/div #js {:className "form-group has-warning"
@@ -73,16 +76,14 @@
                      (dom/textarea #js {:cols "40"
                                         :className "form-control"
                                         :id "emain-body-input"
-                                        :onChange #(js/alert "!")}
-                                   template)))))
+                                        :value (-> data :ui :email-template)
+                                        :onChange email-template-handle})))))
 
 (defn email-create-action-body [data]
-  (email-action-form-body data "" (-> data :ui :default-email-template)))
+  (email-action-form-body data))
 
 (defn email-edit-action [data]
-  (email-action-form-body data 
-                          (get (-> data :ui :current-action) "library")
-                          (get (-> data :ui :current-action) "template")))
+  (email-action-form-body data))
 
 (def action-form-bodys 
   {:email-action email-create-action-body

@@ -18,7 +18,7 @@
               :current-action nil
               :email-form-timer false
               :email-artifact-value ""
-              :default-email-template default-email-template}}))
+              :email-template default-email-template}}))
 
 (defn update-projects-list [reply]
   (let [json (.getResponseJson (.-target reply))
@@ -62,6 +62,11 @@
   (swap! app-state
          assoc-in [:ui :email-artifact-value]
          value))
+
+(defn set-current-email-template [template]
+  (swap! app-state
+         assoc-in [:ui :email-template]
+         template))
 
 (defn update-all-view []
   (.send goog.net.XhrIo "/api/projects" update-projects-list) )

@@ -31,7 +31,8 @@
                "Edit email notification"
        (dom/button #js {:className "btn btn-danger pull-right"
                         :onClick #(action/delete-action 
-                                   (get (deref (:current-action @data)) "id"))} 
+                                   (get 
+                                    (deref (-> @data :ui :current-action)) "id"))} 
                    "Delete"))))))
 
 (def action-forms-headers 
@@ -40,13 +41,13 @@
 
 (defn action-form-header [data owner]
   (apply
-   (get action-forms-headers (:form-type data))
+   (get action-forms-headers (-> data :ui :form-type))
    [data]))
 
 ;; For selecting action form body
 
 (defn input-handle [e]
-  (reset! state/email-artifact-value (.. e -target -value)))
+  (state/set-current-artifact-value (.. e -target -value)))
 
 (defn email-action-form-body [data artifact template]
   (dom/form
@@ -59,13 +60,13 @@
                             :id "artifact-input"
                             :placeholder "e.g. org.clojure/clojure"
                             :onChange input-handle
-                            :value (deref state/email-artifact-value)}))
+                            :value (-> data :ui :email-artifact-value)}))
    (dom/div #js {:className "form-group"}
             (dom/label #js {:for "emain-input"} "Email")
             (dom/input #js {:type "email"
                             :className "form-control"
                             :id "emain-input"
-                            :value (:email (:user data))
+                            :value (-> data :data :user :email)
                             :disabled "disabled"})
             (dom/div #js {:className "form-group"}
                      (dom/label #js {:for "emain-body-input"} "Email body")
@@ -88,8 +89,8 @@
 (defn email-edit-action [data]
   (let [artifact-input (.getElementById js/document "artifact-input")
         email-body-input (.getElementById js/document "emain-body-input")]
-    (email-action-form-body data (get (:current-action data) "library")
-                            (get (:current-action data) "template"))))
+    (email-action-form-body data (get (-> data :ui :current-action) "library")
+                            (get (-> data :ui :current-action) "template"))))
 
 (def action-form-bodys 
   {:email-action email-create-action-body
@@ -100,7 +101,7 @@
     om/IRender
     (render [this]
       (apply 
-       (get action-form-bodys (:form-type data))
+       (get action-form-bodys (-> data :ui :form-type))
        [data]))))
 
 ;; For selecting footer
@@ -108,19 +109,20 @@
 (defn email-action-footer [data]
   (dom/div nil
            (dom/button #js {:className "btn btn-primary pull-left"
-                            :onClick #(action/send-new-email-action (:current-project @data))} "Submit")
+                            :onClick #(action/send-new-email-action (-> @data :ui :current-project))} "Submit")
            (dom/button #js {:className "btn btn-default"
-                            :onClick #(action/test-new-email-action (:current-project @data))} "Test")))
+                            :onClick #(action/test-new-email-action (-> @data :ui :current-project))} "Test")))
 
 (defn email-edit-footer [data]
   (dom/div 
    nil
    (dom/button #js {:className "btn btn-primary pull-left"
                     :onClick #(action/update-email-action 
-                               (:current-project @data)
-                               (get (deref (:current-action @data)) "id"))} "Update")
+                               (-> @data :ui :current-project)
+                               (get 
+                                (deref (-> @data :ui :current-action)) "id"))} "Update")
    (dom/button #js {:className "btn btn-default"
-                    :onClick #(action/test-new-email-action (:current-project @data))} "Test")))
+                    :onClick #(action/test-new-email-action (-> @data :ui :current-project))} "Test")))
 
 (def action-form-footers
   {:email-action email-action-footer
@@ -131,5 +133,5 @@
     om/IRender
     (render [this]
       (apply 
-       (get action-form-footers (:form-type data))
+       (get action-form-footers (-> data :ui :form-type))
        [data]))))

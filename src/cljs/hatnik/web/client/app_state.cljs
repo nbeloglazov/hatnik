@@ -1,52 +1,60 @@
 (ns hatnik.web.client.app-state)
 
 (def app-state 
-  (atom {:projects []
-         :form-type :email-action
-         :user {}
-         :current-project nil
-         :current-action nil
-         :email-form-timer false}))
+  (atom {
+         ; Here we store data from the server
+         :data {:projects []
+                :user {}}
 
-(def email-artifact-value (atom ""))
+         ; Here we store a local data (like ui state)
+         :ui {:form-type :email-action
+              :current-project nil
+              :current-action nil
+              :email-form-timer false
+              :email-artifact-value ""}}))
 
 (defn update-projects-list [reply]
   (let [json (.getResponseJson (.-target reply))
         data (js->clj json)]
     (when (= "ok" (get data "result"))
       (swap! app-state
-             assoc :projects
+             assoc-in [:data :projects]
              (get data "projects")))))
 
 (defn set-form-type [action-type]
   (swap! app-state
-         assoc :form-type
+         assoc-in [:ui :form-type]
          action-type))
 
 (defn set-current-project [id]
   (swap! app-state 
-         assoc :current-project id))
+         assoc-in [:ui :current-project] id))
 
 (defn set-current-action [action]
   (swap! app-state
-         assoc :current-action
+         assoc-in [:ui :current-action]
          action))
-
 
 (defn add-new-project [id name]
   (swap! app-state
-         assoc :projects
+         assoc-in [:data :projects]
          (into [{"id" id "name" name}]
-               (:projects @app-state))))
-
+               (-> @app-state
+                   :data
+                   :projects))))
 
 (defn update-user-data [reply]
   (let [json (.getResponseJson (.-target reply))
         data (js->clj json)]
     (when (= "ok" (get data "result"))
       (swap! app-state
-             assoc-in [:user :email]
+             assoc-in [:data :user :email]
              (get data "email")))))
+
+(defn set-current-artifact-value [value]
+  (swap! app-state
+         assoc-in [:ui :email-artifact-value]
+         value))
 
 (defn update-all-view []
   (.send goog.net.XhrIo "/api/projects" update-projects-list) )
@@ -54,13 +62,3 @@
 (defn update-project-actions [action]
   (.send goog.net.XhrIo "/api/projects" update-projects-list))
 
-
-(defn get-email-form-timer []
-  (:email-form-timer @app-state))
-
-(defn set-email-form-timer [callback time]
-  (let [timer (get-email-form-timer)]
-    (when timer (js/clearInterval timer))
-    (swap! app-state
-           assoc :email-form-timer
-           (js/setTimeout callback time))))

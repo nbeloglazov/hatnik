@@ -43,7 +43,7 @@
                    (state/set-form-type :email-edit-action)
                    (state/set-current-project project-id)
                    (state/set-current-action action)
-                   (reset! state/email-artifact-value name)
+                   (state/set-current-artifact-value name)
                    (.modal ($ :#iModal)))
         :className "panel panel-default action"}
    (dom/div
@@ -58,7 +58,7 @@
 (defn add-action [id]
   (state/set-form-type :email-action)
   (state/set-current-project id)
-  (reset! state/email-artifact-value "")
+  (state/set-current-artifact-value "")
   (.modal ($ :#iModal)))
 
 
@@ -108,5 +108,5 @@
            :button (project-header-menu-button prj)
            :body (actions-table (get prj "id") (get prj "actions"))
            :body-id (str "__PrjList" (get prj "id"))))
-        (:projects data))))))
+        (-> data :data :projects))))))
 

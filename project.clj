@@ -25,9 +25,7 @@
   :plugins [[lein-ring "0.8.11"]
             [lein-cljsbuild "1.0.3"]]
 
-  :ring {:handler hatnik.web.server.handler/app
-         :init hatnik.web.server.handler/initialise}
-
+  :main hatnik.system
   :source-paths ["src/clj"]
   :test-paths ["test/clj"]
 

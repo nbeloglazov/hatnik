@@ -1,4 +1,5 @@
 (ns hatnik.system
+  (:gen-class)
   (:require [com.stuartsierra.component :as component]
             [taoensso.timbre :as timbre]
             [hatnik.config :as conf]
@@ -63,6 +64,14 @@
 (defn restart []
   (stop)
   (go))
+
+(defn -main [& args]
+  (let [system (component/start
+                (make-system (conf/get-config)))]
+    (.addShutdownHook (Runtime/getRuntime)
+                      (Thread. (fn []
+                                 (timbre/info "Shutting down.")
+                                 (component/stop system))))))
 
 (comment
 

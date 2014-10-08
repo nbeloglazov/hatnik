@@ -74,7 +74,10 @@
 
 
 (defn actions-table [id actions]
-  (let [rendered
+  (let [actions (->> actions
+                     (sort-by first)
+                     (map second))
+        rendered
         (map (fn [action]
                (dom/div #js {:className "col-sm-12 col-md-6 col-lg-4 prj-list-item"}
                         (render-action id action)))

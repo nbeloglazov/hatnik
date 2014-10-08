@@ -6,18 +6,14 @@
             [taoensso.timbre :as timbre]
             [monger.ring.session-store :refer [monger-store]]
             [monger.core :as mg]
+            [com.stuartsierra.component :as component]
 
             [hatnik.web.server.renderer :as renderer]
-            [hatnik.web.server.projects :refer [projects-api]]
-            [hatnik.web.server.actions :refer [actions-api]]
-            [hatnik.web.server.login :refer [login-api]]
-            [hatnik.config :refer [config]]
+            [hatnik.web.server.projects :refer [projects-api-routes]]
+            [hatnik.web.server.actions :refer [actions-api-routes]]
+            [hatnik.web.server.login :refer [login-api-routes]]
             [hatnik.db.storage :as stg]
-            [hatnik.db.memory-storage :refer [create-memory-storage]]
-            [hatnik.db.mongo-storage :refer [create-mongo-storage]]
             [hatnik.versions :as ver]
-            [hatnik.worker.handler :as worker-handler]
-            [hatnik.worker.worker :as worker]
 
             [ring.util.request :refer [body-string]]
             [ring.util.response :as resp]
@@ -25,23 +21,6 @@
             [ring.adapter.jetty :refer [run-jetty]]
             [ring.middleware.session.memory :refer [memory-store]]
             [ring.middleware.stacktrace :as stacktrace]))
-
-(defn initialise []
-  (timbre/info "Initialisation started.")
-  (worker-handler/start)
-  (worker/initialise-and-start-job)
-  (timbre/set-level! (:log-level config))
-  (reset! stg/storage
-          (case (:db config)
-            :memory (do
-                      (timbre/info "Using memory db")
-                      (create-memory-storage))
-            :mongo (do
-                     (timbre/info "Using mongo db"
-                                  (select-keys (:mongo config)
-                                               [:host :port :db :drop?]))
-                     (create-mongo-storage (:mongo config)))))
-  (timbre/info "Initialisation finished."))
 
 (defn library-version [library]
   (if-let [version (ver/latest-release library)]
@@ -61,17 +40,20 @@
            :body {:result "error"
                   :message "Not authenticated"}}))))
 
-(defroutes app-routes
-  (GET "/" [] renderer/core-page)
-  (context "/api" []
-           (context "/projects" []
-                    (wrap-authenticated-only projects-api))
-           (context "/actions" []
-                    (wrap-authenticated-only actions-api))
-           login-api
-           (GET "/library-version" [library] (library-version library)))
-  (route/resources "/")
-  (route/not-found "Not Found"))
+(defn app-routes [db config]
+  (routes
+   (GET "/" req (renderer/core-page config (-> req :session :user)))
+   (context "/api" []
+            (context "/projects" []
+                     (wrap-authenticated-only
+                      (projects-api-routes db)))
+            (context "/actions" []
+                     (wrap-authenticated-only
+                      (actions-api-routes db config)))
+            (login-api-routes db config)
+            (GET "/library-version" [library] (library-version library)))
+   (route/resources "/")
+   (route/not-found "Not Found")))
 
 (defn dump-request [handler]
   (fn [req]
@@ -80,14 +62,16 @@
       (timbre/debug "Response:" resp)
       resp)))
 
-(defn get-session-store []
+(defn get-session-store [config]
   (if (= (:db config) :mongo)
     (let [{:keys [host port db drop?]} (:mongo config)
           conn (mg/connect {:host host
                             :port port})]
+      (timbre/info "Using mongo session store.")
       (when drop? (mg/drop-db conn db))
       (monger-store (mg/get-db conn db) "sessions"))
-    (memory-store)))
+    (do (timbre/info "Using memory session store.")
+        (memory-store))))
 
 (defn wrap-exceptions [handler]
   (fn [req]
@@ -98,22 +82,29 @@
         (resp/response {:result :error
                         :message "Something bad happened on server"})))))
 
-(def app
-  (-> #'app-routes
+(defn wrap [config routes]
+  (-> routes
       dump-request
       (handler/site {:session {:cookie-attrs {; 2 weeks
                                               :max-age (* 60 60 24 14)
                                               :http-only true}
-                               :store (get-session-store)}})
+                               :store (get-session-store config)}})
       wrap-exceptions
       (json/wrap-json-body {:keywords? true})
       json/wrap-json-response))
 
-(comment
+(defrecord WebServer [config db server]
 
-   (do
-     (def server (run-jetty #(app %) {:port 8080 :join? false}))
-     (initialise))
+  component/Lifecycle
+  (start [component]
+    (let [port (-> config :web :port)]
+     (timbre/info "Starting WebServer on port" port)
+     (assoc component
+       :server (run-jetty (wrap config (app-routes db config))
+                          {:port port :join? false}))))
 
-   (.stop server)
-)
+  (stop [component]
+    (timbre/info "Stopping WebServer")
+    (when-let [server (:server component)]
+      (.stop server))
+    (assoc component :server nil)))

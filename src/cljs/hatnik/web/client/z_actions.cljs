@@ -3,6 +3,9 @@
             [hatnik.web.client.app-state :as state])
   (:use [jayq.core :only [$]]))
 
+(defn growl-info [message]
+  (.bootstrapGrowl js/$ message #js {"type" "success"}))
+
 (defn get-data-from-input [id]
   (.-value (.getElementById js/document id)))
 
@@ -75,17 +78,15 @@
               :type "email"
               :address email
               :template email-body
-              :library artifact
-              :version "2.3.4"
-              :previous-version "1.2.3"}]
+              :library artifact}]
     (if (or
          (= "" artifact)
          (= "" email)
          (= "" email-body))
       (js/alert "Wrong data! Check out fields!")
 
-      (ajax "/api/actions/test" "POST" data 
-            (wrap-error-alert (fn [e]))))))
+      (ajax "/api/actions/test" "POST" data
+            (wrap-error-alert (fn [e] (growl-info "Email sent. Check your inbox.")))))))
 
 (defn update-email-action [project-id action-id]
     (let [artifact (get-data-from-input "artifact-input")

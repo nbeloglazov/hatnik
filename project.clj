@@ -4,17 +4,19 @@
   :dependencies [; Clojure
                  [org.clojure/clojure "1.6.0"]
                  [ring "1.3.1"]
-                 [compojure "1.1.8"]
+                 [compojure "1.2.0"]
                  [ring/ring-json "0.3.1"]
                  [clj-http "1.0.0"]
                  [tentacles "0.2.5"]
                  [com.taoensso/timbre "3.3.1"]
                  [com.novemberain/monger "2.0.0"]
-                 [ancient-clj "0.1.10"]
+                 [ancient-clj "0.2.0"]
                  [com.draines/postal "1.11.1"]
                  [version-clj "0.1.0"]
                  [clojurewerkz/quartzite "1.3.0"]
-
+                 [prismatic/schema "0.3.0"]
+                 [com.stuartsierra/component "0.2.2"]
+                 
                  ; ClojureScript
                  [org.clojure/clojurescript "0.0-2356"]
                  [jayq "2.5.2"]
@@ -23,9 +25,7 @@
   :plugins [[lein-ring "0.8.11"]
             [lein-cljsbuild "1.0.3"]]
 
-  :ring {:handler hatnik.web.server.handler/app
-         :init hatnik.web.server.handler/initialise}
-
+  :main hatnik.system
   :source-paths ["src/clj"]
   :test-paths ["test/clj"]
 
@@ -38,7 +38,7 @@
           [{:source-paths ["src/cljs"]
             :compiler
             {:output-to "resources/public/gen/js/hatnik.js"
-             :optimizations :whitespace
+             :optimizations :simple
              :pretty-print true}}]
           }}
    :release 

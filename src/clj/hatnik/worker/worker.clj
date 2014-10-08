@@ -35,7 +35,7 @@
   (timbre/debug "Performing action for user" user
                 " Variables: " variables)
   (case (:type action)
-    "email" (email/perform action user variables)))
+    "email" (email/perform action user variables utils)))
 
 (defn check-library-and-perform-actions
   "Retrieves latest version for given library and updates actions if they

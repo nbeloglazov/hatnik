@@ -84,9 +84,10 @@
     :session nil))
 
 (defn login-api-routes [db config]
-  (routes
-   (GET "/github" [code state] (github-login db config code state))
-   (GET "/current-user" req (current-user req))
-   (when (:enable-force-login config)
-     (GET "/force-login" [email] (force-login db email)))
-   (GET "/logout" [] (logout))))
+  (->> [(GET "/github" [code state] (github-login db config code state))
+        (GET "/current-user" req (current-user req))
+        (when (:enable-force-login config)
+          (GET "/force-login" [email] (force-login db email)))
+        (GET "/logout" [] (logout))]
+       (remove nil?)
+       (apply routes)))

@@ -114,5 +114,7 @@
            :button (project-header-menu-button prj)
            :body (actions-table (get prj "id") (get prj "actions"))
            :body-id (str "__PrjList" (get prj "id"))))
-        (-> data :data :projects))))))
+        (->> (-> data :data :projects)
+             (sort-by first)
+             (map second)))))))
 

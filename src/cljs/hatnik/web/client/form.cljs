@@ -6,15 +6,8 @@
             [hatnik.web.client.z-actions :as action])
   (:use [jayq.core :only [$]]))
 
-(om/root widget/action-form-header state/app-state
-         {:target (. js/document (getElementById "iActionFormHeader"))})
-
-(om/root widget/action-form-body state/app-state
-         {:target (. js/document (getElementById "iActionFormBody"))})
-
-(om/root widget/action-form-footer state/app-state
-         {:target (. js/document (getElementById "iActionFormFooter"))})
-
+(om/root widget/email-action-form state/app-state
+         {:target (. js/document (getElementById "iModal"))})
 
 ;; Keyboard actions
 

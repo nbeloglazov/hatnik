@@ -135,3 +135,19 @@
       (apply 
        (get action-form-footers (-> data :ui :form-type))
        [data]))))
+
+
+(defn email-action-form [data owner]
+  (reify
+    om/IRender
+    (render [_]
+      (dom/div 
+       #js {:className "modal-dialog"}
+       (dom/div #js {:className "modal-content"}
+                (dom/div #js {:className "modal-header"}
+                         (om/build action-form-header data))
+                (dom/div #js {:className "modal-body"}
+                         (om/build action-form-body data))
+                (dom/div #js {:className "modal-footer"}
+                         (om/build action-form-footer data))
+                )))))

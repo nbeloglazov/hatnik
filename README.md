@@ -15,7 +15,7 @@ To start the server locally just run:
 
 ```shell
 lein cljsbuild once
-lein ring server 8080
+lein run
 ```
 
 By default app uses in-memory DB. You can change settings by creating `config.clj` file in root folder. Check [config.example.clj](https://github.com/nbeloglazov/hatnik/blob/master/config.example.clj) for available options.

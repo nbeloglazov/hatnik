@@ -72,25 +72,17 @@
                      (dom/label #js {:for "emain-body-input"} "Email body")
                      (dom/textarea #js {:cols "40"
                                         :className "form-control"
-                                        :id "emain-body-input"}
+                                        :id "emain-body-input"
+                                        :onChange #(js/alert "!")}
                                    template)))))
 
-(def default-email-template
-  (str "Hello there\n\n"
-       "{{library}} {{version}} has been released! "
-       "Previous version was {{previous-version}}\n\n"
-       "Your Hatnik"))
-
 (defn email-create-action-body [data]
-  (let [artifact-input (.getElementById js/document "artifact-input")
-        email-body-input (.getElementById js/document "emain-body-input")]
-    (email-action-form-body data "" default-email-template)))
+  (email-action-form-body data "" (-> data :ui :default-email-template)))
 
 (defn email-edit-action [data]
-  (let [artifact-input (.getElementById js/document "artifact-input")
-        email-body-input (.getElementById js/document "emain-body-input")]
-    (email-action-form-body data (get (-> data :ui :current-action) "library")
-                            (get (-> data :ui :current-action) "template"))))
+  (email-action-form-body data 
+                          (get (-> data :ui :current-action) "library")
+                          (get (-> data :ui :current-action) "template")))
 
 (def action-form-bodys 
   {:email-action email-create-action-body

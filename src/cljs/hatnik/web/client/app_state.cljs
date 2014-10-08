@@ -1,5 +1,11 @@
 (ns hatnik.web.client.app-state)
 
+(def default-email-template
+  (str "Hello there\n\n"
+       "{{library}} {{version}} has been released! "
+       "Previous version was {{previous-version}}\n\n"
+       "Your Hatnik"))
+
 (def app-state 
   (atom {
          ; Here we store data from the server
@@ -11,7 +17,8 @@
               :current-project nil
               :current-action nil
               :email-form-timer false
-              :email-artifact-value ""}}))
+              :email-artifact-value ""
+              :default-email-template default-email-template}}))
 
 (defn update-projects-list [reply]
   (let [json (.getResponseJson (.-target reply))

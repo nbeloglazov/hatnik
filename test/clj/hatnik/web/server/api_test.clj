@@ -24,6 +24,7 @@
                                  (map->WebServer {})
                                  [:db :config]))
                    (component/start))]
+    (timbre/set-level! :debug)
     (try (f)
          (finally
            (component/stop system)))))
@@ -189,3 +190,62 @@
         _ (data-equal (-> (http :get "/projects") ok? :projects)
                       (map-by-id expected))
         ]))
+
+(deftest test-api-invalid-requests
+  (let [quil-ver (-> (http :get "/library-version?library=quil")
+                     ok? :version)
+        ring-ver (-> (http :get "/library-version?library=ring")
+                     ok? :version)
+        email "me@email.com"
+
+        resp (ok? (http :get (str "/force-login?skip-dummy-data=true&email="
+                                  email)))
+
+        ; Check that default project is create for user
+        projects (-> (http :get "/projects") ok? :projects)
+        proj-dflt-id (-> projects first first name)
+        _ (data-equal projects
+                      (map-by-id [{:name "Default" :id proj-dflt-id
+                                   :actions {}}]))
+
+        ; Create action in Default.
+        act-dflt-one {:project-id proj-dflt-id
+                      :type "email"
+                      :address email
+                      :template "Template dflt one"
+                      :library "quil"}
+        resp (ok? (http :post "/actions" act-dflt-one))
+        _ (is (= (:last-processed-version resp) quil-ver))
+        act-dflt-one (merge act-dflt-one (dissoc resp :result))
+
+        long-string (apply str (repeat 1000 "1111"))
+        ; Try to create project without name, empty name, long name,
+        ; invalid keys. Also try to update existing project.
+        _ (doseq [proj [{}
+                        {:name ""}
+                        {:name "Valid" :another-key "Hey"}
+                        {:name long-string}]]
+            (error? (http :post "/projects" proj))
+            (error? (http :put (str "/projects/" proj-dflt-id) proj)))
+
+        ; Try to create invalid actions or update existing action to be
+        ; invalid.
+        valid-act (dissoc act-dflt-one
+                          :id :last-processed-version)
+        _ (doseq [action [(dissoc valid-act :template)
+                          (assoc valid-act :library "iDontExist")
+                          (assoc valid-act :type "unknown")
+                          (assoc valid-act :template long-string)
+                          (assoc valid-act :id "1233")]]
+            (error? (http :post "/actions" action))
+            (error? (http :put (str "/actions/" (:id act-dflt-one)) action)))
+
+        ; Check that the project and the action weren't modified.
+        expected [{:name "Default" :id proj-dflt-id
+                   :actions (map-by-id [act-dflt-one])}]
+        _ (data-equal (-> (http :get "/projects") ok? :projects)
+                      (map-by-id expected))
+
+        ]))
+
+(->> test-api-invalid-requests (partial cookie-store-fixture) system-fixture)

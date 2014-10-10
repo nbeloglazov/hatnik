@@ -24,7 +24,7 @@
                                  (map->WebServer {})
                                  [:db :config]))
                    (component/start))]
-    (timbre/set-level! :debug)
+    (timbre/set-level! :info)
     (try (f)
          (finally
            (component/stop system)))))
@@ -244,8 +244,58 @@
         expected [{:name "Default" :id proj-dflt-id
                    :actions (map-by-id [act-dflt-one])}]
         _ (data-equal (-> (http :get "/projects") ok? :projects)
-                      (map-by-id expected))
+                      (map-by-id expected))]))
 
+(deftest test-api-access-to-other-users
+  (let [quil-ver (-> (http :get "/library-version?library=quil")
+                     ok? :version)
+        ring-ver (-> (http :get "/library-version?library=ring")
+                     ok? :version)
+        email "me@email.com"
+
+        _ (ok? (http :get (str "/force-login?skip-dummy-data=true&email="
+                               email)))
+
+        ; Check that default project is create for user
+        proj-id (-> (http :get "/projects") ok? :projects first first name)
+
+        ; Create action in Default.
+        act-base {:project-id proj-id
+                           :type "email"
+                           :address email
+                           :template "Template dflt one"
+                           :library "quil"}
+        resp (ok? (http :post "/actions" act-base))
+        act-full (merge act-base (dissoc resp :result))
+
+        ; Currently we return "ok" result even if you tried to access
+        ; others projects or actions. But these actions should not be
+        ; modified in fact. Now we'll try to change projects/actions of
+        ; the first user while we're logged in as another user.
+
+        ; Login as new user
+        _ (ok? (http :get (str "/force-login?skip-dummy-data=true&"
+                               "email=another@email.com")))
+
+        ; Modify project
+        _ (ok? (http :put (str "/projects/" proj-id) {:name "I changed your project!"}))
+        ; Modify action
+        _ (ok? (http :put (str "/actions/" (:id act-full))
+                     (assoc act-base :template "I changed your action!")))
+        ; Create action. API is not consistent actually, in this case
+        ; it return error if action was not created.
+        _ (error? (http :post "/actions" act-base))
+        ; Delete action
+        _ (ok? (http :delete (str "/actions/" (:id act-full))))
+        ; Delete project
+        _ (ok? (http :delete (str "/projects/" proj-id)))
+
+        ; Now relogin as first user and verify that nothing has changed.
+        _ (ok? (http :get (str "/force-login?skip-dummy-data=true&email="
+                               email)))
+        projects (-> (http :get "/projects") ok? :projects)
+        _ (data-equal projects
+                      (map-by-id [{:name "Default" :id proj-id
+                                   :actions (map-by-id [act-full])}]))
         ]))
 
-(->> test-api-invalid-requests (partial cookie-store-fixture) system-fixture)

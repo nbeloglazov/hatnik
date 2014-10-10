@@ -101,7 +101,7 @@
         ; Create 2 actions in Default proj and 1 action in Foo.
         ;
 
-        ; Create first action in Default.
+        ; Create first action in Default. Email action.
         act-dflt-one {:project-id proj-dflt-id
                       :type "email"
                       :address email
@@ -111,11 +111,9 @@
         _ (is (= (:last-processed-version resp) quil-ver))
         act-dflt-one (merge act-dflt-one (dissoc resp :result))
 
-        ; Create second action in Default.
+        ; Create second action in Default. Noop action.
         act-dflt-two {:project-id proj-dflt-id
-                      :type "email"
-                      :address email
-                      :template "Template dflt two"
+                      :type "noop"
                       :library "ring"}
         resp (ok? (http :post "/actions" act-dflt-two))
         _ (is (= (:last-processed-version resp) ring-ver))

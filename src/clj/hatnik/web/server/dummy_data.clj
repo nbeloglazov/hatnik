@@ -23,11 +23,9 @@
                                     :library "quil"
                                     :last-processed-version "2.2.2"})
     (stg/create-action! db user-id {:project-id proj-id
-                                    :type "email"
-                                    :template "ClojureScript {{VERSION}} was released. Go and update template!"
-                                    :address "norg113@gmail.com"
+                                    :type "noop"
                                     :library "org.clojure/clojurescript"
-                                    :last-processed-version "0.0.0"})))
+                                    :last-processed-version "0.0-0"})))
 
 (defn create-hatnik-project [db user-id]
   (stg/create-project! db {:name "Hatnik"

@@ -1,10 +1,8 @@
 (ns hatnik.web.client.z-actions
   (:require [jayq.core :as jq]
-            [hatnik.web.client.app-state :as state])
+            [hatnik.web.client.app-state :as state]
+            [hatnik.web.client.message :as msg])
   (:use [jayq.core :only [$]]))
-
-(defn growl-info [message]
-  (.bootstrapGrowl js/$ message #js {"type" "success"}))
 
 (defn get-data-from-input [id]
   (.-value (.getElementById js/document id)))
@@ -12,7 +10,7 @@
 (defn wrap-error-alert [callback]
   (fn [reply]
     (let [resp (js->clj reply)]
-      (when (= "error" (get resp "result")) (js/alert (get resp "message")))
+      (when (= "error" (get resp "result")) (msg/danger (get resp "message")))
       (callback reply))))
 
 (defn ajax [url type data callback]
@@ -39,7 +37,7 @@
 (defn ^:export send-new-project-request []
   (let [name (.-value (.getElementById js/document "project-name-input"))]
     (if (= "" name)
-      (js/alert "Project name must be not empty!")
+      (msg/danger "Project name must be not empty!")
       (do
         (.modal ($ :#iModalProject) "hide")
         (ajax  "/api/projects" "POST" {:name name} #(create-new-project-callback name %))))))
@@ -62,7 +60,7 @@
          (= "" artifact)
          (= "" email)
          (= "" email-body))
-      (js/alert "Wrong data! Check out fields!")
+      (msg/danger "Wrong data! Check out fields!")
 
       (do
         (.modal ($ :#iModal) "hide")
@@ -83,10 +81,10 @@
          (= "" artifact)
          (= "" email)
          (= "" email-body))
-      (js/alert "Wrong data! Check out fields!")
+      (msg/danger "Wrong data! Check out fields!")
 
       (ajax "/api/actions/test" "POST" data
-            (wrap-error-alert (fn [e] (growl-info "Email sent. Check your inbox.")))))))
+            (wrap-error-alert (fn [e] (msg/success "Email sent. Check your inbox.")))))))
 
 (defn update-email-action [project-id action-id]
     (let [artifact (get-data-from-input "artifact-input")
@@ -101,7 +99,7 @@
          (= "" artifact)
          (= "" email)
          (= "" email-body))
-      (js/alert "Wrong data! Check out fields!")
+      (msg/danger "Wrong data! Check out fields!")
 
       (do
         (.modal ($ :#iModal) "hide")

@@ -77,7 +77,7 @@
     [:div.col-md-2
      [:a.btn.btn-success
       {:href "#"
-       :onclick "$('#iModalProject').modal()"} "Add project"]]
+       :onclick "hatnik.web.client.components.add_new_project();"} "Add project"]]
     [:div.col-md-10]]
 
    [:div

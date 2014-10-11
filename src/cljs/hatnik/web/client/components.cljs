@@ -4,33 +4,10 @@
             [hatnik.web.client.app-state :as state])
   (:use [jayq.core :only [$]]))
 
-(defn test-action []
-  (js/alert "Hoooo!"))
-
-
-(defn accordion-panel [& {:keys [body-id header button body]}]
-  (dom/div
-   #js {:className "panel panel-default panel-primary"}
-   (dom/div
-    #js {:className "panel-heading"}
-    (dom/div
-     nil
-     (dom/h4
-      #js {:className "panel-title"}
-      (dom/div #js {:className "row"}
-               (dom/div #js {:className "col-sm-8 col-md-8 col-lg-8"}
-                        (dom/a
-                         #js {:data-parent "#accrodion"
-                              :data-toggle "collapse"
-                              :href (str "#" body-id)}
-                         header))
-               (dom/div
-                #js {:className "col-sm-2 col-md-1 col-lg-1 pull-right"}
-                button)))))
-   (dom/div #js {:className "panel-collapse collapse in"
-                 :id body-id}
-            (dom/div #js {:className "panel-body"}
-                     body))))
+(defn ^:export add-new-project []
+  (let [project-name-input (.getElementById js/document "project-name-input")]
+    (set! (.-value project-name-input) "")
+    (.modal ($ :#iModalProject))))
 
 (defn render-action-type [a-type]
   (when (= "email" a-type)
@@ -40,22 +17,23 @@
   (let [name (get action "library")
         template (get action "template")]
   (dom/div
-   #js {:onClick (fn []
-                   (state/set-form-type :email-edit-action)
-                   (state/set-current-project project-id)
-                   (state/set-current-action action)
-                   (state/set-current-artifact-value name)
-                   (state/set-current-email-template template)
-                   (.modal ($ :#iModal)))
+   #js {:onClick 
+        (fn []
+          (state/set-form-type :email-edit-action)
+          (state/set-current-project project-id)
+          (state/set-current-action action)
+          (state/set-current-artifact-value name)
+          (state/set-current-email-template template)
+          (.modal ($ :#iModal)))
         :className "panel panel-default action"}
    (dom/div
     #js {:className "panel-body bg-success"}
-            (render-action-type (get action "type"))
-            (dom/span #js {:className "action-info"}
-                      (dom/div #js {:className "library-name"}
-                               (get action "library"))
-                      (dom/div #js {:className "version"}
-                               (get action "last-processed-version")))))))
+    (render-action-type (get action "type"))
+    (dom/span #js {:className "action-info"}
+              (dom/div #js {:className "library-name"}
+                       (get action "library"))
+              (dom/div #js {:className "version"}
+                       (get action "last-processed-version")))))))
 
 (defn add-action [id]
   (state/set-form-type :email-action)
@@ -102,19 +80,41 @@
                  :onClick #(project-menu project)}
             (dom/span #js {:className "glyphicon glyphicon-pencil pull-right"}))))
 
+(defn project-view [prj owner]
+  (reify
+    om/IRender
+    (render [_]
+      (dom/div
+       #js {:className "panel panel-default panel-primary"}
+       (dom/div
+        #js {:className "panel-heading"}
+        (dom/div
+         nil
+         (dom/h4
+          #js {:className "panel-title"}
+          (dom/div #js {:className "row"}
+                   (dom/div #js {:className "col-sm-8 col-md-8 col-lg-8"}
+                            (dom/a
+                             #js {:data-parent "#accrodion"
+                                  :data-toggle "collapse"
+                                  :href (str "#" (str "__PrjList" (get prj "id")))}
+                             (dom/div #js {:className "bg-primary"} (get prj "name"))))
+                   (dom/div
+                    #js {:className "col-sm-2 col-md-1 col-lg-1 pull-right"}
+                    (project-header-menu-button prj))))))
+       (dom/div #js {:className "panel-collapse collapse in"
+                     :id (str "__PrjList" (get prj "id"))}
+                (dom/div #js {:className "panel-body"}
+                         (actions-table (get prj "id") (get prj "actions"))))))))
+
 (defn project-list [data owner]
   (reify
     om/IRender
     (render [this]
-      (apply dom/div nil
-       (map
-        (fn [prj]
-          (accordion-panel
-           :header (dom/div #js {:className "bg-primary"} (get prj "name"))
-           :button (project-header-menu-button prj)
-           :body (actions-table (get prj "id") (get prj "actions"))
-           :body-id (str "__PrjList" (get prj "id"))))
-        (->> (-> data :data :projects)
-             (sort-by first)
-             (map second)))))))
+      (apply 
+       dom/div nil
+       (map #(om/build project-view %)
+            (->> (-> data :data :projects)
+                 (sort-by first)
+                 (map second)))))))
 

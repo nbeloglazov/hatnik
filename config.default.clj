@@ -3,6 +3,12 @@
  :github-id "GITHUB_CLIENT_ID"
  :github-secret "GITHUB_CLIENT_SECRET"
 
+ ; Token of https://github.com/hatnik user.
+ ; This token is used to create github issues.
+ ; For testing purposes you can generate your own on github settings page
+ ; and user here.
+ :hatnik-github-token "PUT_ME_HERE"
+
  ; Timbre log level. Available :info, :warn, :error
  :log-level :debug
 

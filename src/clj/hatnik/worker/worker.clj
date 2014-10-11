@@ -1,5 +1,6 @@
 (ns hatnik.worker.worker
   (:require [hatnik.worker.email-action :as email]
+            [hatnik.worker.github-issue-action :as github-issue]
             [hatnik.versions :as ver]
             [hatnik.db.storage :as stg]
 
@@ -37,7 +38,7 @@
   (case (:type action)
     "email" (email/perform action user variables utils)
     "noop" nil ; doing nothing
-    ))
+    "github-issue" (github-issue/perform action user variables utils)))
 
 (defn check-library-and-perform-actions
   "Retrieves latest version for given library and updates actions if they

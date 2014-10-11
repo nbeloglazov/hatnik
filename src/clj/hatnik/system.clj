@@ -16,8 +16,9 @@
   (let [db (case (:db config)
              :mongo (mon-stg/map->MongoStorage {:config (:mongo config)})
              :memory (mem-stg/map->MemoryStorage {}))
-        send-email (partial utils/send-email (:email config))
-        utils {:send-email send-email}]
+        utils {:send-email (partial utils/send-email (:email config))
+               :create-github-issue (partial utils/create-github-issue
+                                             (:hatnik-github-token config))}]
     (timbre/set-level! (:log-level config))
     (when (:send-errors-to config)
       (utils/notify-about-errors-via-email config))

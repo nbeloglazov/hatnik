@@ -4,6 +4,11 @@
             [hatnik.web.client.app-state :as state])
   (:use [jayq.core :only [$]]))
 
+(defn ^:export add-new-project []
+  (let [project-name-input (.getElementById js/document "project-name-input")]
+    (set! (.-value project-name-input) "")
+    (.modal ($ :#iModalProject))))
+
 (defn render-action-type [a-type]
   (when (= "email" a-type)
     (dom/span #js {:className "glyphicon glyphicon-envelope action-type"})))

@@ -4,31 +4,6 @@
             [hatnik.web.client.app-state :as state])
   (:use [jayq.core :only [$]]))
 
-
-(defn accordion-panel [& {:keys [body-id header button body]}]
-  (dom/div
-   #js {:className "panel panel-default panel-primary"}
-   (dom/div
-    #js {:className "panel-heading"}
-    (dom/div
-     nil
-     (dom/h4
-      #js {:className "panel-title"}
-      (dom/div #js {:className "row"}
-               (dom/div #js {:className "col-sm-8 col-md-8 col-lg-8"}
-                        (dom/a
-                         #js {:data-parent "#accrodion"
-                              :data-toggle "collapse"
-                              :href (str "#" body-id)}
-                         header))
-               (dom/div
-                #js {:className "col-sm-2 col-md-1 col-lg-1 pull-right"}
-                button)))))
-   (dom/div #js {:className "panel-collapse collapse in"
-                 :id body-id}
-            (dom/div #js {:className "panel-body"}
-                     body))))
-
 (defn render-action-type [a-type]
   (when (= "email" a-type)
     (dom/span #js {:className "glyphicon glyphicon-envelope action-type"})))
@@ -104,11 +79,28 @@
   (reify
     om/IRender
     (render [_]
-      (accordion-panel
-       :header (dom/div #js {:className "bg-primary"} (get prj "name"))
-       :button (project-header-menu-button prj)
-       :body (actions-table (get prj "id") (get prj "actions"))
-       :body-id (str "__PrjList" (get prj "id"))))))
+      (dom/div
+       #js {:className "panel panel-default panel-primary"}
+       (dom/div
+        #js {:className "panel-heading"}
+        (dom/div
+         nil
+         (dom/h4
+          #js {:className "panel-title"}
+          (dom/div #js {:className "row"}
+                   (dom/div #js {:className "col-sm-8 col-md-8 col-lg-8"}
+                            (dom/a
+                             #js {:data-parent "#accrodion"
+                                  :data-toggle "collapse"
+                                  :href (str "#" (str "__PrjList" (get prj "id")))}
+                             (dom/div #js {:className "bg-primary"} (get prj "name"))))
+                   (dom/div
+                    #js {:className "col-sm-2 col-md-1 col-lg-1 pull-right"}
+                    (project-header-menu-button prj))))))
+       (dom/div #js {:className "panel-collapse collapse in"
+                     :id (str "__PrjList" (get prj "id"))}
+                (dom/div #js {:className "panel-body"}
+                         (actions-table (get prj "id") (get prj "actions"))))))))
 
 (defn project-list [data owner]
   (reify

@@ -37,22 +37,23 @@
   (let [name (get action "library")
         template (get action "template")]
   (dom/div
-   #js {:onClick (fn []
-                   (state/set-form-type :email-edit-action)
-                   (state/set-current-project project-id)
-                   (state/set-current-action action)
-                   (state/set-current-artifact-value name)
-                   (state/set-current-email-template template)
-                   (.modal ($ :#iModal)))
+   #js {:onClick 
+        (fn []
+          (state/set-form-type :email-edit-action)
+          (state/set-current-project project-id)
+          (state/set-current-action action)
+          (state/set-current-artifact-value name)
+          (state/set-current-email-template template)
+          (.modal ($ :#iModal)))
         :className "panel panel-default action"}
    (dom/div
     #js {:className "panel-body bg-success"}
-            (render-action-type (get action "type"))
-            (dom/span #js {:className "action-info"}
-                      (dom/div #js {:className "library-name"}
-                               (get action "library"))
-                      (dom/div #js {:className "version"}
-                               (get action "last-processed-version")))))))
+    (render-action-type (get action "type"))
+    (dom/span #js {:className "action-info"}
+              (dom/div #js {:className "library-name"}
+                       (get action "library"))
+              (dom/div #js {:className "version"}
+                       (get action "last-processed-version")))))))
 
 (defn add-action [id]
   (state/set-form-type :email-action)
@@ -99,19 +100,24 @@
                  :onClick #(project-menu project)}
             (dom/span #js {:className "glyphicon glyphicon-pencil pull-right"}))))
 
+(defn project-view [prj owner]
+  (reify
+    om/IRender
+    (render [_]
+      (accordion-panel
+       :header (dom/div #js {:className "bg-primary"} (get prj "name"))
+       :button (project-header-menu-button prj)
+       :body (actions-table (get prj "id") (get prj "actions"))
+       :body-id (str "__PrjList" (get prj "id"))))))
+
 (defn project-list [data owner]
   (reify
     om/IRender
     (render [this]
-      (apply dom/div nil
-       (map
-        (fn [prj]
-          (accordion-panel
-           :header (dom/div #js {:className "bg-primary"} (get prj "name"))
-           :button (project-header-menu-button prj)
-           :body (actions-table (get prj "id") (get prj "actions"))
-           :body-id (str "__PrjList" (get prj "id"))))
-        (->> (-> data :data :projects)
-             (sort-by first)
-             (map second)))))))
+      (apply 
+       dom/div nil
+       (map #(om/build project-view %)
+            (->> (-> data :data :projects)
+                 (sort-by first)
+                 (map second)))))))
 

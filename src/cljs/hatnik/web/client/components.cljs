@@ -4,9 +4,6 @@
             [hatnik.web.client.app-state :as state])
   (:use [jayq.core :only [$]]))
 
-(defn test-action []
-  (js/alert "Hoooo!"))
-
 
 (defn accordion-panel [& {:keys [body-id header button body]}]
   (dom/div

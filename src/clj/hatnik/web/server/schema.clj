@@ -38,10 +38,17 @@
    :address Email
    :template (string-of-length 1 2000)})
 
+(def NoopAction
+  "Schema for NoopAction"
+  {:project-id Id
+   :library (string-of-length 1 128)
+   :type (s/eq "noop")})
+
 (def Action
   "Schema for action. Essentially it is the union of all actions."
   (s/conditional
-   #(= (:type %) "email") EmailAction))
+   #(= (:type %) "email") EmailAction
+   #(= (:type %) "noop") NoopAction))
 
 (defmacro ensure-valid
   "Validates object using given schema and executes body if valid.

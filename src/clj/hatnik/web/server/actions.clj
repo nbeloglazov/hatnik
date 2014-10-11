@@ -40,7 +40,7 @@
           :message "Couldn't create action."})))
     (resp/response
      {:result :error
-      :message (str "Uknown library: " (:library data))})))
+      :message (str "Unknown library: " (:library data))})))
 
 (defn update-action
   "Updates action for given user and returns response containing the
@@ -56,7 +56,7 @@
         :last-processed-version version}))
     (resp/response
      {:result :error
-      :message (str "Uknown library: " (:library data)) })))
+      :message (str "Unknown library: " (:library data)) })))
 
 (defn delete-action
   "Deletes action for given user."

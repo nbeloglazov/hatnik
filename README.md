@@ -1,6 +1,8 @@
 ### Hatnik
 
-[Hatnik](http://hatnik.clojurecup.com) is a web app which aims to help you to track library releases. The idea is pretty simple: setup actions to be performed once some library is released. Action consists of 2 parts: the library to watch and an instruction to perform. Example: send an email to `my@email.com` once when org.clojure/clojurescript releases. The plan is to support following actions: send an email, create a github issue, create a github pull request, update a wiki on github. So far we support only email and will add others if we have enough time during the contest.
+[![Build Status](https://travis-ci.org/nbeloglazov/hatnik.svg)](https://travis-ci.org/nbeloglazov/hatnik/builds)
+
+[Hatnik](http://hatnik.com) is a web app which aims to help you to track library releases. The idea is pretty simple: setup actions to be performed once some library is released. Action consists of 2 parts: the library to watch and an instruction to perform. Example: send an email to `my@email.com` once when org.clojure/clojurescript releases. The plan is to support following actions: send an email, create a github issue, create a github pull request, update a wiki on github. So far we support only email and will add others if we have enough time during the contest.
 
 #### Actions
 
@@ -18,6 +20,6 @@ lein cljsbuild once
 lein run
 ```
 
-By default app uses in-memory DB. You can change settings by creating `config.clj` file in root folder. Check [config.example.clj](https://github.com/nbeloglazov/hatnik/blob/master/config.example.clj) for available options.
+By default app uses in-memory DB. You can change settings by creating `config.clj` file in root folder. Check [config.default.clj](https://github.com/nbeloglazov/hatnik/blob/master/config.default.clj) for available options.
 
 When registering a Github application for your own application, the URI of the "Application callback URL" is /api/github.

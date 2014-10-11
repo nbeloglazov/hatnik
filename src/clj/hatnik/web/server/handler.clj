@@ -93,18 +93,45 @@
       (json/wrap-json-body {:keywords? true})
       json/wrap-json-response))
 
-(defrecord WebServer [config db server]
+(defrecord WebServer [config db server events]
 
   component/Lifecycle
   (start [component]
     (let [port (-> config :web :port)]
      (timbre/info "Starting WebServer on port" port)
-     (assoc component
-       :server (run-jetty (wrap config (app-routes db config))
-                          {:port port :join? false}))))
+     (let [started (promise)
+           stopped (promise)
+           listener (reify org.eclipse.jetty.util.component.LifeCycle$Listener
+                      (lifeCycleFailure [this event cause])
+                      (lifeCycleStarted [this event]
+                        (deliver started true))
+                      (lifeCycleStarting [this event])
+                      (lifeCycleStopped [this event]
+                        (deliver stopped true))
+                      (lifeCycleStopping [this event]))
+           server (run-jetty (wrap config (app-routes db config))
+                             {:port port :join? false
+                              :configurator #(.addLifeCycleListener % listener)})]
+       @started
+       (assoc component
+         :server server
+         :events {:started started
+                  :stopped stopped}))))
 
   (stop [component]
     (timbre/info "Stopping WebServer")
     (when-let [server (:server component)]
-      (.stop server))
+      (.stop server)
+      @(:stopped events))
     (assoc component :server nil)))
+
+(comment
+
+  (def server (-> {:config {:web {:port 1333}}
+                   :db nil}
+                  (map->WebServer)
+                  (component/start)))
+
+  (component/stop server)
+
+  )

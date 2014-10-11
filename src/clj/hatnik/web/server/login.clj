@@ -54,15 +54,18 @@
   "Utility method to login without any authentication.
   Enabiled via :enable-force-login and should be used only
   for in development environment."
-  [db email]
+  [db email skip-dummy-data]
   (if-let [user (stg/get-user db email)]
     (-> (resp/response {:result :ok})
         (assoc :session {:user user}))
-    (let [id (stg/create-user! db email "dummy_token")]
-      (dd/create-dummy-data db id)
+    (let [user (if skip-dummy-data
+                 (create-user db email "dummy_token")
+                 (let [id (stg/create-user! db email "dummy_token")]
+                   (dd/create-dummy-data db id)
+                   {:email email
+                    :id id}))]
       (-> (resp/response {:result :ok})
-          (assoc :session {:user {:email email
-                                  :id id}})))))
+          (assoc :session {:user user})))))
 
 (defn current-user
   "Returns current user info."
@@ -84,9 +87,11 @@
     :session nil))
 
 (defn login-api-routes [db config]
-  (routes
-   (GET "/github" [code state] (github-login db config code state))
-   (GET "/current-user" req (current-user req))
-   (when (:enable-force-login config)
-     (GET "/force-login" [email] (force-login db email)))
-   (GET "/logout" [] (logout))))
+  (->> [(GET "/github" [code state] (github-login db config code state))
+        (GET "/current-user" req (current-user req))
+        (when (:enable-force-login config)
+          (GET "/force-login" [email skip-dummy-data]
+               (force-login db email skip-dummy-data)))
+        (GET "/logout" [] (logout))]
+       (remove nil?)
+       (apply routes)))

@@ -19,6 +19,20 @@
           (s/pred #(re-matches #"^[a-zA-Z0-9]+$" %)
                   'alphanumeric?)))
 
+(def Library
+  "Schema for validating libraries."
+  (string-of-length 1 128))
+
+(def TemplateBody
+  "Schema for validating templates that will be used as message bodies.
+  For example in email or github issues."
+  (string-of-length 1 2000))
+
+(def TemplateTitle
+  "Schema for validating templates that will be used as message titles.
+  For example in email or github issues."
+  (string-of-length 1 256))
+
 (def Email
   "Schema for validation emails. We restrict email to be 128
   without no good reason actually."
@@ -31,24 +45,32 @@
   {:name (string-of-length 1 128)})
 
 (def EmailAction
-  "Schema for EmailAction."
   {:project-id Id
-   :library (string-of-length 1 128)
+   :library Library
    :type (s/eq "email")
    :address Email
-   :template (string-of-length 1 2000)})
+   :template TemplateBody})
 
 (def NoopAction
-  "Schema for NoopAction"
   {:project-id Id
-   :library (string-of-length 1 128)
+   :library Library
    :type (s/eq "noop")})
+
+(def GithubIssueAction
+  {:project-id Id
+   :library Library
+   :type (s/eq "github-issue")
+   :title TemplateTitle
+   :body TemplateBody
+   :repo (s/pred #(re-matches #"(?i)^[A-Z0-9-_]+/[A-Z0-9-_]+$" %)
+                  'valid-github-repo?)})
 
 (def Action
   "Schema for action. Essentially it is the union of all actions."
   (s/conditional
    #(= (:type %) "email") EmailAction
-   #(= (:type %) "noop") NoopAction))
+   #(= (:type %) "noop") NoopAction
+   #(= (:type %) "github-issue") GithubIssueAction))
 
 (defmacro ensure-valid
   "Validates object using given schema and executes body if valid.
@@ -71,6 +93,8 @@
 (gen/add-encoder Class
                  (fn [obj gen]
                    (gen/encode-str (.getName obj) gen)))
+
+
 (comment
 
   (s/check Id "32")

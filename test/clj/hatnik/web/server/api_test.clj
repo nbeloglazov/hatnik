@@ -50,12 +50,12 @@
 
 (defn ok? [resp]
   (is (= (:result resp) "ok")
-      "Expected ok response")
+      (str "Expected ok response. Got: " resp))
   resp)
 
 (defn error? [resp]
   (is (= (:result resp) "error")
-      "Expected error response")
+      (str "Expected error response. Got: " resp))
   resp)
 
 (defn map-by-id [coll]
@@ -98,7 +98,7 @@
                       (map-by-id expected))
 
         ;
-        ; Create 2 actions in Default proj and 1 action in Foo.
+        ; Create 3 actions in Default proj and 1 action in Foo.
         ;
 
         ; Create first action in Default. Email action.
@@ -119,6 +119,17 @@
         _ (is (= (:last-processed-version resp) ring-ver))
         act-dflt-two (merge act-dflt-two (dissoc resp :result))
 
+        ; Create third action in Default. GithubIssue action.
+        act-dflt-three {:project-id proj-dflt-id
+                        :type "github-issue"
+                        :repo "quil/quil"
+                        :body "Template body"
+                        :title "Template title"
+                        :library "ring"}
+        resp (ok? (http :post "/actions" act-dflt-three))
+        _ (is (= (:last-processed-version resp) ring-ver))
+        act-dflt-three (merge act-dflt-three (dissoc resp :result))
+
         ; Create single action in Foo.
         act-foo-one {:project-id proj-foo-id
                      :type "email"
@@ -131,7 +142,9 @@
 
         ; Check that actions created correctly
         expected [{:name "Default" :id proj-dflt-id
-                   :actions (map-by-id [act-dflt-one act-dflt-two])}
+                   :actions (map-by-id [act-dflt-one
+                                        act-dflt-two
+                                        act-dflt-three])}
                   {:name "Foo" :id proj-foo-id
                    :actions (map-by-id [act-foo-one])}]
         _ (data-equal (-> (http :get "/projects") ok? :projects)
@@ -158,9 +171,9 @@
         _ (ok? (http :delete (str "/projects/" proj-foo-id)))
 
         ; Check that only project "First" is present and it contains
-        ; single action.
+        ; actions one and three.
         expected [{:name "First" :id proj-dflt-id
-                   :actions (map-by-id [act-dflt-one])}]
+                   :actions (map-by-id [act-dflt-one act-dflt-three])}]
         _ (data-equal (-> (http :get "/projects") ok? :projects)
                       (map-by-id expected))
 
@@ -184,7 +197,7 @@
         ; retrieved properly.
         _ (ok? (http :get (str "/force-login?skip-dummy-data=true&email="                                  email)))
         expected [{:name "First" :id proj-dflt-id
-                   :actions (map-by-id [act-dflt-one])}]
+                   :actions (map-by-id [act-dflt-one act-dflt-three])}]
         _ (data-equal (-> (http :get "/projects") ok? :projects)
                       (map-by-id expected))
         ]))
@@ -230,11 +243,23 @@
         ; invalid.
         valid-act (dissoc act-dflt-one
                           :id :last-processed-version)
+        valid-gi-action {:project-id proj-dflt-id
+                         :library "quil"
+                         :type "github-issue"
+                         :repo "quil/quil"
+                         :title "Hello {{library}}"
+                         :body "Hello"}
         _ (doseq [action [(dissoc valid-act :template)
                           (assoc valid-act :library "iDontExist")
                           (assoc valid-act :type "unknown")
                           (assoc valid-act :template long-string)
-                          (assoc valid-act :id "1233")]]
+                          (assoc valid-act :id "1233")
+                          (assoc valid-gi-action
+                            :repo "invalid$repo%1")
+                          (assoc valid-gi-action
+                            :title long-string)
+                          (assoc valid-gi-action
+                            :body long-string)]]
             (error? (http :post "/actions" action))
             (error? (http :put (str "/actions/" (:id act-dflt-one)) action)))
 

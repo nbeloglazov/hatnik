@@ -34,6 +34,10 @@
  ; performed.
  :enable-actions true
 
+ ; If specified, errors that happened on server will be send
+ ; to that address via email.x
+ :send-errors-to nil
+
  ; Settings for sending emails.
  :email {:host "smtp.gmail.com"
          :user "GMAIL_ACCOUNT"

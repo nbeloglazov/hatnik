@@ -10,12 +10,17 @@
             [hatnik.web.server.handler :refer [map->WebServer]]
             [hatnik.worker.handler :refer [map->WorkerWebServer]]))
 
+
+
 (defn make-system [config]
   (let [db (case (:db config)
              :mongo (mon-stg/map->MongoStorage {:config (:mongo config)})
              :memory (mem-stg/map->MemoryStorage {}))
-        utils {:send-email (partial utils/send-email (:email config))}]
+        send-email (partial utils/send-email (:email config))
+        utils {:send-email send-email}]
     (timbre/set-level! (:log-level config))
+    (when (:send-errors-to config)
+      (utils/notify-about-errors-via-email config))
     (component/system-map
      :config config
      :db db

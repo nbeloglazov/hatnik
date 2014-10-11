@@ -4,6 +4,7 @@
             [com.stuartsierra.component :as component]
 
             [hatnik.db.storage :as stg]
+            [hatnik.utils :as utils]
 
             [ring.util.response :as resp]
             [ring.middleware.json :as json]
@@ -32,6 +33,7 @@
   [db perform-action utils]
   (-> (POST "/test-action" req (test-action db (:body req)
                                             perform-action utils))
+      utils/wrap-exceptions
       (json/wrap-json-body {:keywords? true})
       json/wrap-json-response))
 

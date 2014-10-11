@@ -4,7 +4,7 @@
   "Protocol for storing users."
   (get-user [storage email] "Returns user if exists on nil.")
   (get-user-by-id [storage id] "Returns user by id.")
-  (create-user! [storage email user-token] "Creates new user and returns id."))
+  (create-user! [storage data] "Creates new user and returns id."))
 
 (defprotocol ProjectStorage
   "Protocol for storing projects."

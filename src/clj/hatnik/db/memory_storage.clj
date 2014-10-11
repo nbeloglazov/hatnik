@@ -20,13 +20,12 @@
          (filter #(= id (:id %)))
          first))
 
-  (create-user! [storage email user-token]
-    (if-let [user (get-user storage email)]
+  (create-user! [storage data]
+    (if-let [user (get-user storage (:email data))]
       (:id user)
       (let [id (next-id)]
-        (swap! atom update-in [:users] conj {:id id
-                                             :email email
-                                             :user-token user-token})
+        (swap! atom update-in [:users] conj (assoc data
+                                              :id id))
         id)))
 
 

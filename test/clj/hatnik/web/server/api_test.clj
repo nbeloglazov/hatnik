@@ -168,7 +168,7 @@
         _ (c/get (str url "/logout"))
         resp (error? (http :get "/projects"))
         ; Error response should have only :result and :message keys.
-        _ (is #{:result :message} (set (keys resp)))
+        _ (is (= #{:result :message} (set (keys resp))))
 
         ; Login as new user and check that we can't see previous user
         ; project

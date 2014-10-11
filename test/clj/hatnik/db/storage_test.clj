@@ -2,40 +2,40 @@
   (:require [clojure.test :refer :all]
             [hatnik.db.storage :as s]))
 
-
 (def foo-email "foo@email.com")
 (def bar-email "bar@email.com")
-(def foo-token "foo-token")
-(def bar-token "bar-token")
+
+(def foo-user
+  {:email foo-email
+   :github-token "foo-token"
+   :github-username "foo"})
+
+(def bar-user
+  {:email bar-email
+   :github-token "bar-token"
+   :github-username "bar"})
 
 (defn test-user-storage [storage]
   (is (every? nil? (map #(s/get-user storage %)
                         [foo-email bar-email]))
       "Storage should be empty")
 
-  (let [foo-id (s/create-user! storage foo-email foo-token)
-        foo-id-2 (s/create-user! storage foo-email foo-token)
-        bar-id (s/create-user! storage bar-email bar-token)]
+  (let [foo-id (s/create-user! storage foo-user)
+        foo-id-2 (s/create-user! storage foo-user)
+        bar-id (s/create-user! storage bar-user)]
 
     (is (= (s/get-user storage foo-email)
-           {:id foo-id
-            :email foo-email
-            :user-token foo-token})
+           (assoc foo-user :id foo-id))
         "Foo should match.")
     (is (= (s/get-user storage bar-email)
-           {:id bar-id
-            :email bar-email
-            :user-token bar-token})
+           (assoc bar-user :id bar-id))
         "Bar should match.")
 
     (is (= (s/get-user-by-id storage foo-id)
-           {:id foo-id
-            :email foo-email
-            :user-token foo-token}))
+           (assoc foo-user :id foo-id)))
+
     (is (= (s/get-user-by-id storage bar-id)
-           {:id bar-id
-            :email bar-email
-            :user-token bar-token}))
+           (assoc bar-user :id bar-id)))
 
     (is (not= foo-id bar-id) "id should be different")
     (is (= foo-id foo-id-2) "Multiple creation should return same user.")))
@@ -122,8 +122,8 @@
         "Bar project should not change")))
 
 (defn test-action-storage [storage]
-  (let [user1 (s/create-user! storage "user1" "token1")
-        user2 (s/create-user! storage "user2" "token2")
+  (let [user1 (s/create-user! storage foo-user)
+        user2 (s/create-user! storage bar-user)
         proj1 (s/create-project! storage {:name "Project 1" :user-id user1})
         proj2 (s/create-project! storage {:name "Project 2" :user-id user2})]
 

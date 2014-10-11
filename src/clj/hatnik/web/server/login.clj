@@ -12,9 +12,11 @@
 
 (defn create-user
   "Creates new user with given email and github-token. Returns id and email."
-  [db email user-token]
+  [db email github-token github-login]
   (timbre/info "Creating new user" email)
-  (let [id (stg/create-user! db email user-token)]
+  (let [id (stg/create-user! db {:email email
+                                 :github-token github-token
+                                 :github-login github-login})]
     (timbre/info "Create default project for user")
     (stg/create-project! db {:name "Default"
                              :user-id id})
@@ -34,8 +36,8 @@
                            :accept :json
                            :as :json})
         user-token (-> resp :body :access_token)
-        emails (github/emails {;:client-id (:github-id config)
-                               :oauth-token user-token})
+        user-login (:login (github/me {:oauth-token user-token}))
+        emails (github/emails {:oauth-token user-token})
         email (first (for [entry emails
                            :when (:primary entry)]
                        (:email entry)))
@@ -46,7 +48,7 @@
                   "selected email:" email)
     (if email
       (let [user (or (stg/get-user db email)
-                     (create-user db email user-token))]
+                     (create-user db email user-token user-login))]
        (assoc response :session {:user user}))
       response)))
 
@@ -59,8 +61,10 @@
     (-> (resp/response {:result :ok})
         (assoc :session {:user user}))
     (let [user (if skip-dummy-data
-                 (create-user db email "dummy_token")
-                 (let [id (stg/create-user! db email "dummy_token")]
+                 (create-user db email "dummy-token" "dummy-login")
+                 (let [id (stg/create-user! db {:email email
+                                                :github-token "dummy-token"
+                                                :github-login "dummy-login"})]
                    (dd/create-dummy-data db id)
                    {:email email
                     :id id}))]

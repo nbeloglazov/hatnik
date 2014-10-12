@@ -37,7 +37,7 @@
               [:db :utils :perform-action :config])
      :web-server (component/using
                   (map->WebServer {})
-                  [:db :utils :config]))))
+                  [:db :config]))))
 
 
 (def system nil)

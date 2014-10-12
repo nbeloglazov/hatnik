@@ -1,25 +1,22 @@
 (ns hatnik.web.server.api-test
   (:require [hatnik.web.server.handler :refer [map->WebServer]]
-            [hatnik.db.memory-storage :refer [map->MemoryStorage]]
             [com.stuartsierra.component :as component]
             [clojure.test :refer :all]
             [clj-http.client :as c]
             [taoensso.timbre :as timbre]
             [hatnik.versions :as ver]
-            [clojure.data :refer [diff]]
-            [clj-http core cookies]))
+            [hatnik.test-utils :refer :all]
+            [clojure.data :refer [diff]]))
 
 (def config
-  {:web {:port 6780}
+  {:web {:port test-web-port}
    :enable-force-login true
    :db :memory})
-
-(def url (str "http://localhost:" (-> config :web :port) "/api"))
 
 (defn system-fixture [f]
   (let [system (-> (component/system-map
                     :config config
-                    :db (map->MemoryStorage {})
+                    :db (get-db)
                     :web-server (component/using
                                  (map->WebServer {})
                                  [:db :config]))
@@ -33,30 +30,7 @@
   (binding [clj-http.core/*cookie-store* (clj-http.cookies/cookie-store)]
     (f)))
 
-(defn http [method path & [body]]
-  (let [resp (->> {:form-params body
-                   :content-type :json
-                   :accept :json
-                   :as :json
-                   :method method
-                   :url (str url path)
-                   :throw-exceptions false
-                   :coerce :always}
-                  c/request
-                  :body)]
-    (timbre/spy resp)))
-
 (use-fixtures :each system-fixture cookie-store-fixture)
-
-(defn ok? [resp]
-  (is (= (:result resp) "ok")
-      (str "Expected ok response. Got: " resp))
-  resp)
-
-(defn error? [resp]
-  (is (= (:result resp) "error")
-      (str "Expected error response. Got: " resp))
-  resp)
 
 (defn map-by-id [coll]
   (into {} (map #(vector (keyword (:id %)) %) coll)))
@@ -178,7 +152,7 @@
                       (map-by-id expected))
 
         ; Logout and check that we don't have access to projects.
-        _ (c/get (str url "/logout"))
+        _ (c/get (str api-url "/logout"))
         resp (error? (http :get "/projects"))
         ; Error response should have only :result and :message keys.
         _ (is (= #{:result :message} (set (keys resp))))

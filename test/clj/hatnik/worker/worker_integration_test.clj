@@ -58,7 +58,8 @@
     (fn [& args]
       (when (zero? @counter)
         (throw (ex-info (str "Function expected to be called only "
-                             times-to-call " times."))))
+                             times-to-call " times.")
+                        {})))
       (swap! arguments conj (vec args))
       (when (zero? (swap! counter dec))
         (deliver finished true)))))

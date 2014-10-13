@@ -100,11 +100,7 @@
 ;; For selecting footer
 
 (defn email-action-footer [data]
-  (dom/div nil
-           (dom/button #js {:className "btn btn-primary pull-left"
-                            :onClick #(action/send-new-email-action (-> @data :ui :current-project))} "Submit")
-           (dom/button #js {:className "btn btn-default"
-                            :onClick #(action/test-new-email-action (-> @data :ui :current-project))} "Test")))
+  (dom/div nil))
 
 (defn email-edit-footer [data]
   (dom/div 

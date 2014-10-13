@@ -47,11 +47,8 @@
     (when (= "ok" (get resp "result"))
       (state/update-all-view))))
 
-(defn send-new-email-action [project-id]
-  (let [artifact (get-data-from-input "artifact-input")
-        email (get-data-from-input "emain-input")
-        email-body (get-data-from-input "emain-body-input")
-        data {:project-id project-id
+(defn send-new-email-action [project-id type artifact email email-body]
+  (let [data {:project-id project-id
               :type "email"
               :address email
               :template email-body
@@ -102,7 +99,7 @@
       (msg/danger "Wrong data! Check out fields!")
 
       (do
-        (.modal ($ :#iModal) "hide")
+        (.modal ($ :#iModalAddAction) "hide")
         (ajax 
          (str "/api/actions/" action-id) "PUT" 
          data (wrap-error-alert

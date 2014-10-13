@@ -17,6 +17,7 @@
 (defn modal-frames []
   (hc/html
    [:div#iModal.modal.fade {:data-keyboard "true"}]
+   [:div#iModalAddAction.modal.fade {:data-keyboard "true"}]
 
    [:div#iModalProject.modal.fade {:data-keyboard "true"}
     [:div.modal-dialog

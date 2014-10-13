@@ -1,7 +1,8 @@
 (ns hatnik.web.client.components
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [hatnik.web.client.app-state :as state])
+            [hatnik.web.client.app-state :as state]
+            [hatnik.web.client.form.add-action :as add-action])
   (:use [jayq.core :only [$]]))
 
 (defn ^:export add-new-project []
@@ -35,17 +36,9 @@
               (dom/div #js {:className "version"}
                        (get action "last-processed-version")))))))
 
-(defn add-action [id]
-  (state/set-form-type :email-action)
-  (state/set-current-project id)
-  (state/set-current-artifact-value "")
-  (state/set-current-email-template state/default-email-template)
-  (.modal ($ :#iModal)))
-
-
 (defn add-new-action [project-id]
   (dom/div #js {:className "panel panel-default panel-info action add-action"
-                :onClick #(add-action project-id)}
+                :onClick #(add-action/show project-id)}
            (dom/div #js {:className "panel-body bg-info"}
                     (dom/span #js {:className "glyphicon glyphicon-plus"})
                     " Add action")))

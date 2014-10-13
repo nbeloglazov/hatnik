@@ -7,6 +7,35 @@
   (om/detach-root 
    (om/get-node component)))
 
+(defn artifact-input-component [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (dom/div #js {:className "form-group has-warning"
+                    :id "artifact-input-group"}
+               (dom/label #js {:htmlFor "artifact-input"} "Library")
+               (dom/input #js {:type "text"
+                               :className "form-control"
+                               :placeholder "e.g. org.clojure/clojure"
+                               :onChange #((:handler data) (.. % -target -value))
+                               :value (:value data)})))))
+
+(defn action-input-form [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (dom/form nil
+                (om/build artifact-input-component (:artifact-value data))))))
+
+(defn action-footer [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (dom/div nil
+               (dom/p nil "hi: ")
+               (dom/p nil
+                      (:artifact-value data))))))
+
 (defn- add-action-component [data owner]
   (reify
     om/IInitState
@@ -26,9 +55,12 @@
                  (dom/h4 nil "Add new action"))
 
         (dom/div #js {:className "modal-body"}
-                 (dom/p nil "BODY"))
+                 (om/build action-input-form 
+                           {:artifact-value 
+                            {:value (:artifact-value state)
+                             :handler #(om/set-state! owner :artifact-value %)}}))
         (dom/div #js {:className "modal-footer"}
-                 (dom/p nil "FOOTER")))))
+                 (om/build action-footer state)))))
 
     om/IDidMount
     (did-mount [this]

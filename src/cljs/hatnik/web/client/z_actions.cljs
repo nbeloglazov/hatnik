@@ -122,7 +122,7 @@
                        (:email-template data-pack)))
 
 (defn delete-action [action-id]
-  (.modal ($ :#iModal) "hide")
+  (.modal ($ :#iModalAddAction) "hide")
   (ajax 
    (str "/api/actions/" action-id) "DELETE"
    {} (wrap-error-alert

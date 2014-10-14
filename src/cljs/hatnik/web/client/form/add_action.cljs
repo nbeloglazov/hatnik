@@ -141,8 +141,13 @@
 
 (defmulti get-action-header #(:type %))
 (defmethod get-action-header :add [_ _] (dom/h4 nil "Add new action"))
-(defmethod get-action-header :update [_ _] (dom/h4 nil "Update action"))
-
+(defmethod get-action-header :update [data _] 
+  (let [action-id (:action-id data)]
+    (dom/h4 #js {:className "modal-title"} "Update action"
+            (dom/button 
+             #js {:className "btn btn-danger pull-right"
+                  :onClick #(action/delete-action action-id)}
+             "Delete"))))
 
 (defmulti get-action-footer #(:type %))
 
@@ -165,7 +170,7 @@
        (dom/div 
         #js {:className "modal-content"}
         (dom/div #js {:className "modal-header"}
-                 (get-action-header data owner))
+                 (get-action-header {:type (:type data) :action-id (:action-id state)} owner))
 
         (dom/div #js {:className "modal-body"}
                  (om/build action-input-form 

@@ -65,7 +65,6 @@
               (wrap-error-alert #(create-new-email-action-callback data %)))))))
 
 (defmulti send-new-action #(:type %))
-
 (defmethod send-new-action :email [data-pack]
   (send-new-email-action (:project-id data-pack)
                          (:artifact-value data-pack)
@@ -73,7 +72,7 @@
                          (:email-template data-pack)))
 
 
-(defn test-new-email-action [project-id type artifact email email-body]
+(defn test-new-email-action [project-id artifact email email-body]
   (let [data {:project-id project-id
               :type "email"
               :address email
@@ -88,7 +87,14 @@
       (ajax "/api/actions/test" "POST" data
             (wrap-error-alert (fn [e] (msg/success "Email sent. Check your inbox.")))))))
 
-(defn update-email-action [project-id action-id type artifact email email-body]
+(defmulti test-action #(:type %))
+(defmethod test-action :email [data-pack]
+  (test-new-email-action (:project-id data-pack)
+                         (:artifact-value data-pack)
+                         (:user-email data-pack)
+                         (:email-template data-pack)))
+
+(defn update-email-action [project-id action-id artifact email email-body]
     (let [data {:project-id project-id
                 :type "email"
                 :address email
@@ -106,6 +112,14 @@
          (str "/api/actions/" action-id) "PUT" 
          data (wrap-error-alert
                #(common-update-callback "Action don't updated!" data %)))))))
+
+(defmulti update-action #(:type %))
+(defmethod update-action :email [data-pack]
+  (update-email-action (:project-id data-pack)
+                       (:action-id data-pack)
+                       (:artifact-value data-pack)
+                       (:user-email data-pack)
+                       (:email-template data-pack)))
 
 (defn delete-action [action-id]
   (.modal ($ :#iModal) "hide")

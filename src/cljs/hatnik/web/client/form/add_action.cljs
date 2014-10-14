@@ -76,8 +76,12 @@
 
                  (dom/button 
                   #js {:className "btn btn-default"
-                       :onClick #(action/test-new-email-action 
-                                  project-id type artifact email template)} "Test"))))))
+                       :onClick #(action/test-action 
+                                  {:type type
+                                   :project-id project-id
+                                   :artifact-value artifact
+                                   :user-email email
+                                   :email-template template})} "Test"))))))
 
 (defn update-action-footer [data owner]
   (reify
@@ -86,21 +90,29 @@
       (let [project-id (:project-id data)
             artifact (:artifact-value data)
             action-id (:action-id data)
-            type "email"
+            type :email
             email (:user-email data)
-            template (:email-template data)
-            callback (:callback data)]
+            template (:email-template data)]
           (dom/div 
            nil
            (dom/button 
             #js {:className "btn btn-primary pull-left"
-                 :onClick #(callback 
-                            project-id action-id type artifact email template)} "Update")
+                 :onClick #(action/update-action 
+                             {:type type
+                              :action-id action-id
+                              :project-id project-id
+                              :artifact-value artifact
+                              :user-email email
+                              :email-template template})} "Update")
 
            (dom/button 
             #js {:className "btn btn-default"
-                 :onClick #(action/test-new-email-action 
-                            project-id type artifact email template)} "Test"))))))
+                 :onClick #(action/test-action 
+                            {:type type
+                             :project-id project-id
+                             :artifact-value artifact
+                             :user-email email
+                             :email-template template})} "Test"))))))
 
 (def default-email-template
   (str "Hello there\n\n"

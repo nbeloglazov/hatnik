@@ -82,6 +82,7 @@
     (render [this]
       (let [project-id (:project-id data)
             artifact (:artifact-value data)
+            action-id (:action-id data)
             type "email"
             email (:user-email data)
             template (:email-template data)
@@ -90,7 +91,8 @@
            nil
            (dom/button 
             #js {:className "btn btn-primary pull-left"
-                 :onClick #(.log js/console "try to update action")} "Update")
+                 :onClick #(callback 
+                            project-id action-id type artifact email template)} "Update")
 
            (dom/button 
             #js {:className "btn btn-default"
@@ -114,6 +116,7 @@
 (defmethod get-init-state :update [data _]
   (let [action (:action data)]
     {:artifact-value (get action "library")
+     :action-id (get action "id")
      :email-template (get action "template")
      :user-email (get action "address")
      :type (keyword (get action "type"))}))
@@ -135,6 +138,7 @@
   (om/build update-action-footer
             (merge state
                    {:project-id (:project-id data)
+                    :artifact-id (:artifact-id data)
                     :callback (:callback data)})))
 
 (defn- add-action-component [data owner]

@@ -80,11 +80,8 @@
       (ajax "/api/actions/test" "POST" data
             (wrap-error-alert (fn [e] (msg/success "Email sent. Check your inbox.")))))))
 
-(defn update-email-action [project-id action-id]
-    (let [artifact (get-data-from-input "artifact-input")
-          email (get-data-from-input "emain-input")
-          email-body (get-data-from-input "emain-body-input")
-          data {:project-id project-id
+(defn update-email-action [project-id action-id type artifact email email-body]
+    (let [data {:project-id project-id
                 :type "email"
                 :address email
                 :template email-body

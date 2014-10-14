@@ -60,16 +60,19 @@
     (render [this]
       (let [project-id (:project-id data)
             artifact (:artifact-value data)
-            type "email"
+            type (:type data)
             email (:user-email data)
-            template (:email-template data)
-            callback (:callback data)]
+            template (:email-template data)]
         (dom/div nil
                  (dom/button 
                   
                   #js {:className "btn btn-primary pull-left"
-                       :onClick #(callback
-                                  project-id type artifact email template)} "Submit")
+                       :onClick #(action/send-new-action
+                                  {:type type
+                                   :project-id project-id
+                                   :artifact-value artifact
+                                   :user-email email
+                                   :email-template template})} "Submit")
 
                  (dom/button 
                   #js {:className "btn btn-default"
@@ -112,7 +115,6 @@
    :project-id (:project-id data)
    :email-template default-email-template
    :user-email "email@template.com"
-   :callback action/send-new-email-action
    :type :email})
 
 (defmethod get-init-state :update [data _]

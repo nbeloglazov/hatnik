@@ -47,7 +47,7 @@
     (when (= "ok" (get resp "result"))
       (state/update-all-view))))
 
-(defn send-new-email-action [project-id type artifact email email-body]
+(defn send-new-email-action [project-id artifact email email-body]
   (let [data {:project-id project-id
               :type "email"
               :address email
@@ -63,6 +63,14 @@
         (.modal ($ :#iModalAddAction) "hide")
         (ajax "/api/actions" "POST" data 
               (wrap-error-alert #(create-new-email-action-callback data %)))))))
+
+(defmulti send-new-action #(:type %))
+
+(defmethod send-new-action :email [data-pack]
+  (send-new-email-action (:project-id data-pack)
+                         (:artifact-value data-pack)
+                         (:user-email data-pack)
+                         (:email-template data-pack)))
 
 
 (defn test-new-email-action [project-id type artifact email email-body]

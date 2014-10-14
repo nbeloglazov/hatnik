@@ -16,22 +16,21 @@
     (dom/span #js {:className "glyphicon glyphicon-envelope action-type"})))
 
 (defn render-action [project-id act]
-  (let [name (get act "library")
-        template (get act "template")]
-    (dom/div
-     #js {:onClick #(add-action/show project-id 
-                                     :type :update 
-                                     :action act 
-                                     :callback action/update-email-action)
-          :className "panel panel-default action"}
-     (dom/div
-      #js {:className "panel-body bg-success"}
-      (render-action-type (get act "type"))
-      (dom/span #js {:className "action-info"}
-                (dom/div #js {:className "library-name"}
-                         (get act "library"))
-                (dom/div #js {:className "version"}
-                         (get act "last-processed-version")))))))
+  (dom/div
+   #js {:onClick (fn []
+                   (add-action/show project-id 
+                                    :type :update 
+                                    :action @act 
+                                    :callback action/update-email-action))
+        :className "panel panel-default action"}
+   (dom/div
+    #js {:className "panel-body bg-success"}
+    (render-action-type (get act "type"))
+    (dom/span #js {:className "action-info"}
+              (dom/div #js {:className "library-name"}
+                       (get act "library"))
+              (dom/div #js {:className "version"}
+                       (get act "last-processed-version"))))))
 
 (defn add-new-action [project-id]
   (dom/div #js {:className "panel panel-default panel-info action add-action"

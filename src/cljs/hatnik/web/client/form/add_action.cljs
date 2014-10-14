@@ -93,7 +93,7 @@
   (let [action (:action data)]
     {:artifact-value (get action "library")
      :email-template (get action "template")
-     :user-email (get action "addres")
+     :user-email (get action "address")
      :type (keyword (get action "type"))}))
 
 (defn- add-action-component [data owner]
@@ -140,7 +140,12 @@
                           :or {action nil
                                type :add
                                callback action/send-new-email-action}}]
-  (om/root add-action-component {:project-id project-id :modal-jq-id :#iModalAddAction :callback callback :type type}
+  (om/root add-action-component 
+           {:project-id project-id 
+            :action action
+            :modal-jq-id :#iModalAddAction 
+            :callback callback 
+            :type type}
            {:target (.getElementById js/document "iModalAddAction")}))
 
 

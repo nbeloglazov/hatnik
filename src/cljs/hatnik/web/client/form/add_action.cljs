@@ -174,8 +174,6 @@
     om/IDidMount
     (did-mount [this]
       (let [modal-window ($ (:modal-jq-id data))]
-        (.on modal-window
-             "hidden.bs.modal" (fn [_ _] (on-modal-close owner)))
         (.modal modal-window)))))
 
 (defn show [project-id & {:keys [type action callback]

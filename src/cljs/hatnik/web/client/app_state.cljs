@@ -7,40 +7,17 @@
        "Your Hatnik"))
 
 (def app-state 
-  (atom {
-         ; Here we store data from the server
-         :data {:projects []
-                :user {}}
-
-         ; Here we store a local data (like ui state)
-         :ui {:form-type :email-action
-              :current-project nil
-              :current-action nil
-              :email-form-timer false
-              :email-artifact-value ""
-              :email-template default-email-template}}))
+  (atom {; Here we store data from the server
+         :projects []
+         :user {}}))
 
 (defn update-projects-list [reply]
   (let [json (.getResponseJson (.-target reply))
         data (js->clj json)]
     (when (= "ok" (get data "result"))
       (swap! app-state
-             assoc-in [:data :projects]
+             assoc-in [:projects]
              (get data "projects")))))
-
-(defn set-form-type [action-type]
-  (swap! app-state
-         assoc-in [:ui :form-type]
-         action-type))
-
-(defn set-current-project [id]
-  (swap! app-state 
-         assoc-in [:ui :current-project] id))
-
-(defn set-current-action [action]
-  (swap! app-state
-         assoc-in [:ui :current-action]
-         action))
 
 (defn add-new-project [id name]
   (swap! app-state
@@ -55,18 +32,12 @@
         data (js->clj json)]
     (when (= "ok" (get data "result"))
       (swap! app-state
-             assoc-in [:data :user :email]
+             assoc-in [:user :email]
              (get data "email")))))
 
-(defn set-current-artifact-value [value]
-  (swap! app-state
-         assoc-in [:ui :email-artifact-value]
-         value))
-
-(defn set-current-email-template [template]
-  (swap! app-state
-         assoc-in [:ui :email-template]
-         template))
+(defn set-current-project [id]
+  (swap! app-state 
+         assoc :current-project id))
 
 (defn update-all-view []
   (.send goog.net.XhrIo "/api/projects" update-projects-list) )

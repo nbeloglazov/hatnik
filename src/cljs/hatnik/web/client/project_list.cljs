@@ -8,5 +8,7 @@
 (om/root widget/project-list state/app-state
          {:target (. js/document (getElementById "iProjectList"))}) 
 
+(.send goog.net.XhrIo "/api/current-user" state/update-user-data)
 (.send goog.net.XhrIo "/api/projects" state/update-projects-list)
+
 

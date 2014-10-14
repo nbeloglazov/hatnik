@@ -100,10 +100,11 @@
   (reify
     om/IRender
     (render [this]
-      (apply 
-       dom/div nil
-       (map #(om/build project-view %)
-            (->> (-> data :data :projects)
-                 (sort-by first)
-                 (map second)))))))
+      (let [project-data (->> (:projects data)
+                              (sort-by first)
+                              (map second))
+            user-data (:user data)]
+        (apply 
+         dom/div nil
+         (map #(om/build project-view %) project-data))))))
 

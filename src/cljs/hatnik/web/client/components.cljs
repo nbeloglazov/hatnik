@@ -2,7 +2,8 @@
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [hatnik.web.client.app-state :as state]
-            [hatnik.web.client.form.add-action :as add-action])
+            [hatnik.web.client.form.add-action :as add-action]
+            [hatnik.web.client.z-actions :as action])
   (:use [jayq.core :only [$]]))
 
 (defn ^:export add-new-project []
@@ -14,27 +15,23 @@
   (when (= "email" a-type)
     (dom/span #js {:className "glyphicon glyphicon-envelope action-type"})))
 
-(defn render-action [project-id action]
-  (let [name (get action "library")
-        template (get action "template")]
-  (dom/div
-   #js {:onClick 
-        (fn []
-          (state/set-form-type :email-edit-action)
-          (state/set-current-project project-id)
-          (state/set-current-action action)
-          (state/set-current-artifact-value name)
-          (state/set-current-email-template template)
-          (.modal ($ :#iModal)))
-        :className "panel panel-default action"}
-   (dom/div
-    #js {:className "panel-body bg-success"}
-    (render-action-type (get action "type"))
-    (dom/span #js {:className "action-info"}
-              (dom/div #js {:className "library-name"}
-                       (get action "library"))
-              (dom/div #js {:className "version"}
-                       (get action "last-processed-version")))))))
+(defn render-action [project-id act]
+  (let [name (get act "library")
+        template (get act "template")]
+    (dom/div
+     #js {:onClick #(add-action/show project-id 
+                                     :type :update 
+                                     :action act 
+                                     :callback action/update-email-action)
+          :className "panel panel-default action"}
+     (dom/div
+      #js {:className "panel-body bg-success"}
+      (render-action-type (get act "type"))
+      (dom/span #js {:className "action-info"}
+                (dom/div #js {:className "library-name"}
+                         (get act "library"))
+                (dom/div #js {:className "version"}
+                         (get act "last-processed-version")))))))
 
 (defn add-new-action [project-id]
   (dom/div #js {:className "panel panel-default panel-info action add-action"
@@ -49,9 +46,9 @@
                      (sort-by first)
                      (map second))
         rendered
-        (map (fn [action]
+        (map (fn [act]
                (dom/div #js {:className "col-sm-12 col-md-6 col-lg-4 prj-list-item"}
-                        (render-action id action)))
+                        (render-action id act)))
              actions)]
     (apply dom/div #js {:className "row"}
            (concat rendered

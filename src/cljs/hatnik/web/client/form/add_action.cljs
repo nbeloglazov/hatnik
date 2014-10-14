@@ -62,26 +62,45 @@
             artifact (:artifact-value data)
             type "email"
             email (:user-email data)
-            template (:email-template data)]
+            template (:email-template data)
+            callback (:callback data)]
         (dom/div nil
                  (dom/button 
                   
                   #js {:className "btn btn-primary pull-left"
-                       :onClick #(action/send-new-email-action 
+                       :onClick #(callback
                                   project-id type artifact email template)} "Submit")
 
                  (dom/button 
                   #js {:className "btn btn-default"
                        :onClick #(action/test-new-email-action (-> @data :ui :current-project))} "Test"))))))
 
+(def default-email-template
+  (str "Hello there\n\n"
+       "{{library}} {{version}} has been released! "
+       "Previous version was {{previous-version}}\n\n"
+       "Your Hatnik"))
+
+(defmulti get-init-state #(:type %))
+
+(defmethod get-init-state :add [_ _] 
+  {:artifact-value ""
+   :email-template default-email-template
+   :user-email "email@template.com"
+   :type :email})
+
+(defmethod get-init-state :update [data _]
+  (let [action (:action data)]
+    {:artifact-value (get action "library")
+     :email-template (get action "template")
+     :user-email (get action "addres")
+     :type (keyword (get action "type"))}))
+
 (defn- add-action-component [data owner]
   (reify
     om/IInitState
     (init-state [_]
-      {:artifact-value ""
-       :email-template ""
-       :user-email "email@template.com"
-       :type :email})
+      (get-init-state data owner))
 
     om/IRenderState
     (render-state [this state]
@@ -107,7 +126,8 @@
         (dom/div #js {:className "modal-footer"}
                  (om/build action-footer 
                            (merge state
-                                  {:project-id (:project-id data)}))))))
+                                  {:project-id (:project-id data)
+                                   :callback (:callback data)}))))))
 
     om/IDidMount
     (did-mount [this]
@@ -116,8 +136,11 @@
              "hidden.bs.modal" (fn [_ _] (on-modal-close owner)))
         (.modal modal-window)))))
 
-(defn show [project-id]
-  (om/root add-action-component {:project-id project-id :modal-jq-id :#iModalAddAction}
+(defn show [project-id & {:keys [type action callback]
+                          :or {action nil
+                               type :add
+                               callback action/send-new-email-action}}]
+  (om/root add-action-component {:project-id project-id :modal-jq-id :#iModalAddAction :callback callback :type type}
            {:target (.getElementById js/document "iModalAddAction")}))
 
 

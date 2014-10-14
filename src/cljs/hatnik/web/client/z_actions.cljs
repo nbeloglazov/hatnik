@@ -60,7 +60,7 @@
       (msg/danger "Wrong data! Check out fields!")
 
       (do
-        (.modal ($ :#iModal) "hide")
+        (.modal ($ :#iModalAddAction) "hide")
         (ajax "/api/actions" "POST" data 
               (wrap-error-alert #(create-new-email-action-callback data %)))))))
 

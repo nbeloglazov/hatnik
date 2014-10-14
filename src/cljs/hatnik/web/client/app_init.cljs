@@ -1,7 +1,6 @@
-(ns hatnik.web.client.project-list
+(ns hatnik.web.client.app-init
   (:require goog.net.XhrIo
             [om.core :as om :include-macros true]
-            [om.dom :as dom :include-macros true]
             [hatnik.web.client.components :as widget]
             [hatnik.web.client.app-state :as state]))
 

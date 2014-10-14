@@ -18,10 +18,9 @@
 (defn render-action [project-id act]
   (dom/div
    #js {:onClick (fn []
-                   (add-action/show project-id 
+                   (add-action/show :project-id project-id 
                                     :type :update 
-                                    :action @act 
-                                    :callback action/update-email-action))
+                                    :action @act))
         :className "panel panel-default action"}
    (dom/div
     #js {:className "panel-body bg-success"}
@@ -34,7 +33,8 @@
 
 (defn add-new-action [project-id]
   (dom/div #js {:className "panel panel-default panel-info action add-action"
-                :onClick #(add-action/show project-id)}
+                :onClick #(add-action/show :type :add 
+                                           :project-id project-id)}
            (dom/div #js {:className "panel-body bg-info"}
                     (dom/span #js {:className "glyphicon glyphicon-plus"})
                     " Add action")))

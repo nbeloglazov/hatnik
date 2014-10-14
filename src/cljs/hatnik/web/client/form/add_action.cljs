@@ -107,19 +107,23 @@
 
 (defmulti get-init-state #(:type %))
 
-(defmethod get-init-state :add [_ _] 
+(defmethod get-init-state :add [data _] 
   {:artifact-value ""
+   :project-id (:project-id data)
    :email-template default-email-template
    :user-email "email@template.com"
+   :callback action/send-new-email-action
    :type :email})
 
 (defmethod get-init-state :update [data _]
   (let [action (:action data)]
-    {:artifact-value (get action "library")
+    {:type :email
+     :project-id (:project-id data)
+     :artifact-value (get action "library")
      :action-id (get action "id")
      :email-template (get action "template")
      :user-email (get action "address")
-     :type (keyword (get action "type"))}))
+     :callback action/update-email-action}))
 
 (defmulti get-action-header #(:type %))
 (defmethod get-action-header :add [_ _] (dom/h4 nil "Add new action"))
@@ -129,17 +133,10 @@
 (defmulti get-action-footer #(:type %))
 
 (defmethod get-action-footer :add [data state _]
-  (om/build add-action-footer 
-            (merge state
-                   {:project-id (:project-id data)
-                    :callback (:callback data)})))
+  (om/build add-action-footer state))
 
 (defmethod get-action-footer :update [data state _]
-  (om/build update-action-footer
-            (merge state
-                   {:project-id (:project-id data)
-                    :artifact-id (:artifact-id data)
-                    :callback (:callback data)})))
+  (om/build update-action-footer state))
 
 (defn- add-action-component [data owner]
   (reify
@@ -176,16 +173,12 @@
       (let [modal-window ($ (:modal-jq-id data))]
         (.modal modal-window)))))
 
-(defn show [project-id & {:keys [type action callback]
-                          :or {action nil
-                               type :add
-                               callback action/send-new-email-action}}]
+(defn show [& data-pack]
+  (.log js/console "!")
   (om/root add-action-component 
-           {:project-id project-id 
-            :action action
-            :modal-jq-id :#iModalAddAction 
-            :callback callback 
-            :type type}
+           (assoc 
+               (into {} (map vec (partition-all 2 data-pack)))
+             :modal-jq-id :#iModalAddAction)            
            {:target (.getElementById js/document "iModalAddAction")}))
 
 

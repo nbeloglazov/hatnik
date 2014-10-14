@@ -54,7 +54,7 @@
                 (om/build user-email-component (:user-email data))
                 (om/build email-template-component (:email data))))))
 
-(defn action-footer [data owner]
+(defn add-action-footer [data owner]
   (reify
     om/IRender
     (render [this]
@@ -73,7 +73,29 @@
 
                  (dom/button 
                   #js {:className "btn btn-default"
-                       :onClick #(action/test-new-email-action (-> @data :ui :current-project))} "Test"))))))
+                       :onClick #(action/test-new-email-action 
+                                  project-id type artifact email template)} "Test"))))))
+
+(defn update-action-footer [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (let [project-id (:project-id data)
+            artifact (:artifact-value data)
+            type "email"
+            email (:user-email data)
+            template (:email-template data)
+            callback (:callback data)]
+          (dom/div 
+           nil
+           (dom/button 
+            #js {:className "btn btn-primary pull-left"
+                 :onClick #(.log js/console "try to update action")} "Update")
+
+           (dom/button 
+            #js {:className "btn btn-default"
+                 :onClick #(action/test-new-email-action 
+                            project-id type artifact email template)} "Test"))))))
 
 (def default-email-template
   (str "Hello there\n\n"
@@ -99,6 +121,21 @@
 (defmulti get-action-header #(:type %))
 (defmethod get-action-header :add [_ _] (dom/h4 nil "Add new action"))
 (defmethod get-action-header :update [_ _] (dom/h4 nil "Update action"))
+
+
+(defmulti get-action-footer #(:type %))
+
+(defmethod get-action-footer :add [data state _]
+  (om/build add-action-footer 
+            (merge state
+                   {:project-id (:project-id data)
+                    :callback (:callback data)})))
+
+(defmethod get-action-footer :update [data state _]
+  (om/build update-action-footer
+            (merge state
+                   {:project-id (:project-id data)
+                    :callback (:callback data)})))
 
 (defn- add-action-component [data owner]
   (reify
@@ -128,10 +165,7 @@
                             {:template (:email-template state)
                              :template-handler #(om/set-state! owner :email-template %)}}))
         (dom/div #js {:className "modal-footer"}
-                 (om/build action-footer 
-                           (merge state
-                                  {:project-id (:project-id data)
-                                   :callback (:callback data)}))))))
+                 (get-action-footer data state owner)))))
 
     om/IDidMount
     (did-mount [this]

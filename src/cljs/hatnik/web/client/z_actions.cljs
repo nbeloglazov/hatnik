@@ -65,11 +65,8 @@
               (wrap-error-alert #(create-new-email-action-callback data %)))))))
 
 
-(defn test-new-email-action [project-id]
-  (let [artifact (get-data-from-input "artifact-input")
-        email (get-data-from-input "emain-input")
-        email-body (get-data-from-input "emain-body-input")
-        data {:project-id project-id
+(defn test-new-email-action [project-id type artifact email email-body]
+  (let [data {:project-id project-id
               :type "email"
               :address email
               :template email-body

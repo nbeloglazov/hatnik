@@ -134,6 +134,7 @@
 
   (stop [component]
     (timbre/info "Stopping Worker component.")
+    (qs/delete-job (j/key "jobs.updateactions.1"))
     (qs/shutdown true)
     component))
 

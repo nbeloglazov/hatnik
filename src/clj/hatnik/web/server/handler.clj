@@ -41,9 +41,17 @@
            :body {:result "error"
                   :message "Not authenticated"}}))))
 
+(defn index-page [config req]
+  (if (.startsWith (-> req :headers (get "host")) "hatnik.clojurecup.com")
+    ; Redirect all requests coming for hatnik.clojurecup.com to hatnik.com
+    {:status 301
+     :headers {"Location" "http://hatnik.com"}
+     :body ""}
+    (renderer/core-page config (-> req :session :user))))
+
 (defn app-routes [db config]
   (routes
-   (GET "/" req (renderer/core-page config (-> req :session :user)))
+   (GET "/" req (index-page config req))
    (context "/api" []
             (context "/projects" []
                      (wrap-authenticated-only

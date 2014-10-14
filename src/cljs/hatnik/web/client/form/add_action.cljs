@@ -96,6 +96,10 @@
      :user-email (get action "address")
      :type (keyword (get action "type"))}))
 
+(defmulti get-action-header #(:type %))
+(defmethod get-action-header :add [_ _] (dom/h4 nil "Add new action"))
+(defmethod get-action-header :update [_ _] (dom/h4 nil "Update action"))
+
 (defn- add-action-component [data owner]
   (reify
     om/IInitState
@@ -109,7 +113,7 @@
        (dom/div 
         #js {:className "modal-content"}
         (dom/div #js {:className "modal-header"}
-                 (dom/h4 nil "Add new action"))
+                 (get-action-header data owner))
 
         (dom/div #js {:className "modal-body"}
                  (om/build action-input-form 

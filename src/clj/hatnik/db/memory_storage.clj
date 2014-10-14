@@ -28,6 +28,16 @@
                                               :id id))
         id)))
 
+  (update-user! [storage email data]
+    (swap! atom update-in [:users]
+           #(map (fn [{cur-email :email id :id :as user}]
+                   (if (= cur-email email)
+                     (assoc data
+                       :email cur-email
+                       :id id)
+                     user))
+                 %)))
+
 
   hatnik.db.storage.ProjectStorage
   (get-projects [storage user-id]
@@ -62,6 +72,7 @@
              (remove #(and (= (:user-id %) user-id)
                            (= (:id %) id))
                      projects))))
+
 
 
   hatnik.db.storage.ActionStorage

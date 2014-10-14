@@ -38,7 +38,20 @@
            (assoc bar-user :id bar-id)))
 
     (is (not= foo-id bar-id) "id should be different")
-    (is (= foo-id foo-id-2) "Multiple creation should return same user.")))
+    (is (= foo-id foo-id-2) "Multiple creation should return same user.")
+
+    ; Test update
+    ; Only github-username should change.
+    ; id and email are immutable fields.
+    (s/update-user! storage foo-email
+                    (assoc foo-user
+                      :id "should-not-change"
+                      :email bar-email
+                      :github-username "foo-new"))
+    (is (= (s/get-user storage foo-email)
+           (assoc foo-user
+             :id foo-id
+             :github-username "foo-new")))))
 
 (def user1 "user1")
 (def user2 "user2")

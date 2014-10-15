@@ -126,7 +126,7 @@
   {:artifact-value ""
    :project-id (:project-id data)
    :email-template default-email-template
-   :user-email "email@template.com"
+   :user-email (:user-email data)
    :type :email})
 
 (defmethod get-init-state :update [data _]

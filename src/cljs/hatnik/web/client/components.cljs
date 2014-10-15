@@ -19,10 +19,12 @@
   (reify
     om/IRender
     (render [this]
-      (let [id (:project-id data)]
+      (let [id (:project-id data)
+            email (:user-email data)]
       (dom/div #js {:className "panel panel-default panel-info action add-action"
                     :onClick #(add-action/show :type :add 
-                                               :project-id id)}
+                                               :project-id id
+                                               :user-email email)}
                (dom/div #js {:className "panel-body bg-info"}
                         (dom/span #js {:className "glyphicon glyphicon-plus"})
                         " Add action"))))))
@@ -67,7 +69,7 @@
 (defmethod render-action "noop" [data] (om/build noop-action-card data))
 (defmethod render-action :add [data] (om/build add-new-action-card data))
 
-(defn actions-table [id actions]
+(defn actions-table [id actions email]
   (let [actions (->> actions
                      (sort-by first)
                      (map second))
@@ -79,7 +81,9 @@
     (apply dom/div #js {:className "row"}
            (concat rendered
                    [(dom/div #js {:className "col-sm-12 col-md-6 col-lg-4 prj-list-item"}
-                             (render-action {:type :add :project-id id}))]))))
+                             (render-action {:type :add 
+                                             :project-id id
+                                             :user-email email}))]))))
 
 (defn project-menu [project]
   (let [project-name-input (.getElementById js/document "project-name-edit-input")]
@@ -121,7 +125,9 @@
        (dom/div #js {:className "panel-collapse collapse in"
                      :id (str "__PrjList" (get prj "id"))}
                 (dom/div #js {:className "panel-body"}
-                         (actions-table (get prj "id") (get prj "actions"))))))))
+                         (actions-table (get prj "id") 
+                                        (get prj "actions") 
+                                        (-> prj :user :email))))))))
 
 (defn project-list [data owner]
   (reify

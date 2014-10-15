@@ -15,30 +15,43 @@
   (when (= "email" a-type)
     (dom/span #js {:className "glyphicon glyphicon-envelope action-type"})))
 
-(defn render-action [project-id act]
-  (dom/div
-   #js {:onClick (fn []
-                   (add-action/show :project-id project-id 
-                                    :type :update 
-                                    :action @act))
-        :className "panel panel-default action"}
-   (dom/div
-    #js {:className "panel-body bg-success"}
-    (render-action-type (get act "type"))
-    (dom/span #js {:className "action-info"}
-              (dom/div #js {:className "library-name"}
-                       (get act "library"))
-              (dom/div #js {:className "version"}
-                       (get act "last-processed-version"))))))
+(defn add-new-action-card [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (let [id (:project-id data)]
+      (dom/div #js {:className "panel panel-default panel-info action add-action"
+                    :onClick #(add-action/show :type :add 
+                                               :project-id id)}
+               (dom/div #js {:className "panel-body bg-info"}
+                        (dom/span #js {:className "glyphicon glyphicon-plus"})
+                        " Add action"))))))
 
-(defn add-new-action [project-id]
-  (dom/div #js {:className "panel panel-default panel-info action add-action"
-                :onClick #(add-action/show :type :add 
-                                           :project-id project-id)}
-           (dom/div #js {:className "panel-body bg-info"}
-                    (dom/span #js {:className "glyphicon glyphicon-plus"})
-                    " Add action")))
+(defn email-action-card [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (let [id (:project-id data)]
+      (dom/div #js {:className "panel panel-default action"
+                    :onClick #(add-action/show :type :update
+                                               :project-id id
+                                               :action @data)}
+               (dom/div 
+                #js {:className "panel-body bg-success"}
+                (dom/span #js {:className "glyphicon glyphicon-envelope action-type"})
+                (dom/span #js {:className "action-info"}
+                          (dom/div #js {:className "library-name"}
+                                   (get data "library"))
+                          (dom/div #js {:className "version"}
+                                   (get data "last-processed-version")))))))))
 
+(defmulti render-action #(:type %))
+
+(defmethod render-action "email" [data]
+  (om/build email-action-card data))
+
+(defmethod render-action :add [data]
+  (om/build add-new-action-card data))
 
 (defn actions-table [id actions]
   (let [actions (->> actions
@@ -47,12 +60,12 @@
         rendered
         (map (fn [act]
                (dom/div #js {:className "col-sm-12 col-md-6 col-lg-4 prj-list-item"}
-                        (render-action id act)))
+                        (render-action (assoc act :project-id id :type (get act "type")))))
              actions)]
     (apply dom/div #js {:className "row"}
            (concat rendered
                    [(dom/div #js {:className "col-sm-12 col-md-6 col-lg-4 prj-list-item"}
-                             (add-new-action id))]))))
+                             (render-action {:type :add :project-id id}))]))))
 
 (defn project-menu [project]
   (let [project-name-input (.getElementById js/document "project-name-edit-input")]
@@ -106,7 +119,8 @@
             user-data (:user data)]
         (dom/div #js {:className "panel-group" :id "iProjectList"}   
                  (apply dom/div nil
-                        (map #(om/build project-view %) project-data)))))))
+                        (map #(om/build project-view (assoc % :user user-data))
+                             project-data)))))))
 
 
 (defn app-view [data owner]

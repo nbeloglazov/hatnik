@@ -223,7 +223,6 @@
         (.modal modal-window)))))
 
 (defn show [& data-pack]
-  (.log js/console "!")
   (om/root add-action-component 
            (assoc 
                (into {} (map vec (partition-all 2 data-pack)))

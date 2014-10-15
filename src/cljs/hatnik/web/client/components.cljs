@@ -34,10 +34,12 @@
   (reify
     om/IRender
     (render [this]
-      (let [id (:project-id data)]
+      (let [id (:project-id data)
+            email (:user-email data)]
       (dom/div #js {:className "panel panel-default action"
                     :onClick #(add-action/show :type :update
                                                :project-id id
+                                               :user-email email
                                                :action @data)}
                (dom/div 
                 #js {:className "panel-body bg-success"}
@@ -52,10 +54,12 @@
   (reify
     om/IRender
     (render [this]
-      (let [id (:project-id data)]
+      (let [id (:project-id data)
+            email (:user-email data)]
         (dom/div #js {:className "panel panel-default action"
                       :onClick #(add-action/show :type :update
                                                  :project-id id
+                                                 :user-email email
                                                  :action @data)}
                  (dom/div 
                   #js {:className "panel-body bg-success"}
@@ -77,7 +81,9 @@
         rendered
         (map (fn [act]
                (dom/div #js {:className "col-sm-12 col-md-6 col-lg-4 prj-list-item"}
-                        (render-action (assoc act :project-id id :type (get act "type")))))
+                        (render-action (assoc act :project-id id 
+                                              :type (get act "type")
+                                              :user-email email))))
              actions)]
     (apply dom/div #js {:className "row"}
            (concat rendered

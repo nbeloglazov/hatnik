@@ -42,7 +42,7 @@
         (.modal ($ :#iModalProject) "hide")
         (ajax  "/api/projects" "POST" {:name name} #(create-new-project-callback name %))))))
 
-(defn create-new-email-action-callback [data reply]
+(defn create-new-action-callback [data reply]
   (let [resp (js->clj reply)]
     (when (= "ok" (get resp "result"))
       (state/update-all-view))))
@@ -62,7 +62,19 @@
       (do
         (.modal ($ :#iModalAddAction) "hide")
         (ajax "/api/actions" "POST" data 
-              (wrap-error-alert #(create-new-email-action-callback data %)))))))
+              (wrap-error-alert #(create-new-action-callback data %)))))))
+
+(defn send-new-noop-action [project-id artifact]
+  (let [data {:project-id project-id
+              :type "noop"
+              :library artifact}]
+    (if (= "" artifact)
+      (msg/danger "Wrong data! Check out fields!")
+
+      (do
+        (.modal ($ :#iModalAddAction) "hide")
+        (ajax "/api/actions" "POST" data 
+              (wrap-error-alert #(create-new-action-callback data %)))))))
 
 (defmulti send-new-action #(:type %))
 (defmethod send-new-action :email [data-pack]
@@ -70,6 +82,9 @@
                          (:artifact-value data-pack)
                          (:user-email data-pack)
                          (:email-template data-pack)))
+(defmethod send-new-action :noop [data-pack]
+  (send-new-noop-action (:project-id data-pack)
+                        (:artifact-value data-pack)))
 
 
 (defn test-new-email-action [project-id artifact email email-body]
@@ -113,6 +128,20 @@
          data (wrap-error-alert
                #(common-update-callback "Action don't updated!" data %)))))))
 
+(defn update-noop-action [project-id action-id artifact]
+  (let [data {:project-id project-id
+              :type "noop"
+              :library artifact}]
+    (if (= "" artifact)
+      (msg/danger "Wrong data! Check out fields!")
+
+      (do
+        (.modal ($ :#iModalAddAction) "hide")
+        (ajax 
+         (str "/api/actions/" action-id) "PUT" 
+         data (wrap-error-alert
+               #(common-update-callback "Action don't updated!" data %)))))))
+
 (defmulti update-action #(:type %))
 (defmethod update-action :email [data-pack]
   (update-email-action (:project-id data-pack)
@@ -120,6 +149,10 @@
                        (:artifact-value data-pack)
                        (:user-email data-pack)
                        (:email-template data-pack)))
+(defmethod update-action :noop [data-pack]
+  (update-noop-action (:project-id data-pack)
+                      (:action-id data-pack)
+                      (:artifact-value data-pack)))
 
 (defn delete-action [action-id]
   (.modal ($ :#iModalAddAction) "hide")

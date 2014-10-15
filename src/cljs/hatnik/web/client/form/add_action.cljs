@@ -51,6 +51,23 @@
                                            (.. % -target -value))
                                :value (:value data)})))))
 
+(defn option-element-map [val pred]
+  (if pred
+    #js {:className "form-control" :selected "selected" :value val}
+    #js {:className "form-control" :value val}))
+
+(defn action-type-component [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (let [callback (:handler data)]
+        (dom/div #js {:className "form-group"}
+                 (dom/label nil "Action type")
+                 (dom/select #js {:className "form-control"
+                                  :onChange #(callback (keyword (.. % -target -value)))}
+                             (dom/option (option-element-map "email" (= :email (:type data)))  "Email")
+                             (dom/option (option-element-map "noop" (= :noop (:type data))) "Noop")))))))
+
 (defn user-email-component [data owner]
   (reify
     om/IRender
@@ -81,8 +98,11 @@
     (render [this]
       (dom/form nil
                 (om/build artifact-input-component (:artifact-value data))
+                (om/build action-type-component (:action-type data))
                 (om/build user-email-component (:user-email data))
-                (om/build email-template-component (:email data))))))
+                
+                (when (= :email (-> data :action-type :type))
+                  (om/build email-template-component (:email data)))))))
 
 (defn add-action-footer [data owner]
   (reify
@@ -120,7 +140,7 @@
       (let [project-id (:project-id data)
             artifact (:artifact-value data)
             action-id (:action-id data)
-            type :email
+            type (:type data)
             email (:user-email data)
             template (:email-template data)]
           (dom/div 
@@ -161,12 +181,12 @@
 
 (defmethod get-init-state :update [data _]
   (let [action (:action data)]
-    {:type :email
+    {:type (keyword (get action "type"))
      :project-id (:project-id data)
      :artifact-value (get action "library")
      :action-id (get action "id")
      :email-template (get action "template")
-     :user-email (get action "address")
+     :user-email (:user-email data)
      :callback action/update-email-action}))
 
 (defmulti get-action-header #(:type %))
@@ -210,6 +230,10 @@
 
                             :user-email
                             {:value (:user-email state)}
+
+                            :action-type 
+                            {:type (:type state)
+                             :handler #(om/set-state! owner :type %)}
                             
                             :email
                             {:template (:email-template state)

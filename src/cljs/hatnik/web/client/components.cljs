@@ -161,7 +161,7 @@
        #js {:className "row"}
        (dom/div #js {:className "col-md-2"}
                 (dom/a #js {:className "btn btn-success"
-                            :onClick add-new-project} "Add new project"))
+                            :onClick add-new-project} "Add project"))
        (dom/div #js {:className "col-md-10"}))
 
       (dom/div nil

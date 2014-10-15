@@ -104,7 +104,29 @@
                               (sort-by first)
                               (map second))
             user-data (:user data)]
-        (apply 
-         dom/div nil
-         (map #(om/build project-view %) project-data))))))
+        (dom/div #js {:className "panel-group" :id "iProjectList"}   
+                 (apply dom/div nil
+                        (map #(om/build project-view %) project-data)))))))
 
+
+(defn app-view [data owner]
+  (reify
+
+    om/IWillMount
+    (will-mount [this]
+      (.send goog.net.XhrIo "/api/current-user" state/update-user-data)
+      (.send goog.net.XhrIo "/api/projects" state/update-projects-list))
+
+    om/IRender 
+    (render [this]
+      (dom/div nil
+      (dom/div 
+       #js {:className "row"}
+       (dom/div #js {:className "col-md-2"}
+                (dom/a #js {:className "btn btn-success"
+                            :onClick add-new-project} "Add new project"))
+       (dom/div #js {:className "col-md-10"}))
+
+      (dom/div nil
+               (dom/p nil "")
+               (om/build project-list data))))))

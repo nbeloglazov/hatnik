@@ -74,16 +74,7 @@
 
 (defn work-main-page []
   (hc/html
-   [:div.row
-    [:div.col-md-2
-     [:a.btn.btn-success
-      {:href "#"
-       :onclick "hatnik.web.client.components.add_new_project();"} "Add project"]]
-    [:div.col-md-10]]
-
-   [:div
-    [:p ""]]
-   [:div#iProjectList.panel-group "Loading..."]))
+   [:div#iAppView ""]))
 
 (defn about-page []
   [:div.about

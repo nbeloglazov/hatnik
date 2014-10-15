@@ -3,6 +3,7 @@
             [om.dom :as dom :include-macros true]
             [hatnik.web.client.app-state :as state]
             [hatnik.web.client.form.add-action :as add-action]
+            [hatnik.web.client.form.project-menu :as pmenu]
             [hatnik.web.client.z-actions :as action])
   (:use [jayq.core :only [$]]))
 
@@ -85,20 +86,16 @@
                                              :project-id id
                                              :user-email email}))]))))
 
-(defn project-menu [project]
-  (let [project-name-input (.getElementById js/document "project-name-edit-input")]
-    (set! (.-value project-name-input)
-          (get @project "name"))
-    (state/set-current-project (get @project "id"))
-    (.modal ($ :#iModalProjectMenu))))
-
 (defn project-header-menu-button [project]
-  (dom/div #js {:className "dropdown"}
-           (dom/button
-            #js {:className "btn btn-default"
-                 :type "button"
-                 :onClick #(project-menu project)}
-            (dom/span #js {:className "glyphicon glyphicon-pencil pull-right"}))))
+  (let [id (get project "id")
+        name (get project "name")]
+    (dom/div #js {:className "dropdown"}
+             (dom/button
+              #js {:className "btn btn-default"
+                   :type "button"
+                   :onClick #(pmenu/show :project-id id
+                                         :name name)}
+              (dom/span #js {:className "glyphicon glyphicon-pencil pull-right"})))))
 
 (defn project-view [prj owner]
   (reify

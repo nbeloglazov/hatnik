@@ -128,22 +128,19 @@
    {} (wrap-error-alert
        #(common-update-callback "Action don't deleted!" {} %))))
 
-(defn ^:export delete-project []
-  (let [project-id (-> (deref state/app-state) :ui :current-project)]
-    (.modal ($ :#iModalProjectMenu) "hide")
-    (ajax
-     (str "/api/projects/" project-id) "DELETE"
-     {} (wrap-error-alert 
-         #(common-update-callback "Project don't deleted!" {} %)))))
+(defn ^:export delete-project [project-id]
+  (.modal ($ :#iModalProjectMenu) "hide")
+  (ajax
+   (str "/api/projects/" project-id) "DELETE"
+   {} (wrap-error-alert 
+       #(common-update-callback "Project don't deleted!" {} %))))
 
-(defn ^:export update-project []
-  (let [project-id (-> (deref state/app-state) :ui :current-project)
-        new-name (get-data-from-input "project-name-edit-input")]
-    (.modal ($ :#iModalProjectMenu) "hide")
-    (ajax
-     (str "/api/projects/" project-id) "PUT"
-     {:name new-name} 
-     (wrap-error-alert #(common-update-callback "Project don't renamed!" {} %)))))
+(defn ^:export update-project [project-id new-name]
+  (.modal ($ :#iModalProjectMenu) "hide")
+  (ajax
+   (str "/api/projects/" project-id) "PUT"
+   {:name new-name} 
+   (wrap-error-alert #(common-update-callback "Project don't renamed!" {} %))))
 
 
 (defn get-library [library callback]

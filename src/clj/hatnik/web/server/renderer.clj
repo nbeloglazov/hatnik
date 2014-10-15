@@ -32,25 +32,7 @@
       [:div.modal-footer
        [:button.btn.btn-primary {:onClick "hatnik.web.client.z_actions.send_new_project_request()"} "Create"]]]]]
 
-   [:div#iModalProjectMenu.modal.fade
-    [:div.modal-dialog
-     [:div.modal-content
-      [:div.modal-header
-       [:h4.modal-title "Project menu"]]
-
-      [:div.modal-body
-       [:form
-        [:input#project-name-edit-input.form-control
-         {:type "text"
-          :placeholder "Project name"}]]]
-
-      [:div.modal-footer
-       [:div.btn.btn-primary.pull-left
-        {:onClick "hatnik.web.client.z_actions.update_project()"}
-        "Update"]
-       [:div.btn.btn-danger.pull-right
-        {:onClick "hatnik.web.client.z_actions.delete_project()"}
-        "Delete"]]]]]))
+   [:div#iModalProjectMenu.modal.fade ]))
 
 (defn page-menu [config user]
   [:nav.navbar.navbar-default {:role "navigation"}

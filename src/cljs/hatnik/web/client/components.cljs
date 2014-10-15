@@ -45,13 +45,27 @@
                           (dom/div #js {:className "version"}
                                    (get data "last-processed-version")))))))))
 
+(defn noop-action-card [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (let [id (:project-id data)]
+        (dom/div #js {:className "panel panel-default action"
+                      :onClick #(add-action/show :type :update
+                                                 :project-id id
+                                                 :action @data)}
+                 (dom/div 
+                  #js {:className "panel-body bg-success"}
+                  (dom/span #js {:className "action-info"}
+                            (dom/div #js {:className "library-name"}
+                                     (get data "library"))
+                            (dom/div #js {:className "version"}
+                                     (get data "last-processed-version")))))))))
+
 (defmulti render-action #(:type %))
-
-(defmethod render-action "email" [data]
-  (om/build email-action-card data))
-
-(defmethod render-action :add [data]
-  (om/build add-new-action-card data))
+(defmethod render-action "email" [data] (om/build email-action-card data))
+(defmethod render-action "noop" [data] (om/build noop-action-card data))
+(defmethod render-action :add [data] (om/build add-new-action-card data))
 
 (defn actions-table [id actions]
   (let [actions (->> actions

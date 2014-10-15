@@ -8,12 +8,12 @@
 (def foo-user
   {:email foo-email
    :github-token "foo-token"
-   :github-username "foo"})
+   :github-login "foo"})
 
 (def bar-user
   {:email bar-email
    :github-token "bar-token"
-   :github-username "bar"})
+   :github-login "bar"})
 
 (defn test-user-storage [storage]
   (is (every? nil? (map #(s/get-user storage %)
@@ -38,7 +38,20 @@
            (assoc bar-user :id bar-id)))
 
     (is (not= foo-id bar-id) "id should be different")
-    (is (= foo-id foo-id-2) "Multiple creation should return same user.")))
+    (is (= foo-id foo-id-2) "Multiple creation should return same user.")
+
+    ; Test update
+    ; Only github-login should change.
+    ; id and email are immutable fields.
+    (s/update-user! storage foo-email
+                    (assoc foo-user
+                      :id "should-not-change"
+                      :email bar-email
+                      :github-login "foo-new"))
+    (is (= (s/get-user storage foo-email)
+           (assoc foo-user
+             :id foo-id
+             :github-login "foo-new")))))
 
 (def user1 "user1")
 (def user2 "user2")

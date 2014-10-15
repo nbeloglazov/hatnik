@@ -40,6 +40,13 @@
           norm-id
           :id)))
 
+  (update-user! [storage email data]
+    (mc/update db users {:email email}
+               (-> data
+                   (dissoc data :_id :id)
+                   (assoc :email email))
+               {:multi false}))
+
 
   hatnik.db.storage.ProjectStorage
   (get-projects [storage user-id]

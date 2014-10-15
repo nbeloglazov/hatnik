@@ -11,17 +11,30 @@
 ; https://github.com/login/oauth/authorize?scope=user:email&client_id=f850785344ec6d812ab2
 
 (defn create-user
-  "Creates new user with given email and github-token. Returns id and email."
-  [db email github-token github-login]
-  (timbre/info "Creating new user" email)
-  (let [id (stg/create-user! db {:email email
-                                 :github-token github-token
-                                 :github-login github-login})]
+  "Creates new user. Also creates default project for the user. Returns user
+  map with added :id key."
+  [db user]
+  (timbre/info "Creating new user" (:email user))
+  (let [id (stg/create-user! db user)]
     (timbre/info "Create default project for user")
     (stg/create-project! db {:name "Default"
                              :user-id id})
-    {:email email
-     :id id}))
+    (assoc user :id id)))
+
+(defn get-or-create-user
+  "Checks if user already exists. If it does - returns user object, if doesn't
+  creates new user. Might update existing user object if it's not complete."
+  [db user]
+  (if-let [existing (stg/get-user db (:email user))]
+    (if (and (contains? existing :github-token)
+             (contains? existing :github-login))
+      existing
+      ; We didn't save user github token or username last time.
+      ; Save it now.
+      (do (timbre/debug "Updating existing user " (:email user))
+          (stg/update-user! db (:email user) user)
+          (merge existing user)))
+    (create-user db user)))
 
 (defn github-login
   "GitHub login callback. User redirected here after he authenticates via github.
@@ -47,8 +60,10 @@
                   "emails:" emails
                   "selected email:" email)
     (if email
-      (let [user (or (stg/get-user db email)
-                     (create-user db email user-token user-login))]
+      (let [user (get-or-create-user db
+                  {:email email
+                   :github-token user-token
+                   :github-login user-login})]
        (assoc response :session {:user user}))
       response)))
 
@@ -60,14 +75,14 @@
   (if-let [user (stg/get-user db email)]
     (-> (resp/response {:result :ok})
         (assoc :session {:user user}))
-    (let [user (if skip-dummy-data
-                 (create-user db email "dummy-token" "dummy-login")
-                 (let [id (stg/create-user! db {:email email
-                                                :github-token "dummy-token"
-                                                :github-login "dummy-login"})]
+    (let [user {:email email
+                :github-token "dummy-token"
+                :github-login "dummy-login"}
+          user (if skip-dummy-data
+                 (create-user db user)
+                 (let [id (stg/create-user! db user)]
                    (dd/create-dummy-data db id)
-                   {:email email
-                    :id id}))]
+                   (assoc user :id id)))]
       (-> (resp/response {:result :ok})
           (assoc :session {:user user})))))
 

@@ -124,14 +124,15 @@
                                    :user-email email
                                    :email-template template})} "Submit")
 
-                 (dom/button 
-                  #js {:className "btn btn-default"
-                       :onClick #(action/test-action 
-                                  {:type type
-                                   :project-id project-id
-                                   :artifact-value artifact
-                                   :user-email email
-                                   :email-template template})} "Test"))))))
+                 (when-not (= :noop type)
+                   (dom/button 
+                    #js {:className "btn btn-default"
+                         :onClick #(action/test-action 
+                                    {:type type
+                                     :project-id project-id
+                                     :artifact-value artifact
+                                     :user-email email
+                                     :email-template template})} "Test")))))))
 
 (defn update-action-footer [data owner]
   (reify
@@ -155,14 +156,15 @@
                               :user-email email
                               :email-template template})} "Update")
 
-           (dom/button 
-            #js {:className "btn btn-default"
-                 :onClick #(action/test-action 
-                            {:type type
-                             :project-id project-id
-                             :artifact-value artifact
-                             :user-email email
-                             :email-template template})} "Test"))))))
+           (when-not (= :noop type)
+             (dom/button 
+              #js {:className "btn btn-default"
+                   :onClick #(action/test-action 
+                              {:type type
+                               :project-id project-id
+                               :artifact-value artifact
+                               :user-email email
+                               :email-template template})} "Test")))))))
 
 (def default-email-template
   (str "Hello there\n\n"

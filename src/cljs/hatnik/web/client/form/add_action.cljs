@@ -67,7 +67,8 @@
                                   :defaultValue (name (:type data))
                                   :onChange #(callback (keyword (.. % -target -value)))}
                              (dom/option (option-element-map "email" (= :email (:type data)))  "Email")
-                             (dom/option (option-element-map "noop" (= :noop (:type data))) "Noop")))))))
+                             (dom/option (option-element-map "noop" (= :noop (:type data))) "Noop")
+                             (dom/option (option-element-map "github-issue" (= :github-issue (:type data))) "GitHub issue")))))))
 
 (defn user-email-component [data owner]
   (reify
@@ -93,6 +94,31 @@
                                         :value (:template data)
                                         :onChange #((:template-handler data) (.. % -target -value))})))))
 
+(defn github-issue-component [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (dom/div nil 
+               (dom/div #js {:className "form-group"}
+                        (dom/label nil "GitHub repository")
+                        (dom/input #js {:type "text"
+                                        :className "form-control"
+                                        :value (:value (:repo data))
+                                        :placeholder "your/repo"
+                                        :onChange #((:handler (:repo data)) (.. % -target -value))}))
+               (dom/div #js {:className "form-group"}
+                        (dom/label nil "Issue title")
+                        (dom/input #js {:type "text"
+                                        :className "form-control"
+                                        :value (:value (:title data))
+                                        :onChange #((:handler (:title data)) (.. % -target -value))}))
+               (dom/div #js {:className "form-group"}
+                        (dom/label nil "Issue body")
+                        (dom/textarea #js {:cols "40"
+                                           :className "form-control"
+                                           :value (:value (:body data))
+                                           :onChange #((:handler (:body data)) (.. % -target -value))}))))))
+
 (defn action-input-form [data owner]
   (reify
     om/IRender
@@ -103,7 +129,10 @@
                 (om/build user-email-component (:user-email data))
                 
                 (when (= :email (-> data :action-type :type))
-                  (om/build email-template-component (:email data)))))))
+                  (om/build email-template-component (:email data)))
+
+                (when (= :github-issue (-> data :action-type :type))
+                  (om/build github-issue-component (:github-issue data)))))))
 
 (defn add-action-footer [data owner]
   (reify
@@ -173,14 +202,25 @@
        "Previous version was {{previous-version}}\n\n"
        "Your Hatnik"))
 
+(def default-github-issue-title "Release {{library}} {{version}}")
+(def default-github-issue-body "Time to update your project.clj to {{library}} {{version}}!")
+
 (defmulti get-init-state #(:type %))
 
+(def new-init-state {:artifact-value ""})
+(def email-init-state {:email-template default-email-template})
+(def github-issue-init-state 
+  {:gh-repo "" 
+   :gh-issue-title default-github-issue-title 
+   :gh-issue-body default-github-issue-body})
+
 (defmethod get-init-state :add [data _] 
-  {:artifact-value ""
-   :project-id (:project-id data)
-   :email-template default-email-template
-   :user-email (:user-email data)
-   :type :email})
+  (merge
+   {:project-id (:project-id data)
+    :email-template default-email-template
+    :user-email (:user-email data)
+    :type :email}
+   new-init-state email-init-state github-issue-init-state))
 
 (defmethod get-init-state :update [data _]
   (let [action (:action data)]
@@ -237,6 +277,14 @@
                             :action-type 
                             {:type (:type state)
                              :handler #(om/set-state! owner :type %)}
+
+                            :github-issue
+                            {:repo {:value (:gh-repo state) 
+                                    :handler #(om/set-state! owner :gh-repo %)}
+                             :title {:value (:gh-issue-title state) 
+                                     :handler #(om/set-state! owner :gh-issue-title %)}
+                             :body {:value (:gh-issue-body state)
+                                    :handler #(om/set-state! owner :gh-issue-body %)}}
                             
                             :email
                             {:template (:email-template state)

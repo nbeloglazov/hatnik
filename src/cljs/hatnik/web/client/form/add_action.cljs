@@ -142,7 +142,10 @@
             artifact (:artifact-value data)
             type (:type data)
             email (:user-email data)
-            template (:email-template data)]
+            template (:email-template data)
+            gh-repo (:gh-repo data)
+            gh-issue-title (:gh-issue-title data)
+            gh-issue-body (:gh-issue-body data)]
         (dom/div nil
                  (dom/button 
                   
@@ -151,6 +154,9 @@
                                   {:type type
                                    :project-id project-id
                                    :artifact-value artifact
+                                   :gh-repo gh-repo
+                                   :gh-issue-title gh-issue-title
+                                   :gh-issue-body gh-issue-body
                                    :user-email email
                                    :email-template template})} "Submit")
 

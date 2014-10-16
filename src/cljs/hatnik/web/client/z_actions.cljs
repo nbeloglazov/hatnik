@@ -76,6 +76,23 @@
         (ajax "/api/actions" "POST" data 
               (wrap-error-alert #(create-new-action-callback data %)))))))
 
+(defn send-new-github-issue-action [project-id repo title body library]
+  (let [data {:project-id project-id
+              :type "github-issue"
+              :repo repo
+              :title title
+              :body body
+              :library library}]
+    (if (or (= "" library)
+            (= "" repo)
+            (= "" title))
+      (msg/danger "Wrong data! Check out fields!")
+
+      (do
+        (.modal ($ :#iModalAddAction) "hide")
+        (ajax "/api/actions" "POST" data 
+              (wrap-error-alert #(create-new-action-callback data %)))))))
+
 (defmulti send-new-action #(:type %))
 (defmethod send-new-action :email [data-pack]
   (send-new-email-action (:project-id data-pack)
@@ -85,6 +102,12 @@
 (defmethod send-new-action :noop [data-pack]
   (send-new-noop-action (:project-id data-pack)
                         (:artifact-value data-pack)))
+(defmethod send-new-action :github-issue [data-pack]
+  (send-new-github-issue-action (:project-id data-pack)
+                                (:gh-repo data-pack)
+                                (:gh-issue-title data-pack)
+                                (:gh-issue-body data-pack)
+                                (:artifact-value data-pack)))
 
 
 (defn test-new-email-action [project-id artifact email email-body]

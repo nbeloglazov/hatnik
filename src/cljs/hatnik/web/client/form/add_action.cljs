@@ -145,30 +145,25 @@
             template (:email-template data)
             gh-repo (:gh-repo data)
             gh-issue-title (:gh-issue-title data)
-            gh-issue-body (:gh-issue-body data)]
+            gh-issue-body (:gh-issue-body data)
+            data-pack {:type type
+                       :project-id project-id
+                       :artifact-value artifact
+                       :gh-repo gh-repo
+                       :gh-issue-title gh-issue-title
+                       :gh-issue-body gh-issue-body
+                       :user-email email
+                       :email-template template}]
         (dom/div nil
                  (dom/button 
                   
                   #js {:className "btn btn-primary pull-left"
-                       :onClick #(action/send-new-action
-                                  {:type type
-                                   :project-id project-id
-                                   :artifact-value artifact
-                                   :gh-repo gh-repo
-                                   :gh-issue-title gh-issue-title
-                                   :gh-issue-body gh-issue-body
-                                   :user-email email
-                                   :email-template template})} "Submit")
+                       :onClick #(action/send-new-action data-pack)} "Submit")
 
                  (when-not (= :noop type)
                    (dom/button 
                     #js {:className "btn btn-default"
-                         :onClick #(action/test-action 
-                                    {:type type
-                                     :project-id project-id
-                                     :artifact-value artifact
-                                     :user-email email
-                                     :email-template template})} "Test")))))))
+                         :onClick #(action/test-action data-pack)} "Test")))))))
 
 (defn update-action-footer [data owner]
   (reify
@@ -179,28 +174,28 @@
             action-id (:action-id data)
             type (:type data)
             email (:user-email data)
-            template (:email-template data)]
+            template (:email-template data)
+            gh-repo (:gh-repo data)
+            gh-issue-title (:gh-issue-title data)
+            gh-issue-body (:gh-issue-body data)
+            data-pack {:type type
+                       :project-id project-id
+                       :artifact-value artifact
+                       :gh-repo gh-repo
+                       :gh-issue-title gh-issue-title
+                       :gh-issue-body gh-issue-body
+                       :user-email email
+                       :email-template template}]
           (dom/div 
            nil
            (dom/button 
             #js {:className "btn btn-primary pull-left"
-                 :onClick #(action/update-action 
-                             {:type type
-                              :action-id action-id
-                              :project-id project-id
-                              :artifact-value artifact
-                              :user-email email
-                              :email-template template})} "Update")
+                 :onClick #(action/update-action data-pack)} "Update")
 
            (when-not (= :noop type)
              (dom/button 
               #js {:className "btn btn-default"
-                   :onClick #(action/test-action 
-                              {:type type
-                               :project-id project-id
-                               :artifact-value artifact
-                               :user-email email
-                               :email-template template})} "Test")))))))
+                   :onClick #(action/test-action data-pack)} "Test")))))))
 
 (def default-email-template
   (str "Hello there\n\n"
@@ -230,11 +225,15 @@
 
 (defmethod get-init-state :update [data _]
   (let [action (:action data)]
+    (.log js/console action)
     {:type (keyword (get action "type"))
      :project-id (:project-id data)
      :artifact-value (get action "library")
      :action-id (get action "id")
      :email-template (get action "template")
+     :gh-repo (get action "repo")
+     :gh-issue-title (get action "title")
+     :gh-issue-body (get action "body")
      :user-email (:user-email data)
      :callback action/update-email-action}))
 

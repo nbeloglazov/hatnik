@@ -98,7 +98,7 @@
     [:li.available {:title "Work in progress"} [:strong "Noop"]
      " - does nothing. Useful if you want to "
      "have a place that lists the latest versions for selected libraries."]
-    [:li.unavailable {:title "Work in progress"} [:strong "GitHub Issue"]
+    [:li.available {:title "Work in progress"} [:strong "GitHub Issue"]
      " - create an issue in the selected repo. The text can be customized just like in email."]
     [:li.unavailable {:title "Work in progress"} [:strong "GitHub Pull Request"]
      " - create a pull request in selected repo using simple find-and-replace-in-file operations."]

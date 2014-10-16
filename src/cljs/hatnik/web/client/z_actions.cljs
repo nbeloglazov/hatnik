@@ -125,12 +125,33 @@
       (ajax "/api/actions/test" "POST" data
             (wrap-error-alert (fn [e] (msg/success "Email sent. Check your inbox.")))))))
 
+(defn test-github-issue-action [project-id repo title body library]
+  (let [data {:project-id project-id
+              :type "github-issue"
+              :repo repo
+              :title title
+              :body body
+              :library library}]
+    (if (or (= "" library)
+            (= "" repo)
+            (= "" title))
+      (msg/danger "Wrong data! Check out fields!")
+
+      (ajax "/api/actions/test" "POST" data
+            (wrap-error-alert (fn [e] (msg/success "GitHub issue created. Check out your project.")))))))
+
 (defmulti test-action #(:type %))
 (defmethod test-action :email [data-pack]
   (test-new-email-action (:project-id data-pack)
                          (:artifact-value data-pack)
                          (:user-email data-pack)
                          (:email-template data-pack)))
+(defmethod test-action :github-issue [data-pack]
+  (test-github-issue-action (:project-id data-pack)
+                            (:gh-repo data-pack)
+                            (:gh-issue-title data-pack)
+                            (:gh-issue-body data-pack)
+                            (:artifact-value data-pack)))
 
 (defn update-email-action [project-id action-id artifact email email-body]
     (let [data {:project-id project-id
@@ -165,6 +186,25 @@
          data (wrap-error-alert
                #(common-update-callback "Action don't updated!" data %)))))))
 
+(defn update-github-issue-action [project-id action-id repo title body library]
+  (let [data {:project-id project-id
+              :type "github-issue"
+              :repo repo
+              :title title
+              :body body
+              :library library}]
+    (if (or (= "" library)
+            (= "" repo)
+            (= "" title))
+      (msg/danger "Wrong data! Check out fields!")
+
+      (do
+        (.modal ($ :#iModalAddAction) "hide")
+        (ajax 
+         (str "/api/actions/" action-id) "PUT" 
+         data (wrap-error-alert
+               #(common-update-callback "Action don't updated!" data %)))))))
+
 (defmulti update-action #(:type %))
 (defmethod update-action :email [data-pack]
   (update-email-action (:project-id data-pack)
@@ -176,6 +216,13 @@
   (update-noop-action (:project-id data-pack)
                       (:action-id data-pack)
                       (:artifact-value data-pack)))
+(defmethod update-action :github-issue [data-pack]
+  (update-github-issue-action (:project-id data-pack)
+                              (:action-if data-pack)
+                              (:gh-repo data-pack)
+                              (:gh-issue-title data-pack)
+                              (:gh-issue-body data-pack)
+                              (:artifact-value data-pack)))
 
 (defn delete-action [action-id]
   (.modal ($ :#iModalAddAction) "hide")

@@ -31,13 +31,14 @@
 
   :profiles
   {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
-                        [ring-mock "0.1.5"]]
+                        [ring-mock "0.1.5"]
+                        [com.cemerick/piggieback "0.1.3"]]
 
          :plugins [[jonase/eastwood "0.1.4"]]
 
          :cljsbuild
          {:builds
-          [{:source-paths ["src/cljs"]
+          [{:source-paths ["src/cljs" "dev/cljs"]
             :compiler
             {:output-to "resources/public/gen/js/hatnik.js"
              :optimizations :simple

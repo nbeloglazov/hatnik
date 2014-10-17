@@ -228,19 +228,34 @@
     :type :email}
    new-init-state email-init-state github-issue-init-state))
 
+(defmulti get-init-state-by-action #(get % "type"))
+(defmethod get-init-state-by-action "noop" [action]
+  (merge email-init-state github-issue-init-state))
+
+(defmethod get-init-state-by-action "email" [action]
+  (merge
+   {:email-template (get action "template")}
+    github-issue-init-state))
+
+(defmethod get-init-state-by-action "github-issue" [action]
+  (let [repo (split (get action "repo") "/")
+        user (first repo)
+        repository (second repo)]    
+  (merge
+   {:gh-issue-title (get action "title")
+    :gh-issue-body (get action "body")
+    :gh-user user
+    :gh-repo repository}
+   email-init-state)))
+
 (defmethod get-init-state :update [data _]
   (let [action (:action data)]
-    (.log js/console action)
-    {:type (keyword (get action "type"))
-     :project-id (:project-id data)
-     :artifact-value (get action "library")
-     :action-id (get action "id")
-     :email-template (get action "template")
-     :gh-repo (get action "repo")
-     :gh-issue-title (get action "title")
-     :gh-issue-body (get action "body")
-     :user-email (:user-email data)
-     :callback action/update-email-action}))
+    (merge {:type (keyword (get action "type"))
+            :project-id (:project-id data)
+            :user-email (:user-email data)
+            :artifact-value (get action "library")
+            :action-id (get action "id")}
+           (get-init-state-by-action action))))
 
 (defmulti get-action-header #(:type %))
 (defmethod get-action-header :add [_ _] (dom/h4 nil "Add new action"))

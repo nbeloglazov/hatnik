@@ -70,29 +70,22 @@
                              (dom/option (option-element-map "noop" (= :noop (:type data))) "Noop")
                              (dom/option (option-element-map "github-issue" (= :github-issue (:type data))) "GitHub issue")))))))
 
-(defn user-email-component [data owner]
+(defn email-component [data owner]
   (reify
     om/IRender
     (render [this]
-      (dom/div #js {:className "form-group"}
-               (dom/label #js {:for "emain-input"} "Email")
-               (dom/input #js {:type "email"
-                               :className "form-control"
-                               :id "emain-input"
-                               :value (:value data)
-                               :disabled "disabled"})))))
-
-(defn email-template-component [data owner]
-  (reify
-    om/IRender
-    (render [this]
-      (dom/div #js {:className "form-group"}
-                     (dom/label #js {:for "emain-body-input"} "Email body")
-                     (dom/textarea #js {:cols "40"
-                                        :className "form-control"
-                                        :id "emain-body-input"
-                                        :value (:template data)
-                                        :onChange #((:template-handler data) (.. % -target -value))})))))
+      (dom/div nil
+               (dom/div #js {:className "form-group"}
+                        (dom/label #js {:for "email-input"} "Email")
+                        (dom/p #js {:id "email-input"}
+                               (:email data)))
+               (dom/div #js {:className "form-group"}
+                        (dom/label #js {:for "emain-body-input"} "Email body")
+                        (dom/textarea #js {:cols "40"
+                                           :className "form-control"
+                                           :id "emain-body-input"
+                                           :value (:template data)
+                                           :onChange #((:template-handler data) (.. % -target -value))}))))))
 
 (defn github-issue-component [data owner]
   (reify
@@ -104,7 +97,7 @@
                         (dom/input #js {:type "text"
                                         :className "form-control"
                                         :value (:value (:repo data))
-                                        :placeholder "your/repo"
+                                        :placeholder "username/repo"
                                         :onChange #((:handler (:repo data)) (.. % -target -value))}))
                (dom/div #js {:className "form-group"}
                         (dom/label nil "Issue title")
@@ -126,10 +119,9 @@
       (dom/form nil
                 (om/build artifact-input-component (:artifact-value data))
                 (om/build action-type-component (:action-type data))
-                (om/build user-email-component (:user-email data))
-                
+
                 (when (= :email (-> data :action-type :type))
-                  (om/build email-template-component (:email data)))
+                  (om/build email-component (:email data)))
 
                 (when (= :github-issue (-> data :action-type :type))
                   (om/build github-issue-component (:github-issue data)))))))
@@ -277,9 +269,6 @@
                             {:value (:artifact-value state)
                              :handler #(om/set-state! owner :artifact-value %)}
 
-                            :user-email
-                            {:value (:user-email state)}
-
                             :action-type 
                             {:type (:type state)
                              :handler #(om/set-state! owner :type %)}
@@ -294,7 +283,8 @@
                             
                             :email
                             {:template (:email-template state)
-                             :template-handler #(om/set-state! owner :email-template %)}}))
+                             :template-handler #(om/set-state! owner :email-template %)
+                             :email (:user-email state)}}))
         (dom/div #js {:className "modal-footer"}
                  (get-action-footer data state owner)))))
 

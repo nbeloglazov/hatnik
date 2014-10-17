@@ -3,7 +3,7 @@
             [om.dom :as dom :include-macros true]
             [hatnik.web.client.z-actions :as action])
   (:use [jayq.core :only [$]]
-        [clojure.string :only [split]]))
+        [clojure.string :only [split replace]]))
 
 (defn on-modal-close [component]  
   (om/detach-root 
@@ -22,7 +22,7 @@
    (js/setTimeout 
     (fn []
       (action/get-library new-val #(library-check-handler % check-handler)))
-    2000))
+    1000))
   (data-handler new-val))
 
 (defn artifact-input-component [data owner]
@@ -88,26 +88,77 @@
                                            :value (:template data)
                                            :onChange #((:template-handler data) (.. % -target -value))}))))))
 
+(defn github-issue-on-change [user repo timer form-handler form-status-handler error-handler]
+  (js/clearTimeout timer)  
+  
+  (form-handler 
+   (if (or (nil? user)
+           (nil? repo)
+           (= "" user)
+           (= "" repo))
+     (do
+       (form-status-handler "has-warning")
+       nil)
+     (js/setTimeout
+      (fn [] 
+        (action/get-github-repos 
+         user 
+         (fn [reply] 
+           (let [rest (js->clj reply)
+                 result (->> rest
+                             (map #(get % "name"))
+                             (filter #(= % repo)))]
+             (if (first result)
+               (form-status-handler "has-success")
+               (form-status-handler "has-error"))))
+         error-handler))
+      1000))))
+
 (defn github-issue-component [data owner]
   (reify
-    om/IRender
-    (render [this]
+    om/IInitState
+    (init-state [this]
+      {:form-status 
+       (let [v (:value (:user data))]
+         (if (or (nil? v) (= "" v))
+           "has-warning"
+           "has-success"))
+       :timer nil
+       })
+    om/IRenderState
+    (render-state [this state]
       (dom/div nil 
-               (dom/div #js {:className "form-group"}
+               (dom/div #js {:className (str "form-group " (:form-status state))}
                         (dom/label nil "GitHub repository")
                         (dom/div #js {:className "form-inline"}
                                  (dom/input #js {:type "text"
                                                  :className "form-control"
                                                  :value (:value (:user data))
                                                  :placeholder "username or organization"
-                                                 :onChange #((:handler (:user data)) (.. % -target -value))
+                                                 :onChange #(github-issue-on-change
+                                                             (.. % -target -value)
+                                                             (:value (:repo data))
+                                                             (:timer state)
+                                                             (fn [t]
+                                                               ((:handler (:user data)) (.. % -target -value))
+                                                               (om/set-state! owner :timer t))
+                                                             (fn [st] (om/set-state! owner :form-status st))
+                                                             (fn [st] (om/set-state! owner :form-status "has-error")))
                                                  })
                                  (dom/span nil " / ")
                                  (dom/input #js {:type "text"
                                                  :className "form-control"
                                                  :value (:value (:repo data))
                                                  :placeholder "repository"
-                                                 :onChange #((:handler (:repo data)) (.. % -target -value))})))
+                                                 :onChange #(github-issue-on-change
+                                                             (:value (:user data))
+                                                             (.. % -target -value)
+                                                             (:timer state)
+                                                             (fn [t]
+                                                               ((:handler (:repo data)) (.. % -target -value))
+                                                               (om/set-state! owner :timer t))
+                                                             (fn [st] (om/set-state! owner :form-status st))
+                                                             (fn [st] (om/set-state! owner :form-status "has-error")))})))
                (dom/div #js {:className "form-group"}
                         (dom/label nil "Issue title")
                         (dom/input #js {:type "text"

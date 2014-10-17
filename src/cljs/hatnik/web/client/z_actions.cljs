@@ -218,7 +218,7 @@
                       (:artifact-value data-pack)))
 (defmethod update-action :github-issue [data-pack]
   (update-github-issue-action (:project-id data-pack)
-                              (:action-if data-pack)
+                              (:action-id data-pack)
                               (:gh-repo data-pack)
                               (:gh-issue-title data-pack)
                               (:gh-issue-body data-pack)

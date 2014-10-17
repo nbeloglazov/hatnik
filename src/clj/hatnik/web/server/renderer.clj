@@ -41,14 +41,14 @@
 
    [:div#navbarCollapse.collapse.navbar-collapse
     (if user
-                                        ; User log in
+      ; User logged in
       [:ul.nav.navbar-nav.navbar-right
        [:li
-        [:a {:href "#"} (:email user)]]
+        [:a (:github-login user)]]
        [:li
         [:a.btn {:href "/api/logout"} "Logout"]]]
 
-                                        ; User don't log in
+      ; User is not logged in
       [:ul.nav.navbar-nav.navbar-right
        [:li
         [:a.btn

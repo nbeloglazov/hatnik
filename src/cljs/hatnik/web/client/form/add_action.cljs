@@ -181,6 +181,7 @@
             data-pack {:type type
                        :project-id project-id
                        :artifact-value artifact
+                       :action-id action-id
                        :gh-repo gh-repo
                        :gh-issue-title gh-issue-title
                        :gh-issue-body gh-issue-body

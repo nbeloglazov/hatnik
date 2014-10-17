@@ -21,6 +21,7 @@
             :contentType "application/json"
             :dataType "json"
             :async true
+            :error #(msg/danger "Invalid request! Check out your request data!")
             :success callback}))
 
 (defn get-github-repos [github-name callback error-handler]

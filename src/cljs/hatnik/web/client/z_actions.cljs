@@ -23,6 +23,11 @@
             :async true
             :success callback}))
 
+(defn get-github-repos [github-name callback]
+  (jq/ajax (str (str "https://api.github.com/users/" github-name "/repos")
+           {:type "GET"}
+           :success callback)))
+
 (defn common-update-callback [msg data reply]
   (let [resp (js->clj reply)]
     (when (= "ok" (get resp "result"))

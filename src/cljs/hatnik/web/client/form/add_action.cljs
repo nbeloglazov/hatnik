@@ -2,7 +2,8 @@
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [hatnik.web.client.z-actions :as action])
-  (:use [jayq.core :only [$]]))
+  (:use [jayq.core :only [$]]
+        [clojure.string :only [split]]))
 
 (defn on-modal-close [component]  
   (om/detach-root 
@@ -94,11 +95,19 @@
       (dom/div nil 
                (dom/div #js {:className "form-group"}
                         (dom/label nil "GitHub repository")
-                        (dom/input #js {:type "text"
-                                        :className "form-control"
-                                        :value (:value (:repo data))
-                                        :placeholder "username/repo"
-                                        :onChange #((:handler (:repo data)) (.. % -target -value))}))
+                        (dom/div #js {:className "form-inline"}
+                                 (dom/input #js {:type "text"
+                                                 :className "form-control"
+                                                 :value (:value (:user data))
+                                                 :placeholder "username or organization"
+                                                 :onChange #((:handler (:user data)) (.. % -target -value))
+                                                 })
+                                 (dom/span nil " / ")
+                                 (dom/input #js {:type "text"
+                                                 :className "form-control"
+                                                 :value (:value (:repo data))
+                                                 :placeholder "repository"
+                                                 :onChange #((:handler (:repo data)) (.. % -target -value))})))
                (dom/div #js {:className "form-group"}
                         (dom/label nil "Issue title")
                         (dom/input #js {:type "text"
@@ -136,12 +145,13 @@
             email (:user-email data)
             template (:email-template data)
             gh-repo (:gh-repo data)
+            gh-user (:gh-user data)
             gh-issue-title (:gh-issue-title data)
             gh-issue-body (:gh-issue-body data)
             data-pack {:type type
                        :project-id project-id
                        :artifact-value artifact
-                       :gh-repo gh-repo
+                       :gh-repo (str gh-user "/" gh-repo)
                        :gh-issue-title gh-issue-title
                        :gh-issue-body gh-issue-body
                        :user-email email
@@ -168,13 +178,14 @@
             email (:user-email data)
             template (:email-template data)
             gh-repo (:gh-repo data)
+            gh-user (:gh-user data)
             gh-issue-title (:gh-issue-title data)
             gh-issue-body (:gh-issue-body data)
             data-pack {:type type
                        :project-id project-id
                        :artifact-value artifact
                        :action-id action-id
-                       :gh-repo gh-repo
+                       :gh-repo (str gh-user "/" gh-repo)
                        :gh-issue-title gh-issue-title
                        :gh-issue-body gh-issue-body
                        :user-email email
@@ -205,6 +216,7 @@
 (def email-init-state {:email-template default-email-template})
 (def github-issue-init-state 
   {:gh-repo "" 
+   :gh-user ""
    :gh-issue-title default-github-issue-title 
    :gh-issue-body default-github-issue-body})
 
@@ -274,7 +286,9 @@
                              :handler #(om/set-state! owner :type %)}
 
                             :github-issue
-                            {:repo {:value (:gh-repo state) 
+                            {:user {:value (:gh-user state)
+                                    :handler #(om/set-state! owner :gh-user %)}
+                             :repo {:value (:gh-repo state) 
                                     :handler #(om/set-state! owner :gh-repo %)}
                              :title {:value (:gh-issue-title state) 
                                      :handler #(om/set-state! owner :gh-issue-title %)}

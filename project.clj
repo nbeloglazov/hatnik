@@ -16,6 +16,7 @@
                  [clojurewerkz/quartzite "1.3.0"]
                  [prismatic/schema "0.3.1"]
                  [com.stuartsierra/component "0.2.2"]
+                 [me.raynes/fs "1.4.5"]
 
                  ; ClojureScript
                  [org.clojure/clojurescript "0.0-2356"]

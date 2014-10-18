@@ -20,14 +20,23 @@
          (filter #(= id (:id %)))
          first))
 
-  (create-user! [storage email user-token]
-    (if-let [user (get-user storage email)]
+  (create-user! [storage data]
+    (if-let [user (get-user storage (:email data))]
       (:id user)
       (let [id (next-id)]
-        (swap! atom update-in [:users] conj {:id id
-                                             :email email
-                                             :user-token user-token})
+        (swap! atom update-in [:users] conj (assoc data
+                                              :id id))
         id)))
+
+  (update-user! [storage email data]
+    (swap! atom update-in [:users]
+           #(map (fn [{cur-email :email id :id :as user}]
+                   (if (= cur-email email)
+                     (assoc data
+                       :email cur-email
+                       :id id)
+                     user))
+                 %)))
 
 
   hatnik.db.storage.ProjectStorage
@@ -63,6 +72,7 @@
              (remove #(and (= (:user-id %) user-id)
                            (= (:id %) id))
                      projects))))
+
 
 
   hatnik.db.storage.ActionStorage

@@ -14,7 +14,7 @@
                  [com.draines/postal "1.11.1"]
                  [version-clj "0.1.0"]
                  [clojurewerkz/quartzite "1.3.0"]
-                 [prismatic/schema "0.3.0"]
+                 [prismatic/schema "0.3.1"]
                  [com.stuartsierra/component "0.2.2"]
                  
                  ; ClojureScript
@@ -31,17 +31,20 @@
 
   :profiles
   {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
-                        [ring-mock "0.1.5"]]
+                        [ring-mock "0.1.5"]
+                        [com.cemerick/piggieback "0.1.3"]]
+
+         :plugins [[jonase/eastwood "0.1.4"]]
 
          :cljsbuild
          {:builds
-          [{:source-paths ["src/cljs"]
+          [{:source-paths ["src/cljs" "dev/cljs"]
             :compiler
             {:output-to "resources/public/gen/js/hatnik.js"
              :optimizations :simple
              :pretty-print true}}]
           }}
-   :release 
+   :release
    {:cljsbuild
     {:builds
      [{:source-paths ["src/cljs"]

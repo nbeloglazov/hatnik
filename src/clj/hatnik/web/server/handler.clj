@@ -14,6 +14,7 @@
             [hatnik.web.server.login :refer [login-api-routes]]
             [hatnik.db.storage :as stg]
             [hatnik.versions :as ver]
+            [hatnik.utils :as utils]
 
             [ring.util.request :refer [body-string]]
             [ring.util.response :as resp]
@@ -40,9 +41,17 @@
            :body {:result "error"
                   :message "Not authenticated"}}))))
 
+(defn index-page [config req]
+  (if (.startsWith (-> req :headers (get "host")) "hatnik.clojurecup.com")
+    ; Redirect all requests coming for hatnik.clojurecup.com to hatnik.com
+    {:status 301
+     :headers {"Location" "http://hatnik.com"}
+     :body ""}
+    (renderer/core-page config (-> req :session :user))))
+
 (defn app-routes [db config]
   (routes
-   (GET "/" req (renderer/core-page config (-> req :session :user)))
+   (GET "/" req (index-page config req))
    (context "/api" []
             (context "/projects" []
                      (wrap-authenticated-only
@@ -73,15 +82,6 @@
     (do (timbre/info "Using memory session store.")
         (memory-store))))
 
-(defn wrap-exceptions [handler]
-  (fn [req]
-    (try
-      (handler req)
-      (catch Exception e
-        (timbre/error e)
-        (resp/response {:result :error
-                        :message "Something bad happened on server"})))))
-
 (defn wrap [config routes]
   (-> routes
       dump-request
@@ -89,7 +89,7 @@
                                               :max-age (* 60 60 24 14)
                                               :http-only true}
                                :store (get-session-store config)}})
-      wrap-exceptions
+      utils/wrap-exceptions
       (json/wrap-json-body {:keywords? true})
       json/wrap-json-response))
 

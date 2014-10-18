@@ -33,12 +33,19 @@
   (get-user-by-id [storage id]
     (norm-id (mc/find-map-by-id db users (to-object-id id))))
 
-  (create-user! [storage email user-token]
-    (if-let [user (get-user storage email)]
+  (create-user! [storage data]
+    (if-let [user (get-user storage (:email data))]
       (:id user)
-      (-> (mc/insert-and-return db users {:email email :user-token user-token})
+      (-> (mc/insert-and-return db users data)
           norm-id
           :id)))
+
+  (update-user! [storage email data]
+    (mc/update db users {:email email}
+               (-> data
+                   (dissoc data :_id :id)
+                   (assoc :email email))
+               {:multi false}))
 
 
   hatnik.db.storage.ProjectStorage

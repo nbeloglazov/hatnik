@@ -1,20 +1,7 @@
 (ns hatnik.worker.email-action
   (:require [postal.core :as p]
-            [clojure.string :as cstr]
-            [taoensso.timbre :as timbre]))
-
-(defn fill-template
-  "Substitutes variables to all {{aba}} placeholders if variable exists.
-  If there is no such variable - leaves placeholder unchanged."
-  [template variables]
-  (clojure.string/replace template #"\{\{([a-zA-Z-]+)\}\}"
-                          (fn [[whole variable]]
-                            (if-let [value (-> variable
-                                               cstr/lower-case
-                                               keyword
-                                               variables)]
-                              (str value)
-                              whole))))
+            [taoensso.timbre :as timbre]
+            [hatnik.utils :as u]))
 
 (defn perform
   "Sends email to provided user using template from action and
@@ -23,7 +10,7 @@
   (let [subject (format "[Hatnik] %s %s released"
                         (:library variables)
                         (:version variables))
-        body (fill-template (:template action) variables)
+        body (u/fill-template (:template action) variables)
         send-email (:send-email utils)]
     (try
       (send-email (:address action) subject body)

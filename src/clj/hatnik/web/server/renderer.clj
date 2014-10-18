@@ -17,6 +17,7 @@
 (defn modal-frames []
   (hc/html
    [:div#iModal.modal.fade {:data-keyboard "true"}]
+   [:div#iModalAddAction.modal.fade {:data-keyboard "true"}]
 
    [:div#iModalProject.modal.fade {:data-keyboard "true"}
     [:div.modal-dialog
@@ -31,25 +32,7 @@
       [:div.modal-footer
        [:button.btn.btn-primary {:onClick "hatnik.web.client.z_actions.send_new_project_request()"} "Create"]]]]]
 
-   [:div#iModalProjectMenu.modal.fade
-    [:div.modal-dialog
-     [:div.modal-content
-      [:div.modal-header
-       [:h4.modal-title "Project menu"]]
-
-      [:div.modal-body
-       [:form
-        [:input#project-name-edit-input.form-control
-         {:type "text"
-          :placeholder "Project name"}]]]
-
-      [:div.modal-footer
-       [:div.btn.btn-primary.pull-left
-        {:onClick "hatnik.web.client.z_actions.update_project()"}
-        "Update"]
-       [:div.btn.btn-danger.pull-right
-        {:onClick "hatnik.web.client.z_actions.delete_project()"}
-        "Delete"]]]]]))
+   [:div#iModalProjectMenu.modal.fade ]))
 
 (defn page-menu [config user]
   [:nav.navbar.navbar-default {:role "navigation"}
@@ -58,14 +41,14 @@
 
    [:div#navbarCollapse.collapse.navbar-collapse
     (if user
-                                        ; User log in
+      ; User logged in
       [:ul.nav.navbar-nav.navbar-right
        [:li
-        [:a {:href "#"} (:email user)]]
+        [:a (:github-login user)]]
        [:li
         [:a.btn {:href "/api/logout"} "Logout"]]]
 
-                                        ; User don't log in
+      ; User is not logged in
       [:ul.nav.navbar-nav.navbar-right
        [:li
         [:a.btn
@@ -73,16 +56,7 @@
 
 (defn work-main-page []
   (hc/html
-   [:div.row
-    [:div.col-md-2
-     [:a.btn.btn-success
-      {:href "#"
-       :onclick "hatnik.web.client.components.add_new_project();"} "Add project"]]
-    [:div.col-md-10]]
-
-   [:div
-    [:p ""]]
-   [:div#iProjectList.panel-group "Loading..."]))
+   [:div#iAppView ""]))
 
 (defn about-page []
   [:div.about
@@ -121,15 +95,15 @@
    [:ul.actions
     [:li.available [:strong  "Email"]
      " - send an email with custom text. You can use template variables to substitute the library name or the version."]
-    [:li.unavailable {:title "Work in progress"} [:strong "GitHub Issue"]
+    [:li.available {:title "Work in progress"} [:strong "Noop"]
+     " - does nothing. Useful if you want to "
+     "have a place that lists the latest versions for selected libraries."]
+    [:li.available {:title "Work in progress"} [:strong "GitHub Issue"]
      " - create an issue in the selected repo. The text can be customized just like in email."]
     [:li.unavailable {:title "Work in progress"} [:strong "GitHub Pull Request"]
      " - create a pull request in selected repo using simple find-and-replace-in-file operations."]
     [:li.unavailable {:title "Work in progress"} [:strong "GitHub Wiki"]
-     " - update a wiki page using the same find-and-replace operations."]
-    [:li.unavailable {:title "Work in progress"} [:strong "Noop"]
-     " - does nothing. Useful if you want to "
-     "have a place that lists the latest versions for selected libraries."]]
+     " - update a wiki page using the same find-and-replace operations."]]
    ])
 
 (defn core-page [config user]

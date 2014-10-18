@@ -4,7 +4,8 @@
   "Protocol for storing users."
   (get-user [storage email] "Returns user if exists on nil.")
   (get-user-by-id [storage id] "Returns user by id.")
-  (create-user! [storage email user-token] "Creates new user and returns id."))
+  (create-user! [storage data] "Creates new user and returns id.")
+  (update-user! [storage email data] "Updates user."))
 
 (defprotocol ProjectStorage
   "Protocol for storing projects."
@@ -20,5 +21,5 @@
     "Returns list of all actions or list of actions for given project and
 user. The version with single argument should never be used on web server.")
   (create-action! [storage user-id data] "Creates action. Returns id.")
-  (update-action! [storage user-id id data] "Updates project.")
+  (update-action! [storage user-id id data] "Updates action.")
   (delete-action! [storage user-id id] "Deletes action."))

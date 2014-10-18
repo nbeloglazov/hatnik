@@ -4,3 +4,4 @@ jdk:
   - openjdk7
 services:
   - mongodb
+env: TEST_DB=mongo

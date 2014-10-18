@@ -8,7 +8,9 @@
 
 (defn get-db []
   (let [db (component/start (map->MemoryStorage {}))
-        user-id (stg/create-user! db "me@email.com" "token")
+        user-id (stg/create-user! db {:email "me@email.com"
+                                      :github-token "token"
+                                      :github-login "me"})
         project-id (stg/create-project! db {:name "Default"
                                             :user-id user-id})]
     (stg/create-action! db user-id {:project-id project-id

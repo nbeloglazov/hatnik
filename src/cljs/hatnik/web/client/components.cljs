@@ -1,7 +1,10 @@
 (ns hatnik.web.client.components
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [hatnik.web.client.app-state :as state])
+            [hatnik.web.client.app-state :as state]
+            [hatnik.web.client.form.add-action :as add-action]
+            [hatnik.web.client.form.project-menu :as pmenu]
+            [hatnik.web.client.z-actions :as action])
   (:use [jayq.core :only [$]]))
 
 (defn ^:export add-new-project []
@@ -13,72 +16,114 @@
   (when (= "email" a-type)
     (dom/span #js {:className "glyphicon glyphicon-envelope action-type"})))
 
-(defn render-action [project-id action]
-  (let [name (get action "library")
-        template (get action "template")]
-  (dom/div
-   #js {:onClick 
-        (fn []
-          (state/set-form-type :email-edit-action)
-          (state/set-current-project project-id)
-          (state/set-current-action action)
-          (state/set-current-artifact-value name)
-          (state/set-current-email-template template)
-          (.modal ($ :#iModal)))
-        :className "panel panel-default action"}
-   (dom/div
-    #js {:className "panel-body bg-success"}
-    (render-action-type (get action "type"))
-    (dom/span #js {:className "action-info"}
-              (dom/div #js {:className "library-name"}
-                       (get action "library"))
-              (dom/div #js {:className "version"}
-                       (get action "last-processed-version")))))))
+(defn add-new-action-card [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (let [id (:project-id data)
+            email (:user-email data)]
+      (dom/div #js {:className "panel panel-default panel-info action add-action"
+                    :onClick #(add-action/show :type :add 
+                                               :project-id id
+                                               :user-email email)}
+               (dom/div #js {:className "panel-body bg-info"}
+                        (dom/span #js {:className "glyphicon glyphicon-plus"})
+                        " Add action"))))))
 
-(defn add-action [id]
-  (state/set-form-type :email-action)
-  (state/set-current-project id)
-  (state/set-current-artifact-value "")
-  (state/set-current-email-template state/default-email-template)
-  (.modal ($ :#iModal)))
+(defn email-action-card [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (let [id (:project-id data)
+            email (:user-email data)]
+      (dom/div #js {:className "panel panel-default action"
+                    :onClick #(add-action/show :type :update
+                                               :project-id id
+                                               :user-email email
+                                               :action @data)}
+               (dom/div 
+                #js {:className "panel-body bg-success"}
+                (dom/span #js {:className "glyphicon glyphicon-envelope action-type"})
+                (dom/span #js {:className "action-info"}
+                          (dom/div #js {:className "library-name"}
+                                   (get data "library"))
+                          (dom/div #js {:className "version"}
+                                   (get data "last-processed-version")))))))))
+
+(defn noop-action-card [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (let [id (:project-id data)
+            email (:user-email data)]
+        (dom/div #js {:className "panel panel-default action"
+                      :onClick #(add-action/show :type :update
+                                                 :project-id id
+                                                 :user-email email
+                                                 :action @data)}
+                 (dom/div 
+                  #js {:className "panel-body bg-success"}
+                  (dom/span #js {:className "action-info"}
+                            (dom/div #js {:className "library-name"}
+                                     (get data "library"))
+                            (dom/div #js {:className "version"}
+                                     (get data "last-processed-version")))))))))
+
+(defn github-issue-action-card [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (let [id (:project-id data)
+            email (:user-email data)]
+        (dom/div #js {:className "panel panel-default action"
+                      :onClick #(add-action/show :type :update
+                                                 :project-id id
+                                                 :user-email email
+                                                 :action @data)}
+                 (dom/div 
+                  #js {:className "panel-body bg-success"}
+                  (dom/span #js {:className "glyphicon glyphicon-fire action-type"})
+                  (dom/span #js {:className "action-info"}
+                            (dom/div #js {:className "library-name"}
+                                     (get data "library"))
+                            (dom/div #js {:className "version"}
+                                     (get data "last-processed-version")))))))))
 
 
-(defn add-new-action [project-id]
-  (dom/div #js {:className "panel panel-default panel-info action add-action"
-                :onClick #(add-action project-id)}
-           (dom/div #js {:className "panel-body bg-info"}
-                    (dom/span #js {:className "glyphicon glyphicon-plus"})
-                    " Add action")))
+(defmulti render-action #(:type %))
+(defmethod render-action "email" [data] (om/build email-action-card data))
+(defmethod render-action "noop" [data] (om/build noop-action-card data))
+(defmethod render-action "github-issue" [data] (om/build github-issue-action-card data))
+(defmethod render-action :add [data] (om/build add-new-action-card data))
 
-
-(defn actions-table [id actions]
+(defn actions-table [id actions email]
   (let [actions (->> actions
                      (sort-by first)
                      (map second))
         rendered
-        (map (fn [action]
+        (map (fn [act]
                (dom/div #js {:className "col-sm-12 col-md-6 col-lg-4 prj-list-item"}
-                        (render-action id action)))
+                        (render-action (assoc act :project-id id 
+                                              :type (get act "type")
+                                              :user-email email))))
              actions)]
     (apply dom/div #js {:className "row"}
            (concat rendered
                    [(dom/div #js {:className "col-sm-12 col-md-6 col-lg-4 prj-list-item"}
-                             (add-new-action id))]))))
-
-(defn project-menu [project]
-  (let [project-name-input (.getElementById js/document "project-name-edit-input")]
-    (set! (.-value project-name-input)
-          (get @project "name"))
-    (state/set-current-project (get @project "id"))
-    (.modal ($ :#iModalProjectMenu))))
+                             (render-action {:type :add 
+                                             :project-id id
+                                             :user-email email}))]))))
 
 (defn project-header-menu-button [project]
-  (dom/div #js {:className "dropdown"}
-           (dom/button
-            #js {:className "btn btn-default"
-                 :type "button"
-                 :onClick #(project-menu project)}
-            (dom/span #js {:className "glyphicon glyphicon-pencil pull-right"}))))
+  (let [id (get project "id")
+        name (get project "name")]
+    (dom/div #js {:className "dropdown"}
+             (dom/button
+              #js {:className "btn btn-default"
+                   :type "button"
+                   :onClick #(pmenu/show :project-id id
+                                         :name name)}
+              (dom/span #js {:className "glyphicon glyphicon-pencil pull-right"})))))
 
 (defn project-view [prj owner]
   (reify
@@ -105,16 +150,42 @@
        (dom/div #js {:className "panel-collapse collapse in"
                      :id (str "__PrjList" (get prj "id"))}
                 (dom/div #js {:className "panel-body"}
-                         (actions-table (get prj "id") (get prj "actions"))))))))
+                         (actions-table (get prj "id") 
+                                        (get prj "actions") 
+                                        (-> prj :user :email))))))))
 
 (defn project-list [data owner]
   (reify
     om/IRender
     (render [this]
-      (apply 
-       dom/div nil
-       (map #(om/build project-view %)
-            (->> (-> data :data :projects)
-                 (sort-by first)
-                 (map second)))))))
+      (let [project-data (->> (:projects data)
+                              (sort-by first)
+                              (map second))
+            user-data (:user data)]
+        (dom/div #js {:className "panel-group" :id "iProjectList"}   
+                 (apply dom/div nil
+                        (map #(om/build project-view (assoc % :user user-data))
+                             project-data)))))))
 
+
+(defn app-view [data owner]
+  (reify
+
+    om/IWillMount
+    (will-mount [this]
+      (.send goog.net.XhrIo "/api/current-user" state/update-user-data)
+      (.send goog.net.XhrIo "/api/projects" state/update-projects-list))
+
+    om/IRender 
+    (render [this]
+      (dom/div nil
+      (dom/div 
+       #js {:className "row"}
+       (dom/div #js {:className "col-md-2"}
+                (dom/a #js {:className "btn btn-success"
+                            :onClick add-new-project} "Add project"))
+       (dom/div #js {:className "col-md-10"}))
+
+      (dom/div nil
+               (dom/p nil "")
+               (om/build project-list data))))))

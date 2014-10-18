@@ -88,38 +88,42 @@
                                            :value (:template data)
                                            :onChange #((:template-handler data) (.. % -target -value))}))))))
 
-(defn github-issue-on-change [user repo timer form-handler form-status-handler error-handler]
+(defn github-issue-on-change [gh-repo timer form-handler form-status-handler error-handler]
   (js/clearTimeout timer)  
   
-  (form-handler 
-   (if (or (nil? user)
-           (nil? repo)
-           (= "" user)
-           (= "" repo))
-     (do
-       (form-status-handler "has-warning")
-       nil)
-     (js/setTimeout
-      (fn [] 
-        (action/get-github-repos 
-         user 
-         (fn [reply] 
-           (let [rest (js->clj reply)
-                 result (->> rest
-                             (map #(get % "name"))
-                             (filter #(= % repo)))]
-             (if (first result)
-               (form-status-handler "has-success")
-               (form-status-handler "has-error"))))
-         error-handler))
-      1000))))
+  (let [pr (split gh-repo "/")
+        user (first pr)
+        repo (second pr)]
+    (form-handler 
+     (if (or (nil? repo)
+             (nil? user)
+             (= "" user)
+             (= "" repo))
+       (do
+         (form-status-handler "has-warning")
+         nil)
+
+       (js/setTimeout
+        (fn [] 
+          (action/get-github-repos 
+           user 
+           (fn [reply] 
+             (let [rest (js->clj reply)
+                   result (->> rest
+                               (map #(get % "name"))
+                               (filter #(= % repo)))]
+               (if (first result)
+                 (form-status-handler "has-success")
+                 (form-status-handler "has-error"))))
+           error-handler))
+        1000)))))
 
 (defn github-issue-component [data owner]
   (reify
     om/IInitState
     (init-state [this]
       {:form-status 
-       (let [v (:value (:user data))]
+       (let [v (:value (:repo data))]
          (if (or (nil? v) (= "" v))
            "has-warning"
            "has-success"))
@@ -130,35 +134,21 @@
       (dom/div nil 
                (dom/div #js {:className (str "form-group " (:form-status state))}
                         (dom/label nil "GitHub repository")
-                        (dom/div #js {:className "form-inline"}
-                                 (dom/input #js {:type "text"
-                                                 :className "form-control"
-                                                 :value (:value (:user data))
-                                                 :placeholder "username or organization"
-                                                 :onChange #(github-issue-on-change
-                                                             (.. % -target -value)
-                                                             (:value (:repo data))
-                                                             (:timer state)
-                                                             (fn [t]
-                                                               ((:handler (:user data)) (.. % -target -value))
-                                                               (om/set-state! owner :timer t))
-                                                             (fn [st] (om/set-state! owner :form-status st))
-                                                             (fn [st] (om/set-state! owner :form-status "has-error")))
-                                                 })
-                                 (dom/span nil " / ")
-                                 (dom/input #js {:type "text"
-                                                 :className "form-control"
-                                                 :value (:value (:repo data))
-                                                 :placeholder "repository"
-                                                 :onChange #(github-issue-on-change
-                                                             (:value (:user data))
-                                                             (.. % -target -value)
-                                                             (:timer state)
-                                                             (fn [t]
-                                                               ((:handler (:repo data)) (.. % -target -value))
-                                                               (om/set-state! owner :timer t))
-                                                             (fn [st] (om/set-state! owner :form-status st))
-                                                             (fn [st] (om/set-state! owner :form-status "has-error")))})))
+                        (dom/input #js {:type "text"
+                                        :className "form-control"
+                                        :value (:value (:repo data))
+                                        :placeholder "github username or organization/repository"
+
+                                        :onChange 
+                                        #(github-issue-on-change
+                                          (.. % -target -value)
+                                          (:timer state)
+                                          (fn [t]
+                                            ((:handler (:repo data)) (.. % -target -value))
+                                            (om/set-state! owner :timer t))
+                                          (fn [st] (om/set-state! owner :form-status st))
+                                          (fn [st] (om/set-state! owner :form-status "has-error")))
+                                        }))
                (dom/div #js {:className "form-group"}
                         (dom/label nil "Issue title")
                         (dom/input #js {:type "text"
@@ -196,13 +186,12 @@
             email (:user-email data)
             template (:email-template data)
             gh-repo (:gh-repo data)
-            gh-user (:gh-user data)
             gh-issue-title (:gh-issue-title data)
             gh-issue-body (:gh-issue-body data)
             data-pack {:type type
                        :project-id project-id
                        :artifact-value artifact
-                       :gh-repo (str gh-user "/" gh-repo)
+                       :gh-repo gh-repo
                        :gh-issue-title gh-issue-title
                        :gh-issue-body gh-issue-body
                        :user-email email
@@ -229,14 +218,13 @@
             email (:user-email data)
             template (:email-template data)
             gh-repo (:gh-repo data)
-            gh-user (:gh-user data)
             gh-issue-title (:gh-issue-title data)
             gh-issue-body (:gh-issue-body data)
             data-pack {:type type
                        :project-id project-id
                        :artifact-value artifact
                        :action-id action-id
-                       :gh-repo (str gh-user "/" gh-repo)
+                       :gh-repo gh-repo
                        :gh-issue-title gh-issue-title
                        :gh-issue-body gh-issue-body
                        :user-email email
@@ -267,7 +255,6 @@
 (def email-init-state {:email-template default-email-template})
 (def github-issue-init-state 
   {:gh-repo "" 
-   :gh-user ""
    :gh-issue-title default-github-issue-title 
    :gh-issue-body default-github-issue-body})
 
@@ -288,16 +275,12 @@
    {:email-template (get action "template")}
     github-issue-init-state))
 
-(defmethod get-init-state-by-action "github-issue" [action]
-  (let [repo (split (get action "repo") "/")
-        user (first repo)
-        repository (second repo)]    
+(defmethod get-init-state-by-action "github-issue" [action]  
   (merge
    {:gh-issue-title (get action "title")
     :gh-issue-body (get action "body")
-    :gh-user user
-    :gh-repo repository}
-   email-init-state)))
+    :gh-repo (get action "repo")}
+   email-init-state))
 
 (defmethod get-init-state :update [data _]
   (let [action (:action data)]
@@ -352,9 +335,7 @@
                              :handler #(om/set-state! owner :type %)}
 
                             :github-issue
-                            {:user {:value (:gh-user state)
-                                    :handler #(om/set-state! owner :gh-user %)}
-                             :repo {:value (:gh-repo state) 
+                            {:repo {:value (:gh-repo state) 
                                     :handler #(om/set-state! owner :gh-repo %)}
                              :title {:value (:gh-issue-title state) 
                                      :handler #(om/set-state! owner :gh-issue-title %)}

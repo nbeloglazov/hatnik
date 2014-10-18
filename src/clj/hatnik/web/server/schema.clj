@@ -40,6 +40,11 @@
           (s/pred #(re-matches #"(?i)^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$" %)
                   'email-format?)))
 
+(def GithubRepository
+  (s/both (s/pred #(re-matches #"(?i)^[A-Z0-9-_]+/[A-Z0-9-_]+$" %)
+                  'valid-github-repo?)
+          (string-of-length 1 128)))
+
 (def Project
   "Schema for project. Project has only 1 field - name in API."
   {:name (string-of-length 1 128)})
@@ -62,8 +67,7 @@
    :type (s/eq "github-issue")
    :title TemplateTitle
    :body TemplateBody
-   :repo (s/pred #(re-matches #"(?i)^[A-Z0-9-_]+/[A-Z0-9-_]+$" %)
-                  'valid-github-repo?)})
+   :repo GithubRepository})
 
 (def Action
   "Schema for action. Essentially it is the union of all actions."

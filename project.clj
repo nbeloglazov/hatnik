@@ -26,7 +26,7 @@
             [lein-cljsbuild "1.0.3"]]
 
   :main hatnik.system
-  :source-paths ["src/clj"]
+  :source-paths ["src/clj" "target/gen/clj"]
   :test-paths ["test/clj"]
 
   :profiles
@@ -34,20 +34,28 @@
                         [ring-mock "0.1.5"]
                         [com.cemerick/piggieback "0.1.3"]]
 
-         :plugins [[jonase/eastwood "0.1.4"]]
+         :plugins [[jonase/eastwood "0.1.4"]
+                   [com.keminglabs/cljx "0.4.0"]]
 
          :cljsbuild
          {:builds
-          [{:source-paths ["src/cljs" "dev/cljs"]
+          [{:source-paths ["src/cljs" "dev/cljs" "target/gen/cljs"]
             :compiler
             {:output-to "resources/public/gen/js/hatnik.js"
              :optimizations :simple
              :pretty-print true}}]
-          }}
+          }
+         :cljx {:builds [{:source-paths ["src/cljx"]
+                 :output-path "target/gen/clj"
+                 :rules :clj}
+
+                {:source-paths ["src/cljx"]
+                 :output-path "target/gen/cljs"
+                 :rules :cljs}]}}
    :release
    {:cljsbuild
     {:builds
-     [{:source-paths ["src/cljs"]
+     [{:source-paths ["src/cljs" "target/gen/cljs"]
        :compiler
        {:output-to "resources/public/gen/js/hatnik.js"
         :optimizations :advanced

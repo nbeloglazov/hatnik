@@ -5,7 +5,7 @@
 
             [hatnik.versions :as ver]
             [hatnik.db.storage :as stg]
-            [hatnik.web.server.schema :as s]))
+            [hatnik.schema :as s]))
 
 (defn get-user
   "Retrieves user from the request map. Assumes that user logged in and

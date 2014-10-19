@@ -7,9 +7,9 @@
 (defn string-of-length
   "Create schema that validates string length."
   [min max]
-  (s/both String
+  (s/both s/Str
           (s/pred #(<= min (count %) max)
-                  (symbol (format "length-from-%s-to-%s?" min max)))))
+                  (symbol (str "length-from-" min "-to-" max "?")))))
 
 (def Id
   "Schema for validaing that string matches id.

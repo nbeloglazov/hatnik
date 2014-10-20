@@ -1,7 +1,9 @@
 (ns hatnik.web.client.z-actions
   (:require [jayq.core :as jq]
             [hatnik.web.client.app-state :as state]
-            [hatnik.web.client.message :as msg])
+            [hatnik.web.client.message :as msg]
+            [hatnik.schema :as schm]
+            [schema.core :as s])
   (:use [jayq.core :only [$]]))
 
 (defn get-data-from-input [id]
@@ -43,7 +45,7 @@
 
 (defn ^:export send-new-project-request []
   (let [name (.-value (.getElementById js/document "project-name-input"))]
-    (if (= "" name)
+    (if (s/check schm/Project {:name name})
       (msg/danger "Project name must be not empty!")
       (do
         (.modal ($ :#iModalProject) "hide")
@@ -54,183 +56,122 @@
     (when (= "ok" (get resp "result"))
       (state/update-all-view))))
 
-(defn send-new-email-action [project-id artifact email email-body]
-  (let [data {:project-id project-id
-              :type "email"
-              :address email
-              :template email-body
-              :library artifact}]
-    (if (or
-         (= "" artifact)
-         (= "" email)
-         (= "" email-body))
-      (msg/danger "Wrong data! Check out fields!")
-
-      (do
-        (.modal ($ :#iModalAddAction) "hide")
-        (ajax "/api/actions" "POST" data 
-              (wrap-error-alert #(create-new-action-callback data %)))))))
-
-(defn send-new-noop-action [project-id artifact]
-  (let [data {:project-id project-id
-              :type "noop"
-              :library artifact}]
-    (if (= "" artifact)
-      (msg/danger "Wrong data! Check out fields!")
-
-      (do
-        (.modal ($ :#iModalAddAction) "hide")
-        (ajax "/api/actions" "POST" data 
-              (wrap-error-alert #(create-new-action-callback data %)))))))
-
-(defn send-new-github-issue-action [project-id repo title body library]
-  (let [data {:project-id project-id
-              :type "github-issue"
-              :repo repo
-              :title title
-              :body body
-              :library library}]
-    (if (or (= "" library)
-            (= "" repo)
-            (= "" title))
-      (msg/danger "Wrong data! Check out fields!")
-
-      (do
-        (.modal ($ :#iModalAddAction) "hide")
-        (ajax "/api/actions" "POST" data 
-              (wrap-error-alert #(create-new-action-callback data %)))))))
 
 (defmulti send-new-action #(:type %))
+
 (defmethod send-new-action :email [data-pack]
-  (send-new-email-action (:project-id data-pack)
-                         (:artifact-value data-pack)
-                         (:user-email data-pack)
-                         (:email-template data-pack)))
-(defmethod send-new-action :noop [data-pack]
-  (send-new-noop-action (:project-id data-pack)
-                        (:artifact-value data-pack)))
-(defmethod send-new-action :github-issue [data-pack]
-  (send-new-github-issue-action (:project-id data-pack)
-                                (:gh-repo data-pack)
-                                (:gh-issue-title data-pack)
-                                (:gh-issue-body data-pack)
-                                (:artifact-value data-pack)))
-
-
-(defn test-new-email-action [project-id artifact email email-body]
-  (let [data {:project-id project-id
+  (let [data {:project-id (:project-id data-pack)
               :type "email"
-              :address email
-              :template email-body
-              :library artifact}]
-    (if (or
-         (= "" artifact)
-         (= "" email)
-         (= "" email-body))
-      (msg/danger "Wrong data! Check out fields!")
+              :address (:user-email data-pack)
+              :template (:email-template data-pack)
+              :library (:artifact-value data-pack)}]
+    (if (s/check schm/EmailAction data)
+      (msg/danger "Data is wrong! Check out it please.")
+      (do
+        (.modal ($ :#iModalAddAction) "hide")
+        (ajax "/api/actions" "POST" data 
+              (wrap-error-alert #(create-new-action-callback data %)))))))
 
-      (ajax "/api/actions/test" "POST" data
-            (wrap-error-alert (fn [e] (msg/success "Email sent. Check your inbox.")))))))
+(defmethod send-new-action :noop [data-pack]
+  (let [data {:type "noop"
+              :project-id (:project-id data-pack)
+              :library (:artifact-value data-pack)}]
+    (if (s/check schm/NoopAction data)
+      (msg/danger "Data is wrong! Check out it please.")
+      (do
+        (.modal ($ :#iModalAddAction) "hide")
+        (ajax "/api/actions" "POST" data 
+              (wrap-error-alert #(create-new-action-callback data %)))))))
 
-(defn test-github-issue-action [project-id repo title body library]
-  (let [data {:project-id project-id
+(defmethod send-new-action :github-issue [data-pack]
+  (let [data {:project-id (:project-id data-pack)
               :type "github-issue"
-              :repo repo
-              :title title
-              :body body
-              :library library}]
-    (if (or (= "" library)
-            (= "" repo)
-            (= "" title))
-      (msg/danger "Wrong data! Check out fields!")
+              :repo (:gh-repo data-pack)
+              :title (:gh-issue-title data-pack)
+              :body (:gh-issue-body data-pack)
+              :library (:artifact-value data-pack)}]
+    (if (s/check schm/GithubIssueAction data)
+      (msg/danger "Data is wrong! Check out it please.")
+      (do
+        (.modal ($ :#iModalAddAction) "hide")
+        (ajax "/api/actions" "POST" data 
+              (wrap-error-alert #(create-new-action-callback data %)))))))
 
-      (ajax "/api/actions/test" "POST" data
-            (wrap-error-alert (fn [e] (msg/success "GitHub issue created. Check out your project.")))))))
 
 (defmulti test-action #(:type %))
 (defmethod test-action :email [data-pack]
-  (test-new-email-action (:project-id data-pack)
-                         (:artifact-value data-pack)
-                         (:user-email data-pack)
-                         (:email-template data-pack)))
+  (let [data {:project-id (:project-id data-pack)
+              :type "email"
+              :address (:user-email data-pack)
+              :template (:email-template data-pack)
+              :library (:artifact-value data-pack)}]
+    (if (s/check schm/EmailAction data)
+      (msg/danger "Data is wrong! Check out it please.")      
+      (do
+        (msg/info "We are trying to send email to you...")
+       (ajax "/api/actions/test" "POST" data
+            (wrap-error-alert (fn [e] (msg/success "Email sent. Check your inbox."))))))))
+
 (defmethod test-action :github-issue [data-pack]
-  (test-github-issue-action (:project-id data-pack)
-                            (:gh-repo data-pack)
-                            (:gh-issue-title data-pack)
-                            (:gh-issue-body data-pack)
-                            (:artifact-value data-pack)))
-
-(defn update-email-action [project-id action-id artifact email email-body]
-    (let [data {:project-id project-id
-                :type "email"
-                :address email
-                :template email-body
-                :library artifact}]
-    (if (or
-         (= "" artifact)
-         (= "" email)
-         (= "" email-body))
-      (msg/danger "Wrong data! Check out fields!")
-
-      (do
-        (.modal ($ :#iModalAddAction) "hide")
-        (ajax 
-         (str "/api/actions/" action-id) "PUT" 
-         data (wrap-error-alert
-               #(common-update-callback "Action don't updated!" data %)))))))
-
-(defn update-noop-action [project-id action-id artifact]
-  (let [data {:project-id project-id
-              :type "noop"
-              :library artifact}]
-    (if (= "" artifact)
-      (msg/danger "Wrong data! Check out fields!")
-
-      (do
-        (.modal ($ :#iModalAddAction) "hide")
-        (ajax 
-         (str "/api/actions/" action-id) "PUT" 
-         data (wrap-error-alert
-               #(common-update-callback "Action don't updated!" data %)))))))
-
-(defn update-github-issue-action [project-id action-id repo title body library]
-  (let [data {:project-id project-id
+  (let [data {:project-id (:project-id data-pack)
               :type "github-issue"
-              :repo repo
-              :title title
-              :body body
-              :library library}]
-    (if (or (= "" library)
-            (= "" repo)
-            (= "" title))
-      (msg/danger "Wrong data! Check out fields!")
-
+              :repo (:gh-repo data-pack)
+              :title (:gh-issue-title data-pack)
+              :body (:gh-issue-body data-pack)
+              :library (:artifact-value data-pack)}]
+    (if (s/check schm/GithubIssueAction data)
+      (msg/danger "Data is wrong! Check out it please.")
       (do
-        (.modal ($ :#iModalAddAction) "hide")
-        (ajax 
-         (str "/api/actions/" action-id) "PUT" 
-         data (wrap-error-alert
-               #(common-update-callback "Action don't updated!" data %)))))))
+        (msg/info "We are trying to create issue on Github...")
+        (ajax "/api/actions/test" "POST" data
+              (wrap-error-alert (fn [e] (msg/success "GitHub issue created. Check out your project."))))))))
+
 
 (defmulti update-action #(:type %))
 (defmethod update-action :email [data-pack]
-  (update-email-action (:project-id data-pack)
-                       (:action-id data-pack)
-                       (:artifact-value data-pack)
-                       (:user-email data-pack)
-                       (:email-template data-pack)))
-(defmethod update-action :noop [data-pack]
-  (update-noop-action (:project-id data-pack)
-                      (:action-id data-pack)
-                      (:artifact-value data-pack)))
-(defmethod update-action :github-issue [data-pack]
-  (update-github-issue-action (:project-id data-pack)
-                              (:action-id data-pack)
-                              (:gh-repo data-pack)
-                              (:gh-issue-title data-pack)
-                              (:gh-issue-body data-pack)
-                              (:artifact-value data-pack)))
+  (let [data {:project-id (:project-id data-pack)
+              :type "email"
+              :address (:user-email data-pack)
+              :template (:email-template data-pack)
+              :library (:artifact-value data-pack)}]
+    (if (s/check schm/EmailAction data)
+      (msg/danger "Data is wrong! Check out it please.")
+      (do
+        (.modal ($ :#iModalAddAction) "hide")
+        (ajax 
+         (str "/api/actions/" (:action-id data-pack)) "PUT" 
+         data (wrap-error-alert
+               #(common-update-callback "Action don't updated!" data %)))))))
 
+(defmethod update-action :noop [data-pack]
+  (let [data {:project-id (:project-id data-pack)
+              :type "noop"
+              :library (:artifact-value data-pack)}]
+    (if (s/check schm/NoopAction data)
+      (msg/danger "Data is wrong! Check out it please.")
+      (do
+        (.modal ($ :#iModalAddAction) "hide")
+        (ajax 
+         (str "/api/actions/" (:action-id data-pack)) "PUT" 
+         data (wrap-error-alert
+               #(common-update-callback "Action don't updated!" data %)))))))
+
+(defmethod update-action :github-issue [data-pack]
+  (let [data {:project-id (:project-id data-pack)
+              :type "github-issue"
+              :repo (:gh-repo data-pack)
+              :title (:gh-issue-title data-pack)
+              :body (:gh-issue-body data-pack)
+              :library (:artifact-value data-pack)}]
+    (if (s/check schm/GithubIssueAction data)
+      (msg/danger "Data is wrong! Check out it please.")
+      (do
+        (.modal ($ :#iModalAddAction) "hide")
+        (ajax 
+         (str "/api/actions/" (:action-id data-pack)) "PUT" 
+         data (wrap-error-alert
+               #(common-update-callback "Action don't updated!" data %)))))))
+   
 (defn delete-action [action-id]
   (.modal ($ :#iModalAddAction) "hide")
   (ajax 
@@ -246,11 +187,14 @@
        #(common-update-callback "Project don't deleted!" {} %))))
 
 (defn ^:export update-project [project-id new-name]
-  (.modal ($ :#iModalProjectMenu) "hide")
-  (ajax
-   (str "/api/projects/" project-id) "PUT"
-   {:name new-name} 
-   (wrap-error-alert #(common-update-callback "Project don't renamed!" {} %))))
+  (let [data {:name new-name}]
+    (if (s/check schm/Project data)
+      (msg/danger "Data is wrong! Check out it please.")
+      (do
+        (.modal ($ :#iModalProjectMenu) "hide")
+        (ajax
+         (str "/api/projects/" project-id) "PUT"  data
+         (wrap-error-alert #(common-update-callback "Project don't renamed!" {} %)))))))
 
 
 (defn get-library [library callback]

@@ -29,7 +29,7 @@
         temp-file (fs/temp-file "hatnik-temp-file")]
     (try
       (set-state dir initial-state)
-      (spit temp-file "inacessible")
+      (spit temp-file "inaccessible")
 
       ; Update library-1 to version 2.2.2
       (let [variables {:library "library-1"
@@ -55,8 +55,8 @@
                        :version "3.0.0"
                        :previous-version "2.3.4"}
             operations [{:file "file1.txt"
-                         :regex "({{library}} )[0-9.\\w]+"
-                         :replacement "$1{{version}}"}]]
+                         :regex "({{library}}) [0-9.\\w]+"
+                         :replacement "$1 {{version}}"}]]
         (is (= [:updated]
                (update-files {:operations operations}
                              variables
@@ -71,8 +71,8 @@
                        :version "6.0"
                        :previous-version "5.5-alpha"}
             operations [{:file "some/dir/hello.txt"
-                         :regex "({{library}} of version )[^!]+"
-                         :replacement "$1{{version}}"}]]
+                         :regex "({{library}} of version) [^!]+"
+                         :replacement "$1 {{version}}"}]]
         (is (= [:updated]
                (update-files {:operations operations}
                              variables

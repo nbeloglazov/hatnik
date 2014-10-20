@@ -20,6 +20,14 @@
                    :subject subject
                    :body body}))
 
+(defn map-value
+  "Iterates through the map and applies given function to each value,
+  return updated map."
+  [f mp]
+  (into {}
+        (for [[key value] mp]
+          [key (f value)])))
+
 (defn create-github-issue
   "Creates github issue using provided token and data.
     github-token - token of Hatnik github user

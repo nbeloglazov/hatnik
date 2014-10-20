@@ -17,6 +17,7 @@
 To start the server locally just run:
 
 ```shell
+lein cljx once
 lein cljsbuild once
 lein run
 ```

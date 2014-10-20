@@ -1,6 +1,6 @@
 (defproject hatnik.web "0.1.0-SNAPSHOT"
-  :description "FIXME: write description"
-  :url "http://example.com/FIXME"
+  :description "Web app for tracking library releases."
+  :url "http://hatnik.com"
   :dependencies [; Clojure
                  [org.clojure/clojure "1.6.0"]
                  [ring "1.3.1"]
@@ -16,7 +16,10 @@
                  [clojurewerkz/quartzite "1.3.0"]
                  [prismatic/schema "0.3.1"]
                  [com.stuartsierra/component "0.2.2"]
-                 
+                 [me.raynes/fs "1.4.5"]
+                 [com.googlecode.streamflyer/streamflyer-core "1.1.2"]
+                 [commons-io "2.4"]
+
                  ; ClojureScript
                  [org.clojure/clojurescript "0.0-2356"]
                  [jayq "2.5.2"]

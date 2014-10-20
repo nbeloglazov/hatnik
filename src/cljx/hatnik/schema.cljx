@@ -48,6 +48,17 @@
           (s/pred #(re-matches #"(?i)^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$" %)
                   'email-format?)))
 
+(def GithubRepository
+  (s/both (s/pred #(re-matches #"(?i)^[A-Z0-9-_]+/[A-Z0-9-_]+$" %)
+                  'valid-github-repo?)
+          (string-of-length 1 128)))
+
+(def ReplaceOperation
+  "Schema for replact operation in pull request action."
+  {:file (string-of-length 1 1024)
+   :regex (string-of-length 1 128)
+   :replacement (string-of-length 1 128)})
+
 (def Project
   "Schema for project. Project has only 1 field - name in API."
   {:name (string-of-length 1 128)})
@@ -70,15 +81,25 @@
    :type (s/eq "github-issue")
    :title TemplateTitle
    :body TemplateBody
-   :repo (s/pred #(re-matches #"(?i)^[A-Z0-9-_]+/[A-Z0-9-_]+$" %)
-                  'valid-github-repo?)})
+   :repo GithubRepository})
+
+(def GithubPullRequestAction
+  {:project-id Id
+   :library Library
+   :type (s/eq "github-pull-request")
+   :title TemplateTitle
+   :body TemplateBody
+   :commit-message (string-of-length 1 2000)
+   :repo GithubRepository
+   :operations [ReplaceOperation]})
 
 (def Action
   "Schema for action. Essentially it is the union of all actions."
   (s/conditional
    #(= (:type %) "email") EmailAction
    #(= (:type %) "noop") NoopAction
-   #(= (:type %) "github-issue") GithubIssueAction))
+   #(= (:type %) "github-issue") GithubIssueAction
+   #(= (:type %) "github-pull-request") GithubPullRequestAction))
 
 #+clj
 (defmacro ensure-valid

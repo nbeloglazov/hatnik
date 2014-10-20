@@ -72,7 +72,7 @@
                       (map-by-id expected))
 
         ;
-        ; Create 3 actions in Default proj and 1 action in Foo.
+        ; Create 4 actions in Default proj and 1 action in Foo.
         ;
 
         ; Create first action in Default. Email action.
@@ -104,6 +104,21 @@
         _ (is (= (:last-processed-version resp) ring-ver))
         act-dflt-three (merge act-dflt-three (dissoc resp :result))
 
+        ; Create fourth action in Default. GithubPullRequest action.
+        act-dflt-four {:project-id proj-dflt-id
+                       :type "github-pull-request"
+                       :repo "quil/quil"
+                       :body "Template body PR"
+                       :title "Template title PR"
+                       :commit-message "Commit message"
+                       :operations [{:file "project.clj"
+                                     :regex "hello"
+                                     :replacement "world"}]
+                       :library "ring"}
+        resp (ok? (http :post "/actions" act-dflt-four))
+        _ (is (= (:last-processed-version resp) ring-ver))
+        act-dflt-four (merge act-dflt-four (dissoc resp :result))
+
         ; Create single action in Foo.
         act-foo-one {:project-id proj-foo-id
                      :type "email"
@@ -118,7 +133,8 @@
         expected [{:name "Default" :id proj-dflt-id
                    :actions (map-by-id [act-dflt-one
                                         act-dflt-two
-                                        act-dflt-three])}
+                                        act-dflt-three
+                                        act-dflt-four])}
                   {:name "Foo" :id proj-foo-id
                    :actions (map-by-id [act-foo-one])}]
         _ (data-equal (-> (http :get "/projects") ok? :projects)
@@ -147,7 +163,9 @@
         ; Check that only project "First" is present and it contains
         ; actions one and three.
         expected [{:name "First" :id proj-dflt-id
-                   :actions (map-by-id [act-dflt-one act-dflt-three])}]
+                   :actions (map-by-id [act-dflt-one
+                                        act-dflt-three
+                                        act-dflt-four])}]
         _ (data-equal (-> (http :get "/projects") ok? :projects)
                       (map-by-id expected))
 
@@ -169,12 +187,71 @@
 
         ; Login as old user again and verify that the project is
         ; retrieved properly.
-        _ (ok? (http :get (str "/force-login?skip-dummy-data=true&email="                                  email)))
+        _ (ok? (http :get (str "/force-login?skip-dummy-data=true&email="
+                               email)))
         expected [{:name "First" :id proj-dflt-id
-                   :actions (map-by-id [act-dflt-one act-dflt-three])}]
+                   :actions (map-by-id [act-dflt-one
+                                        act-dflt-three
+                                        act-dflt-four])}]
         _ (data-equal (-> (http :get "/projects") ok? :projects)
                       (map-by-id expected))
         ]))
+
+(def long-string (apply str (repeat 1000 "1111")))
+
+(defn without-each-key [action]
+  (map #(dissoc action %) (keys action)))
+
+(defn make-invalid-email-actions [proj-id email]
+  (let [valid {:project-id proj-id
+               :type "email"
+               :address email
+               :template "Template dflt one"
+               :library "quil"}]
+    (concat (without-each-key valid)
+            (map #(merge valid %)
+                 [{:library "iDontExist"}
+                  {:type "unknown"}
+                  {:template long-string}
+                  {:id "1234"}]))))
+
+(defn make-invalid-github-issue-actions [proj-id]
+  (let [valid {:project-id proj-id
+               :library "quil"
+               :type "github-issue"
+               :repo "nbeloglazov/hatnik"
+               :title "Hello {{library}}"
+               :body "Hello"}]
+    (concat (without-each-key valid)
+            (map #(merge valid %)
+                 [{:repo "invalid$repo%1"}
+                  {:title long-string}
+                  {:body long-string}]))))
+
+(defn make-invalid-github-pull-request-actions [proj-id]
+  (let [valid {:project-id proj-id
+               :library "quil"
+               :type "github-pull-request"
+               :repo "nbeloglazov/hatnik"
+               :title "Hello {{library}}"
+               :body "Hello"
+               :commit-message "Commit"
+               :operations [{:file "some/file"
+                             :regex "regex"
+                             :replacement "replacement"}]}]
+    (concat (without-each-key valid)
+            (map #(merge valid %)
+                 [{:repo "invalid$repo%1"}
+                  {:title long-string}
+                  {:body long-string}
+                  {:commit-message long-string}
+                  {:operations [{:regex "regex"
+                                 :replacement "repl"}]}
+                  {:operations [{:file "some/file"
+                                 :replacement "repl"}]}
+                  {:operations [{:file long-string
+                                 :regex long-string
+                                 :replacement long-string}]}]))))
 
 (deftest test-api-invalid-requests
   (let [quil-ver (-> (http :get "/library-version?library=quil")
@@ -203,7 +280,6 @@
         _ (is (= (:last-processed-version resp) quil-ver))
         act-dflt-one (merge act-dflt-one (dissoc resp :result))
 
-        long-string (apply str (repeat 1000 "1111"))
         ; Try to create project without name, empty name, long name,
         ; invalid keys. Also try to update existing project.
         _ (doseq [proj [{}
@@ -213,27 +289,11 @@
             (error? (http :post "/projects" proj))
             (error? (http :put (str "/projects/" proj-dflt-id) proj)))
 
-        ; Try to create invalid actions or update existing action to be
-        ; invalid.
-        valid-act (dissoc act-dflt-one
-                          :id :last-processed-version)
-        valid-gi-action {:project-id proj-dflt-id
-                         :library "quil"
-                         :type "github-issue"
-                         :repo "quil/quil"
-                         :title "Hello {{library}}"
-                         :body "Hello"}
-        _ (doseq [action [(dissoc valid-act :template)
-                          (assoc valid-act :library "iDontExist")
-                          (assoc valid-act :type "unknown")
-                          (assoc valid-act :template long-string)
-                          (assoc valid-act :id "1233")
-                          (assoc valid-gi-action
-                            :repo "invalid$repo%1")
-                          (assoc valid-gi-action
-                            :title long-string)
-                          (assoc valid-gi-action
-                            :body long-string)]]
+        ; Try to create invalid actions.
+        _ (doseq [action (concat
+                          (make-invalid-email-actions proj-dflt-id email)
+                          (make-invalid-github-issue-actions proj-dflt-id)
+                          (make-invalid-github-pull-request-actions proj-dflt-id))]
             (error? (http :post "/actions" action))
             (error? (http :put (str "/actions/" (:id act-dflt-one)) action)))
 

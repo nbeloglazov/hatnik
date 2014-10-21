@@ -3,7 +3,10 @@
             [ring.util.response :as resp]
             [taoensso.timbre :as timbre]
             [taoensso.timbre.appenders.postal :refer [make-postal-appender]]
-            [tentacles.issues :as issues]
+            [tentacles
+             [issues :as issues]
+             [repos :as repos]
+             [pulls :as pulls]]
             [clojure.string :as cstr]))
 
 (defn send-email
@@ -37,6 +40,27 @@
   (issues/create-issue user repo title
                        {:body body
                         :oauth-token github-token}))
+
+(defn fork-github-repo
+  "Forks github repo. Returns clone url.
+    github-token - token of Hathink github user.
+    user - owner of the repo we want to fork.
+    repo - repo we want to fork."
+  [github-token user repo]
+  (->> {:oauth-token github-token}
+       (repos/create-fork user repo)
+       (:ssh_url)))
+
+(defn create-github-pull-request
+  "Creates github pull request, all commits must be pushed to
+  server to be ready for pull-requesting.
+    github-token - token of Hathink github user.
+    data - map with pull request settings. Should contain
+           following fields: :user, :repo, :title, :body, :branch"
+  [github-token {:keys [user repo title body branch] :as data}]
+  (pulls/create-pull user repo title "master" (str "hatnik:" branch)
+                     {:oauth-token github-token
+                      :body body}))
 
 (defn fill-template
   "Substitutes variables to all {{aba}} placeholders if variable exists.

@@ -1,16 +1,5 @@
-#+clj
 (ns hatnik.schema
-  (:require [schema.core :as s]
-            [schema.coerce :as coerce]
-            [cheshire.generate :as gen]
-            [schema.utils :as u]))
-
-#+cljs
-(ns hatnik.schema
-  (:require [schema.core :as s]
-            [schema.coerce :as coerce]
-            [schema.utils :as u]))
-
+  (:require [schema.core :as s]))
 
 (defn string-of-length
   "Create schema that validates string length."
@@ -100,32 +89,6 @@
    #(= (:type %) "noop") NoopAction
    #(= (:type %) "github-issue") GithubIssueAction
    #(= (:type %) "github-pull-request") GithubPullRequestAction))
-
-#+clj
-(defmacro ensure-valid
-  "Validates object using given schema and executes body if valid.
-  If not valid - returns 400 response."
-  [schema obj & body]
-  `(if-let [error# (s/check ~schema ~obj)]
-     {:body {:result :error
-             :message "Invalid request format"
-             :validation-error error#}
-      :status 400}
-     (do ~@body)))
-
-
-; Add encoders to cheshire so validation errors can be
-; encoded to string and sent in response.
-#+clj
-(gen/add-encoder schema.utils.ValidationError
-                 (fn [obj gen]
-                   (gen/encode-seq (u/validation-error-explain obj) gen)))
-
-#+clj
-(gen/add-encoder Class
-                 (fn [obj gen]
-                   (gen/encode-str (.getName obj) gen)))
-
 
 (comment
 

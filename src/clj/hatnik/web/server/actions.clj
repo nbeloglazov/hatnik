@@ -5,7 +5,8 @@
 
             [hatnik.versions :as ver]
             [hatnik.db.storage :as stg]
-            [hatnik.schema :as s]))
+            [hatnik.schema :as s]
+            [hatnik.schema-utils :as su]))
 
 (defn get-user
   "Retrieves user from the request map. Assumes that user logged in and
@@ -89,16 +90,16 @@
   [db config]
   (routes
    (POST "/" req
-         (s/ensure-valid s/Action (:body req)
-                         (create-action db (get-user req) (:body req))))
+         (su/ensure-valid s/Action (:body req)
+                          (create-action db (get-user req) (:body req))))
 
    (PUT "/:id" [id :as req]
-        (s/ensure-valid s/Action (:body req)
-                        (update-action db (get-user req) id (:body req))))
+        (su/ensure-valid s/Action (:body req)
+                         (update-action db (get-user req) id (:body req))))
 
    (DELETE "/:id" [id :as req] (delete-action db (get-user req) id))
 
    (POST "/test" req
-         (s/ensure-valid s/Action (:body req)
-                         (test-action (get-user req) (:body req)
-                                      (:worker-server config))))))
+         (su/ensure-valid s/Action (:body req)
+                          (test-action (get-user req) (:body req)
+                                       (:worker-server config))))))

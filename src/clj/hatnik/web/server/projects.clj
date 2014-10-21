@@ -3,7 +3,8 @@
             [compojure.core :refer :all]
 
             [hatnik.db.storage :as stg]
-            [hatnik.schema :as s]))
+            [hatnik.schema :as s]
+            [hatnik.schema-utils :as su]))
 
 (defn get-user
   "Retrieves user from the request map. Assumes that user logged in and
@@ -59,11 +60,11 @@
    (GET "/" req (all-projects db (get-user req)))
 
    (POST "/" req
-         (s/ensure-valid s/Project (:body req)
-                         (create-project db (get-user req) (:body req))))
+         (su/ensure-valid s/Project (:body req)
+                          (create-project db (get-user req) (:body req))))
 
    (PUT "/:id" [id :as req]
-        (s/ensure-valid s/Project (:body req)
-                        (update-project db (get-user req) id (:body req))))
+        (su/ensure-valid s/Project (:body req)
+                         (update-project db (get-user req) id (:body req))))
 
    (DELETE "/:id" [id :as req] (delete-project db (get-user req) id))))

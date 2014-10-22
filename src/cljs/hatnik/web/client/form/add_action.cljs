@@ -1,7 +1,9 @@
 (ns hatnik.web.client.form.add-action
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [hatnik.web.client.z-actions :as action])
+            [hatnik.web.client.z-actions :as action]
+            [hatnik.schema :as schm]
+            [schema.core :as s])
   (:use [jayq.core :only [$]]
         [clojure.string :only [split replace]]))
 
@@ -73,20 +75,29 @@
 
 (defn email-component [data owner]
   (reify
-    om/IRender
-    (render [this]
+    om/IInitState
+    (init-state [this]
+      {:status "has-success"})
+
+    om/IRenderState
+    (render-state [this state]
       (dom/div nil
                (dom/div #js {:className "form-group"}
                         (dom/label #js {:for "email-input"} "Email")
                         (dom/p #js {:id "email-input"}
                                (:email data)))
-               (dom/div #js {:className "form-group"}
+               (dom/div #js {:className (str "form-group " (:status state))}
                         (dom/label #js {:for "emain-body-input"} "Email body")
                         (dom/textarea #js {:cols "40"
                                            :className "form-control"
                                            :id "emain-body-input"
                                            :value (:template data)
-                                           :onChange #((:template-handler data) (.. % -target -value))}))))))
+                                           :onChange #(do
+                                                        ((:template-handler data) (.. % -target -value))
+                                                        (om/set-state! owner :status
+                                                                       (if (s/check schm/TemplateBody (.. % -target -value))
+                                                                         "has-error"
+                                                                         "has-success")))}))))))
 
 (defn github-issue-on-change [gh-repo timer form-handler form-status-handler error-handler]
   (js/clearTimeout timer)  

@@ -6,6 +6,8 @@
             [schema.core :as s])
   (:use [jayq.core :only [$]]))
 
+(def default-error-message "Data is wrong! Check out highlighted fields please.")
+
 (defn get-data-from-input [id]
   (.-value (.getElementById js/document id)))
 
@@ -46,7 +48,7 @@
 (defn ^:export send-new-project-request []
   (let [name (.-value (.getElementById js/document "project-name-input"))]
     (if (s/check schm/Project {:name name})
-      (msg/danger "Project name must be not empty!")
+      (msg/danger default-error-message)
       (do
         (.modal ($ :#iModalProject) "hide")
         (ajax  "/api/projects" "POST" {:name name} #(create-new-project-callback name %))))))
@@ -66,7 +68,7 @@
               :template (:email-template data-pack)
               :library (:artifact-value data-pack)}]
     (if (s/check schm/EmailAction data)
-      (msg/danger "Data is wrong! Check out it please.")
+      (msg/danger default-error-message)
       (do
         (.modal ($ :#iModalAddAction) "hide")
         (ajax "/api/actions" "POST" data 
@@ -77,7 +79,7 @@
               :project-id (:project-id data-pack)
               :library (:artifact-value data-pack)}]
     (if (s/check schm/NoopAction data)
-      (msg/danger "Data is wrong! Check out it please.")
+      (msg/danger default-error-message)
       (do
         (.modal ($ :#iModalAddAction) "hide")
         (ajax "/api/actions" "POST" data 
@@ -91,7 +93,7 @@
               :body (:gh-issue-body data-pack)
               :library (:artifact-value data-pack)}]
     (if (s/check schm/GithubIssueAction data)
-      (msg/danger "Data is wrong! Check out it please.")
+      (msg/danger default-error-message)
       (do
         (.modal ($ :#iModalAddAction) "hide")
         (ajax "/api/actions" "POST" data 
@@ -106,7 +108,7 @@
               :template (:email-template data-pack)
               :library (:artifact-value data-pack)}]
     (if (s/check schm/EmailAction data)
-      (msg/danger "Data is wrong! Check out it please.")      
+      (msg/danger default-error-message)      
       (do
         (msg/info "We are trying to send email to you...")
        (ajax "/api/actions/test" "POST" data
@@ -120,7 +122,7 @@
               :body (:gh-issue-body data-pack)
               :library (:artifact-value data-pack)}]
     (if (s/check schm/GithubIssueAction data)
-      (msg/danger "Data is wrong! Check out it please.")
+      (msg/danger default-error-message)
       (do
         (msg/info "We are trying to create issue on Github...")
         (ajax "/api/actions/test" "POST" data
@@ -135,7 +137,7 @@
               :template (:email-template data-pack)
               :library (:artifact-value data-pack)}]
     (if (s/check schm/EmailAction data)
-      (msg/danger "Data is wrong! Check out it please.")
+      (msg/danger default-error-message)
       (do
         (.modal ($ :#iModalAddAction) "hide")
         (ajax 
@@ -148,7 +150,7 @@
               :type "noop"
               :library (:artifact-value data-pack)}]
     (if (s/check schm/NoopAction data)
-      (msg/danger "Data is wrong! Check out it please.")
+      (msg/danger default-error-message)
       (do
         (.modal ($ :#iModalAddAction) "hide")
         (ajax 
@@ -164,7 +166,7 @@
               :body (:gh-issue-body data-pack)
               :library (:artifact-value data-pack)}]
     (if (s/check schm/GithubIssueAction data)
-      (msg/danger "Data is wrong! Check out it please.")
+      (msg/danger default-error-message)
       (do
         (.modal ($ :#iModalAddAction) "hide")
         (ajax 
@@ -189,7 +191,7 @@
 (defn ^:export update-project [project-id new-name]
   (let [data {:name new-name}]
     (if (s/check schm/Project data)
-      (msg/danger "Data is wrong! Check out it please.")
+      (msg/danger default-error-message)
       (do
         (.modal ($ :#iModalProjectMenu) "hide")
         (ajax

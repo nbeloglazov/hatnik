@@ -48,7 +48,7 @@
 (defn ^:export send-new-project-request []
   (let [name (.-value (.getElementById js/document "project-name-input"))]
     (if (s/check schm/Project {:name name})
-      (msg/danger default-error-message)
+      (msg/danger "Project name cannot be empty!")
       (do
         (.modal ($ :#iModalProject) "hide")
         (ajax  "/api/projects" "POST" {:name name} #(create-new-project-callback name %))))))

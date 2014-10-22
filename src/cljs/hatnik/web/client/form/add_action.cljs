@@ -138,6 +138,8 @@
          (if (or (nil? v) (= "" v))
            "has-warning"
            "has-success"))
+       :title-status "has-success"
+       :body-status "has-success"
        :timer nil
        })
     om/IRenderState
@@ -160,18 +162,28 @@
                                           (fn [st] (om/set-state! owner :form-status st))
                                           (fn [st] (om/set-state! owner :form-status "has-error")))
                                         }))
-               (dom/div #js {:className "form-group"}
+               (dom/div #js {:className (str "form-group " (:title-status state))}
                         (dom/label nil "Issue title")
                         (dom/input #js {:type "text"
                                         :className "form-control"
                                         :value (:value (:title data))
-                                        :onChange #((:handler (:title data)) (.. % -target -value))}))
-               (dom/div #js {:className "form-group"}
+                                        :onChange #(do
+                                                     ((:handler (:title data)) (.. % -target -value))
+                                                     (om/set-state! owner :title-status
+                                                                    (if (s/check schm/TemplateTitle (.. % -target -value))
+                                                                      "has-error"
+                                                                      "has-success")))}))
+               (dom/div #js {:className (str "form-group " (:body-status state))}
                         (dom/label nil "Issue body")
                         (dom/textarea #js {:cols "40"
                                            :className "form-control"
                                            :value (:value (:body data))
-                                           :onChange #((:handler (:body data)) (.. % -target -value))}))))))
+                                           :onChange #(do
+                                                        ((:handler (:body data)) (.. % -target -value))
+                                                        (om/set-state! owner :body-status
+                                                                       (if (s/check schm/TemplateBody (.. % -target -value))
+                                                                         "has-error"
+                                                                         "has-success")))}))))))
 
 (defn action-input-form [data owner]
   (reify

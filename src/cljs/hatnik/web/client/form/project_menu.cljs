@@ -1,7 +1,9 @@
 (ns hatnik.web.client.form.project-menu
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [hatnik.web.client.z-actions :as action])
+            [hatnik.web.client.z-actions :as action]
+            [hatnik.schema :as schm]
+            [schema.core :as s])
   (:use [jayq.core :only [$]]))
 
 
@@ -14,7 +16,12 @@
 
     om/IInitState 
     (init-state [this]
-      {:name (:name data)})
+      (let [name (:name data)]
+        {:name name
+         :status (if (or (nil? name)
+                         (= "" name))
+                   "has-warning"
+                   "has-success")}))
 
     om/IRenderState
     (render-state [this state]
@@ -30,10 +37,16 @@
           (dom/div 
            #js {:className "modal-body"}
            (dom/form nil
-                     (dom/input #js {:className "form-control"
-                                     :type "text"
-                                     :value (:name state)
-                                     :onChange #(om/set-state! owner :name (.. % -target -value))})))
+                     (dom/div #js {:className (str "form-group " (:status state))}
+                              (dom/input #js {:className "form-control"
+                                              :type "text"
+                                              :value (:name state)
+                                              :onChange #(do
+                                                           (om/set-state! owner :name (.. % -target -value))
+                                                           (om/set-state! owner :status 
+                                                                          (if (s/check (schm/string-of-length 1 128) (.. % -target -value))
+                                                                            "has-error" 
+                                                                            "has-success")))}))))
 
           (dom/div #js {:className "modal-footer"}
                    (dom/div #js {:className "btn btn-primary pull-left"

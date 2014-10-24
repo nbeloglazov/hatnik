@@ -150,7 +150,7 @@
                         (dom/input #js {:type "text"
                                         :className "form-control"
                                         :value (:value (:repo data))
-                                        :placeholder "github username or organization/repository"
+                                        :placeholder "user/repository or organization/repository"
 
                                         :onChange 
                                         #(github-issue-on-change

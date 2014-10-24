@@ -6,7 +6,7 @@
             [schema.core :as s])
   (:use [jayq.core :only [$]]))
 
-(def default-error-message "Data is wrong! Check out highlighted fields please.")
+(def default-error-message "Sorry, but fields highlighted in red are invalid. Please check them out.")
 
 (defn get-data-from-input [id]
   (.-value (.getElementById js/document id)))
@@ -25,7 +25,7 @@
             :contentType "application/json"
             :dataType "json"
             :async true
-            :error #(msg/danger "Invalid request! Check out your request data!")
+            :error #(msg/danger "Invalid request. Please, check out request data.")
             :success callback}))
 
 (defn get-github-repos [github-name callback error-handler]
@@ -48,7 +48,7 @@
 (defn ^:export send-new-project-request []
   (let [name (.-value (.getElementById js/document "project-name-input"))]
     (if (s/check schm/Project {:name name})
-      (msg/danger "Project name cannot be empty!")
+      (msg/danger "Project name cannot be empty.")
       (do
         (.modal ($ :#iModalProject) "hide")
         (ajax  "/api/projects" "POST" {:name name} #(create-new-project-callback name %))))))
@@ -110,9 +110,9 @@
     (if (s/check schm/EmailAction data)
       (msg/danger default-error-message)      
       (do
-        (msg/info "We are trying to send email to you...")
+        (msg/info "Sending test email...")
        (ajax "/api/actions/test" "POST" data
-            (wrap-error-alert (fn [e] (msg/success "Email sent. Check your inbox."))))))))
+            (wrap-error-alert (fn [e] (msg/success "The email is sent. Check your inbox."))))))))
 
 (defmethod test-action :github-issue [data-pack]
   (let [data {:project-id (:project-id data-pack)
@@ -124,10 +124,11 @@
     (if (s/check schm/GithubIssueAction data)
       (msg/danger default-error-message)
       (do
-        (msg/info "We are trying to create issue on Github...")
+        (msg/info "Creating test issue on Github...")
         (ajax "/api/actions/test" "POST" data
-              (wrap-error-alert (fn [e] (msg/success "GitHub issue created. Check out your project."))))))))
+              (wrap-error-alert (fn [e] (msg/success "The issue is created. Check out your project."))))))))
 
+(def action-update-error-message "Couldn't update the action. Please file a bug if the issue persists.")
 
 (defmulti update-action #(:type %))
 (defmethod update-action :email [data-pack]
@@ -140,10 +141,10 @@
       (msg/danger default-error-message)
       (do
         (.modal ($ :#iModalAddAction) "hide")
-        (ajax 
-         (str "/api/actions/" (:action-id data-pack)) "PUT" 
+        (ajax
+         (str "/api/actions/" (:action-id data-pack)) "PUT"
          data (wrap-error-alert
-               #(common-update-callback "Action don't updated!" data %)))))))
+               #(common-update-callback action-update-error-message data %)))))))
 
 (defmethod update-action :noop [data-pack]
   (let [data {:project-id (:project-id data-pack)
@@ -154,9 +155,9 @@
       (do
         (.modal ($ :#iModalAddAction) "hide")
         (ajax 
-         (str "/api/actions/" (:action-id data-pack)) "PUT" 
+         (str "/api/actions/" (:action-id data-pack)) "PUT"
          data (wrap-error-alert
-               #(common-update-callback "Action don't updated!" data %)))))))
+               #(common-update-callback action-update-error-message data %)))))))
 
 (defmethod update-action :github-issue [data-pack]
   (let [data {:project-id (:project-id data-pack)
@@ -172,21 +173,21 @@
         (ajax 
          (str "/api/actions/" (:action-id data-pack)) "PUT" 
          data (wrap-error-alert
-               #(common-update-callback "Action don't updated!" data %)))))))
+               #(common-update-callback action-update-error-message data %)))))))
    
 (defn delete-action [action-id]
   (.modal ($ :#iModalAddAction) "hide")
   (ajax 
    (str "/api/actions/" action-id) "DELETE"
    {} (wrap-error-alert
-       #(common-update-callback "Action don't deleted!" {} %))))
+       #(common-update-callback "Couldn't delete the action. Please file a bug if the issue persists." {} %))))
 
 (defn ^:export delete-project [project-id]
   (.modal ($ :#iModalProjectMenu) "hide")
   (ajax
    (str "/api/projects/" project-id) "DELETE"
    {} (wrap-error-alert 
-       #(common-update-callback "Project don't deleted!" {} %))))
+       #(common-update-callback "Couldn't delete the project. Please file a bug if the issue persists." {} %))))
 
 (defn ^:export update-project [project-id new-name]
   (let [data {:name new-name}]
@@ -196,7 +197,7 @@
         (.modal ($ :#iModalProjectMenu) "hide")
         (ajax
          (str "/api/projects/" project-id) "PUT"  data
-         (wrap-error-alert #(common-update-callback "Project don't renamed!" {} %)))))))
+         (wrap-error-alert #(common-update-callback "Couldn't rename the project. Please file a bug if the issue persists." {} %)))))))
 
 
 (defn get-library [library callback]

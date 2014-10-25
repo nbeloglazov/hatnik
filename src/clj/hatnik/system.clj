@@ -16,9 +16,12 @@
   (let [db (case (:db config)
              :mongo (mon-stg/map->MongoStorage {:config (:mongo config)})
              :memory (mem-stg/map->MemoryStorage {}))
+        token (:hatnik-github-token config)
         utils {:send-email (partial utils/send-email (:email config))
-               :create-github-issue (partial utils/create-github-issue
-                                             (:hatnik-github-token config))}]
+               :create-github-issue (partial utils/create-github-issue token)
+               :create-github-pull-request (partial utils/create-github-pull-request
+                                                    token)
+               :fork-github-repo (partial utils/fork-github-repo token)}]
     (timbre/set-level! (:log-level config))
     (when (:send-errors-to config)
       (utils/notify-about-errors-via-email config))

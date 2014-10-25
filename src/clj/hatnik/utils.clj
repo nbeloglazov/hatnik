@@ -47,9 +47,10 @@
     user - owner of the repo we want to fork.
     repo - repo we want to fork."
   [github-token user repo]
-  (->> {:oauth-token github-token}
-       (repos/create-fork user repo)
-       (:ssh_url)))
+  (let [url (->> {:oauth-token github-token}
+                 (repos/create-fork user repo)
+                 (:clone_url))]
+    (cstr/replace url #"(https?://)" (str "$1" github-token "@"))))
 
 (defn create-github-pull-request
   "Creates github pull request, all commits must be pushed to
@@ -61,6 +62,11 @@
   (pulls/create-pull user repo title "master" (str "hatnik:" branch)
                      {:oauth-token github-token
                       :body body}))
+
+(defn split-repo
+  "Splits github repo string returning user and repo."
+  [repo]
+  (cstr/split repo #"/"))
 
 (defn fill-template
   "Substitutes variables to all {{aba}} placeholders if variable exists.

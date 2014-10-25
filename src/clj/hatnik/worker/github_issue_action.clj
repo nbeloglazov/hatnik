@@ -1,8 +1,6 @@
 (ns hatnik.worker.github-issue-action
   (:require [taoensso.timbre :as timbre]
-            [hatnik.utils :as u]
-            [clojure.string :as cstr]))
-
+            [hatnik.utils :as u]))
 
 (defn perform
   "Creates github issue."
@@ -12,7 +10,7 @@
                  (str "\n\nThis issue is created on behalf of @"
                       (:github-login user))
                  (u/fill-template variables))
-        [target-user target-repo] (cstr/split (:repo action) #"/")]
+        [target-user target-repo] (u/split-repo (:repo action))]
     ((:create-github-issue utils)
      {:body body
       :title title

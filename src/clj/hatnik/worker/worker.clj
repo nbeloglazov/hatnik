@@ -88,7 +88,7 @@
   (let [actions (stg/get-actions db)
         libraries (group-by :library actions)]
     (timbre/info "Total actions:" (count actions)
-                 "Libraries to update:" (keys libraries))
+                 ", libraries to update:" (keys libraries))
     (doseq [[library actions] libraries]
       (check-library-and-perform-actions library actions db
                                          perform-action utils))

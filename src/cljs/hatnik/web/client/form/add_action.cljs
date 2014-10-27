@@ -37,6 +37,7 @@
             artifact (:artifact-value data)
             type (:type data)
             email-body (:email-body data)
+            email-subject (:email-subject data)
             gh-repo (:gh-repo data)
             gh-issue-title (:gh-issue-title data)
             gh-issue-body (:gh-issue-body data)
@@ -46,7 +47,8 @@
                        :gh-repo gh-repo
                        :gh-issue-title gh-issue-title
                        :gh-issue-body gh-issue-body
-                       :email-body email-body}]
+                       :email-body email-body
+                       :email-subject email-subject}]
         (dom/div nil
                  (dom/button
 
@@ -68,6 +70,7 @@
             action-id (:action-id data)
             type (:type data)
             email-body (:email-body data)
+            email-subject (:email-subject data)
             gh-repo (:gh-repo data)
             gh-issue-title (:gh-issue-title data)
             gh-issue-body (:gh-issue-body data)
@@ -78,7 +81,8 @@
                        :gh-repo gh-repo
                        :gh-issue-title gh-issue-title
                        :gh-issue-body gh-issue-body
-                       :email-body email-body}]
+                       :email-body email-body
+                       :email-subject email-subject}]
           (dom/div
            nil
            (dom/button
@@ -89,6 +93,8 @@
              (dom/button
               #js {:className "btn btn-default"
                    :onClick #(action/test-action data-pack)} "Test")))))))
+
+(def default-email-subject "{{library}} {{version}} released")
 
 (def default-email-body
   (str "Hello there\n\n"
@@ -102,7 +108,8 @@
 (defmulti get-init-state #(:type %))
 
 (def new-init-state {:artifact-value ""})
-(def email-init-state {:email-body default-email-body})
+(def email-init-state {:email-body default-email-body
+                       :email-subject default-email-subject})
 (def github-issue-init-state
   {:gh-repo ""
    :gh-issue-title default-github-issue-title
@@ -112,6 +119,7 @@
   (merge
    {:project-id (:project-id data)
     :email-body default-email-body
+    :email-subject default-email-subject
     :user-email (:user-email data)
     :type :email}
    new-init-state email-init-state github-issue-init-state))
@@ -122,7 +130,8 @@
 
 (defmethod get-init-state-by-action "email" [action]
   (merge
-   {:email-body (get action "body")}
+   {:email-body (get action "body")
+    :email-subject (get action "subject")}
     github-issue-init-state))
 
 (defmethod get-init-state-by-action "github-issue" [action]
@@ -193,8 +202,10 @@
                                     :handler #(om/set-state! owner :gh-issue-body %)}}
 
                             :email
-                            {:body (:email-body state)
-                             :body-handler #(om/set-state! owner :email-body %)
+                            {:body {:value (:email-body state)
+                                    :handler #(om/set-state! owner :email-body %)}
+                             :subject {:value (:email-subject state)
+                                       :handler #(om/set-state! owner :email-subject %)}
                              :email (:user-email state)}}))
         (dom/div #js {:className "modal-footer"}
                  (get-action-footer data state owner)))))

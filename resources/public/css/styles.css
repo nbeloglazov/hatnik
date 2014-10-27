@@ -30,11 +30,11 @@
     list-style-type: lower-alpha;
 }
 
-#emain-input {
+#email-input {
     margin-bottom: 10px;
 }
 
-#emain-body-input {
+#email-body-input {
     height: 150px;
     resize: vertical;
 }

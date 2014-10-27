@@ -6,7 +6,7 @@
             [schema.core :as s])
   (:use [jayq.core :only [$]]))
 
-(def default-error-message "Sorry, but fields highlighted in red are invalid. Please check them out.")
+(def default-error-message "Fields highlighted in red are invalid. Please check them out.")
 
 (defn get-data-from-input [id]
   (.-value (.getElementById js/document id)))
@@ -58,14 +58,31 @@
     (when (= "ok" (get resp "result"))
       (state/update-all-view))))
 
+(defn build-email-action [data-pack]
+  {:project-id (:project-id data-pack)
+   :type "email"
+   :body (:email-body data-pack)
+   :subject (:email-subject data-pack)
+   :library (:artifact-value data-pack)})
+
+(defn build-gh-issue-action [data-pack]
+  {:project-id (:project-id data-pack)
+   :type "github-issue"
+   :repo (:gh-repo data-pack)
+   :title (:gh-issue-title data-pack)
+   :body (:gh-issue-body data-pack)
+   :library (:artifact-value data-pack)})
+
+(defn build-noop-action [data-pack]
+  {:type "noop"
+   :project-id (:project-id data-pack)
+   :library (:artifact-value data-pack)})
+
 
 (defmulti send-new-action #(:type %))
 
 (defmethod send-new-action :email [data-pack]
-  (let [data {:project-id (:project-id data-pack)
-              :type "email"
-              :body (:email-body data-pack)
-              :library (:artifact-value data-pack)}]
+  (let [data (build-email-action data-pack)]
     (if (s/check schm/EmailAction data)
       (msg/danger default-error-message)
       (do
@@ -74,9 +91,7 @@
               (wrap-error-alert #(create-new-action-callback data %)))))))
 
 (defmethod send-new-action :noop [data-pack]
-  (let [data {:type "noop"
-              :project-id (:project-id data-pack)
-              :library (:artifact-value data-pack)}]
+  (let [data (build-noop-action data-pack)]
     (if (s/check schm/NoopAction data)
       (msg/danger default-error-message)
       (do
@@ -85,12 +100,7 @@
               (wrap-error-alert #(create-new-action-callback data %)))))))
 
 (defmethod send-new-action :github-issue [data-pack]
-  (let [data {:project-id (:project-id data-pack)
-              :type "github-issue"
-              :repo (:gh-repo data-pack)
-              :title (:gh-issue-title data-pack)
-              :body (:gh-issue-body data-pack)
-              :library (:artifact-value data-pack)}]
+  (let [data (build-gh-issue-action data-pack)]
     (if (s/check schm/GithubIssueAction data)
       (msg/danger default-error-message)
       (do
@@ -101,10 +111,7 @@
 
 (defmulti test-action #(:type %))
 (defmethod test-action :email [data-pack]
-  (let [data {:project-id (:project-id data-pack)
-              :type "email"
-              :body (:email-body data-pack)
-              :library (:artifact-value data-pack)}]
+  (let [data (build-email-action data-pack)]
     (if (s/check schm/EmailAction data)
       (msg/danger default-error-message)
       (do
@@ -113,12 +120,7 @@
             (wrap-error-alert (fn [e] (msg/success "The email is sent. Check your inbox."))))))))
 
 (defmethod test-action :github-issue [data-pack]
-  (let [data {:project-id (:project-id data-pack)
-              :type "github-issue"
-              :repo (:gh-repo data-pack)
-              :title (:gh-issue-title data-pack)
-              :body (:gh-issue-body data-pack)
-              :library (:artifact-value data-pack)}]
+  (let [data (build-gh-issue-action data-pack)]
     (if (s/check schm/GithubIssueAction data)
       (msg/danger default-error-message)
       (do
@@ -130,10 +132,7 @@
 
 (defmulti update-action #(:type %))
 (defmethod update-action :email [data-pack]
-  (let [data {:project-id (:project-id data-pack)
-              :type "email"
-              :body (:email-body data-pack)
-              :library (:artifact-value data-pack)}]
+  (let [data (build-email-action data-pack)]
     (if (s/check schm/EmailAction data)
       (msg/danger default-error-message)
       (do
@@ -144,9 +143,7 @@
                #(common-update-callback action-update-error-message data %)))))))
 
 (defmethod update-action :noop [data-pack]
-  (let [data {:project-id (:project-id data-pack)
-              :type "noop"
-              :library (:artifact-value data-pack)}]
+  (let [data (build-noop-action data-pack)]
     (if (s/check schm/NoopAction data)
       (msg/danger default-error-message)
       (do
@@ -157,12 +154,7 @@
                #(common-update-callback action-update-error-message data %)))))))
 
 (defmethod update-action :github-issue [data-pack]
-  (let [data {:project-id (:project-id data-pack)
-              :type "github-issue"
-              :repo (:gh-repo data-pack)
-              :title (:gh-issue-title data-pack)
-              :body (:gh-issue-body data-pack)
-              :library (:artifact-value data-pack)}]
+  (let [data (build-gh-issue-action data-pack)]
     (if (s/check schm/GithubIssueAction data)
       (msg/danger default-error-message)
       (do

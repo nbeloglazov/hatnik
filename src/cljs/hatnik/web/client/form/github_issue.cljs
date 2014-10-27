@@ -53,9 +53,10 @@
     (render-state [this state]
       (dom/div nil 
                (dom/div #js {:className (str "form-group " (:form-status state))}
-                        (dom/label nil "GitHub repository")
+                        (dom/label #js {:htmlFor "gh-repo"} "GitHub repository")
                         (dom/input #js {:type "text"
                                         :className "form-control"
+                                        :id "gh-repo"
                                         :value (:value (:repo data))
                                         :placeholder "user/repository or organization/repository"
 
@@ -70,9 +71,10 @@
                                           (fn [st] (om/set-state! owner :form-status "has-error")))
                                         }))
                (dom/div #js {:className (str "form-group " (:title-status state))}
-                        (dom/label nil "Issue title")
+                        (dom/label #js {:htmlFor "gh-issue-title"} "Issue title")
                         (dom/input #js {:type "text"
                                         :className "form-control"
+                                        :id "gh-issue-title"
                                         :value (:value (:title data))
                                         :onChange #(do
                                                      ((:handler (:title data)) (.. % -target -value))
@@ -81,9 +83,10 @@
                                                                       "has-error"
                                                                       "has-success")))}))
                (dom/div #js {:className (str "form-group " (:body-status state))}
-                        (dom/label nil "Issue body")
+                        (dom/label #js {:htmlFor "gh-issue-body"} "Issue body")
                         (dom/textarea #js {:cols "40"
                                            :className "form-control"
+                                           :id "gh-issue-body"
                                            :value (:value (:body data))
                                            :onChange #(do
                                                         ((:handler (:body data)) (.. % -target -value))

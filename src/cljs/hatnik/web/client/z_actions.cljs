@@ -65,7 +65,7 @@
   (let [data {:project-id (:project-id data-pack)
               :type "email"
               :address (:user-email data-pack)
-              :template (:email-template data-pack)
+              :body (:email-body data-pack)
               :library (:artifact-value data-pack)}]
     (if (s/check schm/EmailAction data)
       (msg/danger default-error-message)
@@ -105,7 +105,7 @@
   (let [data {:project-id (:project-id data-pack)
               :type "email"
               :address (:user-email data-pack)
-              :template (:email-template data-pack)
+              :body (:email-body data-pack)
               :library (:artifact-value data-pack)}]
     (if (s/check schm/EmailAction data)
       (msg/danger default-error-message)      
@@ -135,7 +135,7 @@
   (let [data {:project-id (:project-id data-pack)
               :type "email"
               :address (:user-email data-pack)
-              :template (:email-template data-pack)
+              :body (:email-body data-pack)
               :library (:artifact-value data-pack)}]
     (if (s/check schm/EmailAction data)
       (msg/danger default-error-message)

@@ -10,7 +10,7 @@
   (let [subject (format "[Hatnik] %s %s released"
                         (:library variables)
                         (:version variables))
-        body (u/fill-template (:template action) variables)
+        body (u/fill-template (:body action) variables)
         send-email (:send-email utils)]
     (try
       (send-email (:address action) subject body)
@@ -27,7 +27,7 @@
   (require 'hatnik.config 'hatnik.utils)
   (let [config (:email (hatnik.config/get-config))
         send-email (partial hatnik.utils/send-email config)]
-    (perform {:template "Library {{library}} released {{version}}"
+    (perform {:body "Library {{library}} released {{version}}"
               :address "nikelandjelo@gmail.com"}
              {}
              {:library "Meee"

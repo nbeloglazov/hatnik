@@ -32,11 +32,12 @@
   (reify
     om/IRender
     (render [this]
-      (let [project-id (:project-id data)
+      (let [; TODO: simplify code below
+            project-id (:project-id data)
             artifact (:artifact-value data)
             type (:type data)
             email (:user-email data)
-            template (:email-template data)
+            email-body (:email-body data)
             gh-repo (:gh-repo data)
             gh-issue-title (:gh-issue-title data)
             gh-issue-body (:gh-issue-body data)
@@ -47,7 +48,7 @@
                        :gh-issue-title gh-issue-title
                        :gh-issue-body gh-issue-body
                        :user-email email
-                       :email-template template}]
+                       :email-body email-body}]
         (dom/div nil
                  (dom/button 
                   
@@ -63,12 +64,13 @@
   (reify
     om/IRender
     (render [this]
-      (let [project-id (:project-id data)
+      (let [; TODO: simplify code below
+            project-id (:project-id data)
             artifact (:artifact-value data)
             action-id (:action-id data)
             type (:type data)
             email (:user-email data)
-            template (:email-template data)
+            email-body (:email-body data)
             gh-repo (:gh-repo data)
             gh-issue-title (:gh-issue-title data)
             gh-issue-body (:gh-issue-body data)
@@ -80,7 +82,7 @@
                        :gh-issue-title gh-issue-title
                        :gh-issue-body gh-issue-body
                        :user-email email
-                       :email-template template}]
+                       :email-body email-body}]
           (dom/div 
            nil
            (dom/button 
@@ -92,19 +94,19 @@
               #js {:className "btn btn-default"
                    :onClick #(action/test-action data-pack)} "Test")))))))
 
-(def default-email-template
+(def default-email-body
   (str "Hello there\n\n"
        "{{library}} {{version}} has been released! "
        "Previous version was {{previous-version}}\n\n"
        "Your Hatnik"))
 
 (def default-github-issue-title "Release {{library}} {{version}}")
-(def default-github-issue-body "Time to update your project.clj to {{library}} {{version}}!")
+(def default-github-issue-body "Time to update your project.clj to {{library}} {{version}}")
 
 (defmulti get-init-state #(:type %))
 
 (def new-init-state {:artifact-value ""})
-(def email-init-state {:email-template default-email-template})
+(def email-init-state {:email-body default-email-body})
 (def github-issue-init-state 
   {:gh-repo "" 
    :gh-issue-title default-github-issue-title 
@@ -113,7 +115,7 @@
 (defmethod get-init-state :add [data _] 
   (merge
    {:project-id (:project-id data)
-    :email-template default-email-template
+    :email-body default-email-body
     :user-email (:user-email data)
     :type :email}
    new-init-state email-init-state github-issue-init-state))
@@ -124,7 +126,7 @@
 
 (defmethod get-init-state-by-action "email" [action]
   (merge
-   {:email-template (get action "template")}
+   {:email-body (get action "body")}
     github-issue-init-state))
 
 (defmethod get-init-state-by-action "github-issue" [action]  
@@ -195,8 +197,8 @@
                                     :handler #(om/set-state! owner :gh-issue-body %)}}
                             
                             :email
-                            {:template (:email-template state)
-                             :template-handler #(om/set-state! owner :email-template %)
+                            {:body (:email-body state)
+                             :body-handler #(om/set-state! owner :email-body %)
                              :email (:user-email state)}}))
         (dom/div #js {:className "modal-footer"}
                  (get-action-footer data state owner)))))

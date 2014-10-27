@@ -23,9 +23,9 @@
                         (dom/textarea #js {:cols "40"
                                            :className "form-control"
                                            :id "emain-body-input"
-                                           :value (:template data)
+                                           :value (:body data)
                                            :onChange #(do
-                                                        ((:template-handler data) (.. % -target -value))
+                                                        ((:body-handler data) (.. % -target -value))
                                                         (om/set-state! owner :status
                                                                        (if (s/check schm/TemplateBody (.. % -target -value))
                                                                          "has-error"

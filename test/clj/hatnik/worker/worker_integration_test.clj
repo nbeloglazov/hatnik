@@ -79,9 +79,9 @@
                         :library "lib-2"
                         :type "email"
                         :address "foo@email.com"
-                        :template (str "Email {{library}} {{version}} "
-                                       "{{previous-version}} {{project}} "
-                                       "{{not-used}}")}))
+                        :body (str "Email {{library}} {{version}} "
+                                   "{{previous-version}} {{project}} "
+                                   "{{not-used}}")}))
           _ (ok? (http :post "/actions"
                        {:project-id proj1-id
                         :library "lib-3"
@@ -103,9 +103,9 @@
                         :library "lib-4"
                         :type "email"
                         :address "foo@email.com"
-                        :template (str "Email {{library}} {{version}} "
-                                       "{{previous-version}} {{project}} "
-                                       "{{not-used}}")}))])))
+                        :body (str "Email {{library}} {{version}} "
+                                   "{{previous-version}} {{project}} "
+                                   "{{not-used}}")}))])))
 
 (defn assert-emails-args
   "Validates that send-email was called with expected args."

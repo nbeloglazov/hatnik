@@ -6,31 +6,12 @@
             [schema.core :as s])
   (:use [jayq.core :only [$]]
         [clojure.string :only [split replace]]
-        [hatnik.web.client.form.artifact-input :only [artifact-input-component]]))
+        [hatnik.web.client.form.artifact-input :only [artifact-input-component]]
+        [hatnik.web.client.form.action-type :only [action-type-component]]))
 
 (defn on-modal-close [component]  
   (om/detach-root 
    (om/get-node component)))
-
-
-(defn option-element-map [val pred]
-  (if pred
-    #js {:className "form-control" :selected "selected" :value val}
-    #js {:className "form-control" :value val}))
-
-(defn action-type-component [data owner]
-  (reify
-    om/IRender
-    (render [this]
-      (let [callback (:handler data)]
-        (dom/div #js {:className "form-group action-type-component"}
-                 (dom/label nil "Action type")
-                 (dom/select #js {:className "form-control"
-                                  :defaultValue (name (:type data))
-                                  :onChange #(callback (keyword (.. % -target -value)))}
-                             (dom/option (option-element-map "email" (= :email (:type data)))  "Email")
-                             (dom/option (option-element-map "noop" (= :noop (:type data))) "Noop")
-                             (dom/option (option-element-map "github-issue" (= :github-issue (:type data))) "GitHub issue")))))))
 
 (defn email-component [data owner]
   (reify

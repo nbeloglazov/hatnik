@@ -7,9 +7,7 @@
   "Sends email to provided user using template from action and
   provided variables."
   [action user variables utils]
-  (let [subject (format "[Hatnik] %s %s released"
-                        (:library variables)
-                        (:version variables))
+  (let [subject (u/fill-template (:subject action) variables)
         body (u/fill-template (:body action) variables)
         send-email (:send-email utils)]
     (try
@@ -32,5 +30,4 @@
              {:library "Meee"
               :version "2.2.0"}
              {:send-email send-email}))
-
   )

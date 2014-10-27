@@ -49,6 +49,7 @@
   {:project-id Id
    :library Library
    :type (s/eq "email")
+   :subject TemplateTitle
    :body TemplateBody})
 
 (def NoopAction

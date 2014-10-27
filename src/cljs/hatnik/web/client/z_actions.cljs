@@ -20,7 +20,7 @@
 (defn ajax [url type data callback]
   (jq/ajax url
            {:type type
-            :data (.stringify js/JSON 
+            :data (.stringify js/JSON
                               (clj->js data))
             :contentType "application/json"
             :dataType "json"
@@ -64,14 +64,13 @@
 (defmethod send-new-action :email [data-pack]
   (let [data {:project-id (:project-id data-pack)
               :type "email"
-              :address (:user-email data-pack)
               :body (:email-body data-pack)
               :library (:artifact-value data-pack)}]
     (if (s/check schm/EmailAction data)
       (msg/danger default-error-message)
       (do
         (.modal ($ :#iModalAddAction) "hide")
-        (ajax "/api/actions" "POST" data 
+        (ajax "/api/actions" "POST" data
               (wrap-error-alert #(create-new-action-callback data %)))))))
 
 (defmethod send-new-action :noop [data-pack]
@@ -82,7 +81,7 @@
       (msg/danger default-error-message)
       (do
         (.modal ($ :#iModalAddAction) "hide")
-        (ajax "/api/actions" "POST" data 
+        (ajax "/api/actions" "POST" data
               (wrap-error-alert #(create-new-action-callback data %)))))))
 
 (defmethod send-new-action :github-issue [data-pack]
@@ -96,7 +95,7 @@
       (msg/danger default-error-message)
       (do
         (.modal ($ :#iModalAddAction) "hide")
-        (ajax "/api/actions" "POST" data 
+        (ajax "/api/actions" "POST" data
               (wrap-error-alert #(create-new-action-callback data %)))))))
 
 
@@ -104,11 +103,10 @@
 (defmethod test-action :email [data-pack]
   (let [data {:project-id (:project-id data-pack)
               :type "email"
-              :address (:user-email data-pack)
               :body (:email-body data-pack)
               :library (:artifact-value data-pack)}]
     (if (s/check schm/EmailAction data)
-      (msg/danger default-error-message)      
+      (msg/danger default-error-message)
       (do
         (msg/info "Sending test email...")
        (ajax "/api/actions/test" "POST" data
@@ -134,7 +132,6 @@
 (defmethod update-action :email [data-pack]
   (let [data {:project-id (:project-id data-pack)
               :type "email"
-              :address (:user-email data-pack)
               :body (:email-body data-pack)
               :library (:artifact-value data-pack)}]
     (if (s/check schm/EmailAction data)
@@ -154,7 +151,7 @@
       (msg/danger default-error-message)
       (do
         (.modal ($ :#iModalAddAction) "hide")
-        (ajax 
+        (ajax
          (str "/api/actions/" (:action-id data-pack)) "PUT"
          data (wrap-error-alert
                #(common-update-callback action-update-error-message data %)))))))
@@ -170,14 +167,14 @@
       (msg/danger default-error-message)
       (do
         (.modal ($ :#iModalAddAction) "hide")
-        (ajax 
-         (str "/api/actions/" (:action-id data-pack)) "PUT" 
+        (ajax
+         (str "/api/actions/" (:action-id data-pack)) "PUT"
          data (wrap-error-alert
                #(common-update-callback action-update-error-message data %)))))))
-   
+
 (defn delete-action [action-id]
   (.modal ($ :#iModalAddAction) "hide")
-  (ajax 
+  (ajax
    (str "/api/actions/" action-id) "DELETE"
    {} (wrap-error-alert
        #(common-update-callback "Couldn't delete the action. Please file a bug if the issue persists." {} %))))
@@ -186,7 +183,7 @@
   (.modal ($ :#iModalProjectMenu) "hide")
   (ajax
    (str "/api/projects/" project-id) "DELETE"
-   {} (wrap-error-alert 
+   {} (wrap-error-alert
        #(common-update-callback "Couldn't delete the project. Please file a bug if the issue persists." {} %))))
 
 (defn ^:export update-project [project-id new-name]
@@ -204,4 +201,3 @@
   (ajax
    (str "/api/library-version?library=" library) "GET"
    {} callback))
-

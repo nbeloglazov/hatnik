@@ -78,7 +78,6 @@
                        {:project-id proj1-id
                         :library "lib-2"
                         :type "email"
-                        :address "foo@email.com"
                         :body (str "Email {{library}} {{version}} "
                                    "{{previous-version}} {{project}} "
                                    "{{not-used}}")}))
@@ -102,7 +101,6 @@
                        {:project-id proj2-id
                         :library "lib-4"
                         :type "email"
-                        :address "foo@email.com"
                         :body (str "Email {{library}} {{version}} "
                                    "{{previous-version}} {{project}} "
                                    "{{not-used}}")}))])))

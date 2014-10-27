@@ -14,23 +14,12 @@
   [req]
   (-> req :session :user))
 
-(defn restrict-email-to-be-current
-  "Makes :address field in the action map contain email of current user.
-  Currently we allow to send emails only to the user itself, can't send
-  to other addresses."
-  [action user]
-  (if (:address action)
-    (assoc action :address (:email user))
-    action))
-
 (defn create-action
   "Creates action for the given user and returns id of the created action.
   Response contains the latest library version."
   [db user data]
   (if-let [version (ver/latest-release (:library data))]
-    (let [action (-> data
-                     (assoc :last-processed-version version)
-                     (restrict-email-to-be-current user))
+    (let [action (assoc data :last-processed-version version)
           id (stg/create-action! db (:id user) action)]
       (resp/response
        (if id
@@ -48,9 +37,7 @@
   latest version of the library."
   [db user id data]
   (if-let [version (ver/latest-release (:library data))]
-    (let [action (-> data
-                     (assoc :last-processed-version version)
-                     (restrict-email-to-be-current user))]
+    (let [action (assoc data :last-processed-version version)]
       (stg/update-action! db (:id user) id action)
       (resp/response
        {:result :ok
@@ -74,7 +61,7 @@
         data (assoc data
                :version "2.3.4"
                :previous-version "1.2.3")
-        resp (->> {:form-params (restrict-email-to-be-current data user)
+        resp (->> {:form-params data
                    :content-type :json
                    :accept :json
                    :as :json}

@@ -9,7 +9,6 @@
     (stg/create-action! db user-id {:project-id proj-id
                                     :type "email"
                                     :body "Hey {{LIBRARY}} released. New version {{VERSION}}."
-                                    :address "nikelandjelo@gmail.com"
                                     :library "com.nbeloglazov/hatnik-test-lib"
                                     :last-processed-version "0.0.9"})))
 
@@ -19,7 +18,6 @@
     (stg/create-action! db user-id {:project-id proj-id
                                     :type "email"
                                     :body "Quil {{VERSION}} was released. Go and update wiki and examples!"
-                                    :address "nikelandjelo@gmail.com"
                                     :library "quil"
                                     :last-processed-version "2.2.2"})
     (stg/create-action! db user-id {:project-id proj-id

@@ -78,7 +78,6 @@
         ; Create first action in Default. Email action.
         act-dflt-one {:project-id proj-dflt-id
                       :type "email"
-                      :address email
                       :body "Template dflt one"
                       :library "quil"}
         resp (ok? (http :post "/actions" act-dflt-one))
@@ -122,7 +121,6 @@
         ; Create single action in Foo.
         act-foo-one {:project-id proj-foo-id
                      :type "email"
-                     :address email
                      :body "Template foo single"
                      :library "quil"}
         resp (ok? (http :post "/actions" act-foo-one))
@@ -205,7 +203,6 @@
 (defn make-invalid-email-actions [proj-id email]
   (let [valid {:project-id proj-id
                :type "email"
-               :address email
                :body "Template dflt one"
                :library "quil"}]
     (concat (without-each-key valid)
@@ -273,7 +270,6 @@
         ; Create action in Default.
         act-dflt-one {:project-id proj-dflt-id
                       :type "email"
-                      :address email
                       :body "Template dflt one"
                       :library "quil"}
         resp (ok? (http :post "/actions" act-dflt-one))
@@ -313,15 +309,14 @@
         _ (ok? (http :get (str "/force-login?skip-dummy-data=true&email="
                                email)))
 
-        ; Check that default project is create for user
+        ; Check that default project was created
         proj-id (-> (http :get "/projects") ok? :projects first first name)
 
         ; Create action in Default.
         act-base {:project-id proj-id
-                           :type "email"
-                           :address email
-                           :body "Template dflt one"
-                           :library "quil"}
+                  :type "email"
+                  :body "Template dflt one"
+                  :library "quil"}
         resp (ok? (http :post "/actions" act-base))
         act-full (merge act-base (dissoc resp :result))
 

@@ -22,5 +22,8 @@
                                   :onChange #(callback (keyword (.. % -target -value)))}
                              (dom/option (option-element-map "email" (= :email (:type data)))  "Email")
                              (dom/option (option-element-map "noop" (= :noop (:type data))) "Noop")
-                             (dom/option (option-element-map "github-issue" (= :github-issue (:type data))) "GitHub issue")))))))
+                             (dom/option (option-element-map "github-issue" (= :github-issue (:type data))) "GitHub issue")
+                             (dom/option (option-element-map "github-pull-request" 
+                                                             (= :github-pull-request (:type data)))
+                                         "GitHub pull request")))))))
 

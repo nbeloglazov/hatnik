@@ -8,7 +8,8 @@
         [hatnik.web.client.form.artifact-input :only [artifact-input-component]]
         [hatnik.web.client.form.action-type :only [action-type-component]]
         [hatnik.web.client.form.email :only [email-component]]
-        [hatnik.web.client.form.github-issue :only [github-issue-component]]))
+        [hatnik.web.client.form.github-issue :only [github-issue-component]]
+        [hatnik.web.client.form.github-pull-request :only [github-pull-request-component]]))
 
 (defn on-modal-close [component]  
   (om/detach-root 
@@ -26,7 +27,10 @@
                   (om/build email-component (:email data)))
 
                 (when (= :github-issue (-> data :action-type :type))
-                  (om/build github-issue-component (:github-issue data)))))))
+                  (om/build github-issue-component (:github-issue data)))
+
+                (when (= :github-pull-request (-> data :action-type :type))
+                  (om/build github-pull-request-component (:github-pull-request data)))))))
 
 (defn add-action-footer [data owner]
   (reify
@@ -193,6 +197,10 @@
                                      :handler #(om/set-state! owner :gh-issue-title %)}
                              :body {:value (:gh-issue-body state)
                                     :handler #(om/set-state! owner :gh-issue-body %)}}
+
+                            :github-pull-request
+                            {:repo {:value (:gh-repo state) 
+                                    :handler #(om/set-state! owner :gh-repo %)}}
                             
                             :email
                             {:template (:email-template state)

@@ -36,6 +36,32 @@
            error-handler))
         1000)))))
 
+(defn pull-request-operation [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (dom/div nil
+               (dom/div #js {:className "form-group"}
+                        (dom/label nil "file")
+                        (dom/input #js {:type "text"
+                                        :className "form-control"}))
+               (dom/div #js {:className "form-group"}
+                        (dom/label nil "regex")
+                        (dom/input #js {:type "text"
+                                        :className "form-control"}))
+               (dom/div #js {:className "form-group"}
+                        (dom/label nil "replacement")
+                        (dom/input #js {:type "text"
+                                        :className "form-control"}))))))
+
+(defn pull-request-operations-list [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (dom/div #js {:className "form-group"}
+               (dom/label nil "Operations list")
+               (om/build pull-request-operation {})))))
+
 (defn github-pull-request-component [data owner]
   (reify
     om/IInitState
@@ -78,4 +104,5 @@
                         (dom/textarea #js {:cols "40"
                                                :className "form-control"}))
 
-               (dom/div nil "Operations")))))
+               (dom/div nil
+                        (om/build pull-request-operations-list {}))))))

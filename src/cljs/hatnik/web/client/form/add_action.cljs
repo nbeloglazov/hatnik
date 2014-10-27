@@ -32,23 +32,10 @@
   (reify
     om/IRender
     (render [this]
-      (let [; TODO: simplify code below
-            project-id (:project-id data)
-            artifact (:artifact-value data)
-            type (:type data)
-            email-body (:email-body data)
-            email-subject (:email-subject data)
-            gh-repo (:gh-repo data)
-            gh-issue-title (:gh-issue-title data)
-            gh-issue-body (:gh-issue-body data)
-            data-pack {:type type
-                       :project-id project-id
-                       :artifact-value artifact
-                       :gh-repo gh-repo
-                       :gh-issue-title gh-issue-title
-                       :gh-issue-body gh-issue-body
-                       :email-body email-body
-                       :email-subject email-subject}]
+      (let [; Make local copy of data to be sure it doesn't play tricks with us.
+            data-pack (select-keys data [:type :project-id :artifact-value
+                                         :gh-repo :gh-issue-title :gh-issue-body
+                                         :email-body :email-subject])]
         (dom/div nil
                  (dom/button
 
@@ -64,25 +51,10 @@
   (reify
     om/IRender
     (render [this]
-      (let [; TODO: simplify code below
-            project-id (:project-id data)
-            artifact (:artifact-value data)
-            action-id (:action-id data)
-            type (:type data)
-            email-body (:email-body data)
-            email-subject (:email-subject data)
-            gh-repo (:gh-repo data)
-            gh-issue-title (:gh-issue-title data)
-            gh-issue-body (:gh-issue-body data)
-            data-pack {:type type
-                       :project-id project-id
-                       :artifact-value artifact
-                       :action-id action-id
-                       :gh-repo gh-repo
-                       :gh-issue-title gh-issue-title
-                       :gh-issue-body gh-issue-body
-                       :email-body email-body
-                       :email-subject email-subject}]
+      (let [; Make local copy of data to be sure it doesn't play tricks with us.
+            data-pack (select-keys data [:type :project-id :artifact-value
+                                         :gh-repo :gh-issue-title :gh-issue-body
+                                         :email-body :email-subject :action-id])]
           (dom/div
            nil
            (dom/button

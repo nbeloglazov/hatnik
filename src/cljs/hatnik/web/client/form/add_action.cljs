@@ -7,37 +7,12 @@
   (:use [jayq.core :only [$]]
         [clojure.string :only [split replace]]
         [hatnik.web.client.form.artifact-input :only [artifact-input-component]]
-        [hatnik.web.client.form.action-type :only [action-type-component]]))
+        [hatnik.web.client.form.action-type :only [action-type-component]]
+        [hatnik.web.client.form.email :only [email-component]]))
 
 (defn on-modal-close [component]  
   (om/detach-root 
    (om/get-node component)))
-
-(defn email-component [data owner]
-  (reify
-    om/IInitState
-    (init-state [this]
-      {:status "has-success"})
-
-    om/IRenderState
-    (render-state [this state]
-      (dom/div nil
-               (dom/div #js {:className "form-group"}
-                        (dom/label #js {:for "email-input"} "Email")
-                        (dom/p #js {:id "email-input"}
-                               (:email data)))
-               (dom/div #js {:className (str "form-group " (:status state))}
-                        (dom/label #js {:for "emain-body-input"} "Email body")
-                        (dom/textarea #js {:cols "40"
-                                           :className "form-control"
-                                           :id "emain-body-input"
-                                           :value (:template data)
-                                           :onChange #(do
-                                                        ((:template-handler data) (.. % -target -value))
-                                                        (om/set-state! owner :status
-                                                                       (if (s/check schm/TemplateBody (.. % -target -value))
-                                                                         "has-error"
-                                                                         "has-success")))}))))))
 
 (defn github-issue-on-change [gh-repo timer form-handler form-status-handler error-handler]
   (js/clearTimeout timer)  

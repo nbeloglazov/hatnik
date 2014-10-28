@@ -37,6 +37,7 @@
                     :id "artifact-input-group"}
                (dom/label #js {:htmlFor "artifact-input"} "Library")
                (dom/input #js {:type "text"
+                               :id "artifact-input"
                                :className "form-control"
                                :placeholder "e.g. org.clojure/clojure"
                                :onChange #(check-input-value 

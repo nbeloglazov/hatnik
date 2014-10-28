@@ -16,7 +16,7 @@
     (render [this]
       (let [callback (:handler data)]
         (dom/div #js {:className "form-group action-type-component"}
-                 (dom/label {:htmlFor "action-type"} "Action type")
+                 (dom/label #js {:htmlFor "action-type"} "Action type")
                  (dom/select #js {:className "form-control"
                                   :id "action-type"
                                   :defaultValue (name (:type data))

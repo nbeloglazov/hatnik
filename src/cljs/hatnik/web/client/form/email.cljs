@@ -9,7 +9,8 @@
   (reify
     om/IInitState
     (init-state [this]
-      {:status "has-success"})
+      {:subject-status "has-success"
+       :body-status "has-success"})
 
     om/IRenderState
     (render-state [this state]

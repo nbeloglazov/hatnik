@@ -34,7 +34,7 @@
     margin-bottom: 10px;
 }
 
-#email-body-input {
+form textarea.form-control {
     height: 150px;
     resize: vertical;
 }

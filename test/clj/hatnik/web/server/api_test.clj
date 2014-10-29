@@ -78,8 +78,8 @@
         ; Create first action in Default. Email action.
         act-dflt-one {:project-id proj-dflt-id
                       :type "email"
-                      :address email
-                      :template "Template dflt one"
+                      :subject "Subject dflt one"
+                      :body "Template dflt one"
                       :library "quil"}
         resp (ok? (http :post "/actions" act-dflt-one))
         _ (is (= (:last-processed-version resp) quil-ver))
@@ -122,8 +122,8 @@
         ; Create single action in Foo.
         act-foo-one {:project-id proj-foo-id
                      :type "email"
-                     :address email
-                     :template "Template foo single"
+                     :subject "Subject foo single"
+                     :body "Template foo single"
                      :library "quil"}
         resp (ok? (http :post "/actions" act-foo-one))
         _ (is (= (:last-processed-version resp) quil-ver))
@@ -143,10 +143,10 @@
         ; Rename project "Default" to "First"
         _ (ok? (http :put (str "/projects/" proj-dflt-id) {:name "First"}))
 
-        ; Update action dflt-one. Change library and template.
+        ; Update action dflt-one. Change library and body.
         act-dflt-one (assoc act-dflt-one
                        :library "ring"
-                       :template "Oh my new template")
+                       :body "Oh my new body")
         resp (->> (dissoc act-dflt-one :id :last-processed-version)
                   (http :put (str "/actions/" (:id act-dflt-one)))
                   ok?)
@@ -175,7 +175,7 @@
         ; Error response should have only :result and :message keys.
         _ (is (= #{:result :message} (set (keys resp))))
 
-        ; Login as new user and check that we can't see previous user
+        ; Login as new user and check that we can't see previous user's
         ; project
         resp (ok? (http :get (str "/force-login?skip-dummy-data=true&"
                                   "email=new@email.com")))
@@ -205,14 +205,15 @@
 (defn make-invalid-email-actions [proj-id email]
   (let [valid {:project-id proj-id
                :type "email"
-               :address email
-               :template "Template dflt one"
+               :subject "Subject dflt one"
+               :body "Template dflt one"
                :library "quil"}]
     (concat (without-each-key valid)
             (map #(merge valid %)
                  [{:library "iDontExist"}
                   {:type "unknown"}
-                  {:template long-string}
+                  {:body long-string}
+                  {:subject long-string}
                   {:id "1234"}]))))
 
 (defn make-invalid-github-issue-actions [proj-id]
@@ -273,8 +274,8 @@
         ; Create action in Default.
         act-dflt-one {:project-id proj-dflt-id
                       :type "email"
-                      :address email
-                      :template "Template dflt one"
+                      :subject "Subject dflt one"
+                      :body "Template dflt one"
                       :library "quil"}
         resp (ok? (http :post "/actions" act-dflt-one))
         _ (is (= (:last-processed-version resp) quil-ver))
@@ -313,15 +314,15 @@
         _ (ok? (http :get (str "/force-login?skip-dummy-data=true&email="
                                email)))
 
-        ; Check that default project is create for user
+        ; Check that default project was created
         proj-id (-> (http :get "/projects") ok? :projects first first name)
 
         ; Create action in Default.
         act-base {:project-id proj-id
-                           :type "email"
-                           :address email
-                           :template "Template dflt one"
-                           :library "quil"}
+                  :type "email"
+                  :subject "Subject dflt one"
+                  :body "Template dflt one"
+                  :library "quil"}
         resp (ok? (http :post "/actions" act-base))
         act-full (merge act-base (dissoc resp :result))
 
@@ -338,7 +339,7 @@
         _ (ok? (http :put (str "/projects/" proj-id) {:name "I changed your project!"}))
         ; Modify action
         _ (ok? (http :put (str "/actions/" (:id act-full))
-                     (assoc act-base :template "I changed your action!")))
+                     (assoc act-base :body "I changed your action!")))
         ; Create action. API is not consistent actually, in this case
         ; it return error if action was not created.
         _ (error? (http :post "/actions" act-base))

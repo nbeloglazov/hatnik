@@ -30,13 +30,6 @@
   For example in email or github issues."
   (string-of-length 1 256))
 
-(def Email
-  "Schema for validation emails. We restrict email to be 128
-  without no good reason actually."
-  (s/both (string-of-length 1 128)
-          (s/pred #(re-matches #"(?i)^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$" %)
-                  'email-format?)))
-
 (def GithubRepository
   (s/both (s/pred #(re-matches #"(?i)^[A-Z0-9-_]+/[A-Z0-9-_]+$" %)
                   'valid-github-repo?)
@@ -56,8 +49,8 @@
   {:project-id Id
    :library Library
    :type (s/eq "email")
-   :address Email
-   :template TemplateBody})
+   :subject TemplateTitle
+   :body TemplateBody})
 
 (def NoopAction
   {:project-id Id

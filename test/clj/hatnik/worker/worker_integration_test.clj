@@ -78,10 +78,12 @@
                        {:project-id proj1-id
                         :library "lib-2"
                         :type "email"
-                        :address "foo@email.com"
-                        :template (str "Email {{library}} {{version}} "
-                                       "{{previous-version}} {{project}} "
-                                       "{{not-used}}")}))
+                        :subject (str "Subject {{library}} {{version}} "
+                                      "{{previous-version}} {{project}} "
+                                      "{{not-used}}")
+                        :body (str "Email {{library}} {{version}} "
+                                   "{{previous-version}} {{project}} "
+                                   "{{not-used}}")}))
           _ (ok? (http :post "/actions"
                        {:project-id proj1-id
                         :library "lib-3"
@@ -102,10 +104,12 @@
                        {:project-id proj2-id
                         :library "lib-4"
                         :type "email"
-                        :address "foo@email.com"
-                        :template (str "Email {{library}} {{version}} "
-                                       "{{previous-version}} {{project}} "
-                                       "{{not-used}}")}))])))
+                        :subject (str "Subject bar {{library}} {{version}} "
+                                      "{{previous-version}} {{project}} "
+                                      "{{not-used}}")
+                        :body (str "Email {{library}} {{version}} "
+                                   "{{previous-version}} {{project}} "
+                                   "{{not-used}}")}))])))
 
 (defn assert-emails-args
   "Validates that send-email was called with expected args."
@@ -115,15 +119,15 @@
 
   (are [v] (some #(= % v) args)
        ; Check that email for lib-2 release was sent 2 times.
-       ["foo@email.com" "[Hatnik] lib-2 0.3.2 released"
+       ["foo@email.com" "Subject lib-2 0.3.2 0.2.2 Default {{not-used}}"
         "Email lib-2 0.3.2 0.2.2 Default {{not-used}}"]
-       ["foo@email.com" "[Hatnik] lib-2 0.4.2 released"
+       ["foo@email.com" "Subject lib-2 0.4.2 0.3.2 Default {{not-used}}"
         "Email lib-2 0.4.2 0.3.2 Default {{not-used}}"]
 
        ; Check that email for lib-4 release was sent 2 times.
-       ["bar@email.com" "[Hatnik] lib-4 0.5.2 released"
+       ["bar@email.com" "Subject bar lib-4 0.5.2 0.4.2 Default {{not-used}}"
         "Email lib-4 0.5.2 0.4.2 Default {{not-used}}"]
-       ["bar@email.com" "[Hatnik] lib-4 0.6.2 released"
+       ["bar@email.com" "Subject bar lib-4 0.6.2 0.5.2 Default {{not-used}}"
         "Email lib-4 0.6.2 0.5.2 Default {{not-used}}"]))
 
 (defn assert-github-issue-args

@@ -16,8 +16,9 @@
     (render [this]
       (let [callback (:handler data)]
         (dom/div #js {:className "form-group action-type-component"}
-                 (dom/label nil "Action type")
+                 (dom/label {:htmlFor "action-type"} "Action type")
                  (dom/select #js {:className "form-control"
+                                  :id "action-type"
                                   :defaultValue (name (:type data))
                                   :onChange #(callback (keyword (.. % -target -value)))}
                              (dom/option (option-element-map "email" (= :email (:type data)))  "Email")

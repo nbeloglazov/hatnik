@@ -8,8 +8,8 @@
                                          :user-id user-id})]
     (stg/create-action! db user-id {:project-id proj-id
                                     :type "email"
-                                    :template "Hey {{LIBRARY}} released. New version {{VERSION}}."
-                                    :address "nikelandjelo@gmail.com"
+                                    :subject "{{library}} {{version}} released"
+                                    :body "Hey {{library}} released. New version {{VERSION}}."
                                     :library "com.nbeloglazov/hatnik-test-lib"
                                     :last-processed-version "0.0.9"})))
 
@@ -18,8 +18,8 @@
                                          :user-id user-id})]
     (stg/create-action! db user-id {:project-id proj-id
                                     :type "email"
-                                    :template "Quil {{VERSION}} was released. Go and update wiki and examples!"
-                                    :address "nikelandjelo@gmail.com"
+                                    :subject "{{library}} {{version}} released"
+                                    :body "Quil {{version}} was released. Go and update wiki and examples!"
                                     :library "quil"
                                     :last-processed-version "2.2.2"})
     (stg/create-action! db user-id {:project-id proj-id

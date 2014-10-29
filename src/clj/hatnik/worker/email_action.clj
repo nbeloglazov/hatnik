@@ -7,17 +7,15 @@
   "Sends email to provided user using template from action and
   provided variables."
   [action user variables utils]
-  (let [subject (format "[Hatnik] %s %s released"
-                        (:library variables)
-                        (:version variables))
-        body (u/fill-template (:template action) variables)
+  (let [subject (u/fill-template (:subject action) variables)
+        body (u/fill-template (:body action) variables)
         send-email (:send-email utils)]
     (try
-      (send-email (:address action) subject body)
+      (send-email (:email user) subject body)
       nil
       (catch Exception e
         (timbre/error e "Couldn't send email"
-                      "Address:" (:address action)
+                      "Address:" (:email user)
                       "Subject:" subject
                       "Body:" body)
         "Couldn't send email."))))
@@ -27,11 +25,9 @@
   (require 'hatnik.config 'hatnik.utils)
   (let [config (:email (hatnik.config/get-config))
         send-email (partial hatnik.utils/send-email config)]
-    (perform {:template "Library {{library}} released {{version}}"
-              :address "nikelandjelo@gmail.com"}
+    (perform {:body "Library {{library}} released {{version}}"}
              {}
              {:library "Meee"
               :version "2.2.0"}
              {:send-email send-email}))
-
   )

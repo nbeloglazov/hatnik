@@ -1,11 +1,5 @@
 (ns hatnik.web.client.app-state)
 
-(def default-email-template
-  (str "Hello there\n\n"
-       "{{library}} {{version}} has been released! "
-       "Previous version was {{previous-version}}\n\n"
-       "Your Hatnik"))
-
 (def app-state 
   (atom {; Here we store data from the server
          :projects []

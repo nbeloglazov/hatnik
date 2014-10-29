@@ -8,14 +8,15 @@
 (defn library-check-handler [reply callback]
   (let [resp (js->clj reply)]
     (if (= "ok" (get resp "result"))
-      (callback "has-success" nil)
-      (callback "has-error" nil))))
+      (callback "has-success" (get resp "version") nil)
+      (callback "has-error" nil nil))))
 
 (defn check-input-value [data-handler check-handler timer new-val]
-  (js/clearTimeout timer)  
-  (check-handler 
+  (js/clearTimeout timer)
+  (check-handler
    "has-warning"
-   (js/setTimeout 
+   nil
+   (js/setTimeout
     (fn []
       (action/get-library new-val #(library-check-handler % check-handler)))
     1000))
@@ -29,7 +30,8 @@
        :form-status (if (= "" (:value data))
                       "has-warning"
                       "has-success")
-       :value (:value data)})
+       :value (:value data)
+       :version (:version data)})
 
     om/IRenderState
     (render-state [this state]
@@ -41,11 +43,17 @@
                                :id "artifact-input"
                                :className "form-control"
                                :placeholder "e.g. org.clojure/clojure"
-                               :onChange #(check-input-value 
-                                           (:handler data) 
-                                           (fn [x timer] 
-                                             (om/set-state! owner :form-status x)
+                               :onChange #(check-input-value
+                                           (:handler data)
+                                           (fn [result version timer]
+                                             (om/set-state! owner :form-status result)
+                                             (om/set-state! owner :version version)
                                              (om/set-state! owner :timer timer))
                                            (:timer state)
                                            (.. % -target -value))
-                               :value (:value data)})))))
+                               :value (:value data)})
+               (dom/span #js {:className "form-control-feedback"}
+                         (case (:form-status state)
+                           "has-error" "Not found"
+                           "has-success" (:version state)
+                           nil))))))

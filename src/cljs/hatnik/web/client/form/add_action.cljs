@@ -119,6 +119,7 @@
             :project-id (:project-id data)
             :user-email (:user-email data)
             :artifact-value (get action "library")
+            :artifact-version (get action "last-processed-version")
             :action-id (get action "id")}
            (get-init-state-by-action action))))
 
@@ -159,6 +160,7 @@
                  (om/build action-input-form
                            {:artifact-value
                             {:value (:artifact-value state)
+                             :version (:artifact-version state)
                              :handler #(om/set-state! owner :artifact-value %)}
 
                             :action-type

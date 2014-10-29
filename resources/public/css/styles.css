@@ -30,6 +30,15 @@
     list-style-type: lower-alpha;
 }
 
+#artifact-input-group {
+    position: relative;
+}
+
+#artifact-input-group .form-control-feedback {
+    width: auto;
+    margin-right: 10px;
+}
+
 #email-input {
     margin-bottom: 10px;
 }

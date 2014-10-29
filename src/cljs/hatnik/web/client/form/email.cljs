@@ -15,7 +15,7 @@
     (render-state [this state]
       (dom/div nil
                (dom/div #js {:className "form-group"}
-                        (dom/label nil "Email")
+                        (dom/label nil "Address")
                         (dom/p #js {:id "email-input"}
                                (:email data)))
                (dom/div #js {:className (str "form-group " (:subject-status state))}

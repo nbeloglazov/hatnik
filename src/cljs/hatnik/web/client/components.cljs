@@ -12,10 +12,6 @@
     (set! (.-value project-name-input) "")
     (.modal ($ :#iModalProject))))
 
-(defn render-action-type [a-type]
-  (when (= "email" a-type)
-    (dom/span #js {:className "glyphicon glyphicon-envelope action-type"})))
-
 (defn add-new-action-card [data owner]
   (reify
     om/IRender
@@ -30,46 +26,29 @@
                         (dom/span #js {:className "glyphicon glyphicon-plus"})
                         " Add action"))))))
 
-(defn email-action-card [data owner]
-  (reify
-    om/IRender
-    (render [this]
-      (let [id (:project-id data)
-            email (:user-email data)]
-      (dom/div #js {:className "panel panel-default action"
-                    :onClick #(add-action/show :type :update
-                                               :project-id id
-                                               :user-email email
-                                               :action @data)}
-               (dom/div 
-                #js {:className "panel-body bg-success"}
-                (dom/span #js {:className "glyphicon glyphicon-envelope action-type"})
-                (dom/span #js {:className "action-info"}
-                          (dom/div #js {:className "library-name"}
-                                   (get data "library"))
-                          (dom/div #js {:className "version"}
-                                   (get data "last-processed-version")))))))))
+(def action-types
+  {"noop" {:text "noop"
+           :icon nil
+           :alt nil}
+   "email" {:text "email"
+            :icon "/img/email-icon.png"
+            :alt "email"}
+   "github-issue" {:text "issue"
+                   :icon "/img/github-icon.png"
+                   :alt "github"}})
 
-(defn noop-action-card [data owner]
-  (reify
-    om/IRender
-    (render [this]
-      (let [id (:project-id data)
-            email (:user-email data)]
-        (dom/div #js {:className "panel panel-default action"
-                      :onClick #(add-action/show :type :update
-                                                 :project-id id
-                                                 :user-email email
-                                                 :action @data)}
-                 (dom/div 
-                  #js {:className "panel-body bg-success"}
-                  (dom/span #js {:className "action-info"}
-                            (dom/div #js {:className "library-name"}
-                                     (get data "library"))
-                            (dom/div #js {:className "version"}
-                                     (get data "last-processed-version")))))))))
+(defn render-action-type [type]
+  (let [{:keys [text icon alt]} (action-types type)]
+    (dom/div nil
+      (when icon
+        (dom/img #js {:src icon
+                      :className "action-icon"
+                      :alt alt
+                      :title alt}))
+      (dom/span #js {:className "action-name"}
+                text))))
 
-(defn github-issue-action-card [data owner]
+(defn action-card [data owner]
   (reify
     om/IRender
     (render [this]
@@ -80,21 +59,17 @@
                                                  :project-id id
                                                  :user-email email
                                                  :action @data)}
-                 (dom/div 
-                  #js {:className "panel-body bg-success"}
-                  (dom/span #js {:className "glyphicon glyphicon-fire action-type"})
-                  (dom/span #js {:className "action-info"}
-                            (dom/div #js {:className "library-name"}
-                                     (get data "library"))
-                            (dom/div #js {:className "version"}
-                                     (get data "last-processed-version")))))))))
+                 (dom/div #js {:className "panel-body bg-success"}
+                   (render-action-type (:type data))
+                   (dom/div #js {:className "library-name"}
+                            (get data "library"))
+                   (dom/div #js {:className "version"}
+                            (get data "last-processed-version"))))))))
 
-
-(defmulti render-action #(:type %))
-(defmethod render-action "email" [data] (om/build email-action-card data))
-(defmethod render-action "noop" [data] (om/build noop-action-card data))
-(defmethod render-action "github-issue" [data] (om/build github-issue-action-card data))
-(defmethod render-action :add [data] (om/build add-new-action-card data))
+(defn render-action [data]
+  (if (= (:type data) :add)
+    (om/build add-new-action-card data)
+    (om/build action-card data)))
 
 (defn actions-table [id actions email]
   (let [actions (->> actions

@@ -40,34 +40,52 @@
   (reify
     om/IRender
     (render [this]
-      (dom/div nil
-               (dom/div #js {:className "form-group"}
-                        (dom/label nil "file")
-                        (dom/input #js {:type "text"
-                                        :value (:file data)
-                                        :className "form-control"}))
-               (dom/div #js {:className "form-group"}
-                        (dom/label nil "regex")
-                        (dom/input #js {:type "text"
-                                        :value (:regex data)
-                                        :className "form-control"}))
-               (dom/div #js {:className "form-group"}
-                        (dom/label nil "replacement")
-                        (dom/input #js {:type "text"
-                                        :value (:replace data)
-                                        :className "form-control"}))))))
+      (dom/div
+       #js {:className "panel-group"
+            :id (str "gh-pull-req-op-" (:id data))}
+       (dom/div #js {:className "panel panel-default"}
+                (dom/div
+                 #js {:className "panel-heading"}
+                 (dom/h4 #js {:className "panel-title"}
+                         (dom/a #js {:data-toggle "collapse"
+                                     :data-parent (str "#gh-pull-req-op-" (:id data))
+                                     :href (str "#gh-pull-req-op-col-" (:id data))}
+                                (str "Operation №" (:id data)))))
+                
+                (dom/div
+                 #js {:className "panel-collapse collapse in"
+                      :id (str "gh-pull-req-op-col-" (:id data))}
+                 (dom/div #js {:className "panel-body"}
+                          (dom/div #js {:className "form-group"}
+                                   (dom/label nil "file")
+                                   (dom/input #js {:type "text"
+                                                   :value (:file data)
+                                                   :className "form-control"}))
+                          (dom/div #js {:className "form-group"}
+                                   (dom/label nil "regex")
+                                   (dom/input #js {:type "text"
+                                                   :value (:regex data)
+                                                   :className "form-control"}))
+                          (dom/div #js {:className "form-group"}
+                                   (dom/label nil "replacement")
+                                   (dom/input #js {:type "text"
+                                                   :value (:replace data)
+                                                   :className "form-control"})))))))))
 
 (defn pull-request-operations-list [data owner]
   (reify
     om/IRender
     (render [this]
       (dom/div nil
-               (dom/div nil
-                        (dom/button
-                         #js {:className "btn btn-primary pull-right"}
-                         "Add operation"))
                (dom/div #js {:className "form-group"}
-                        (dom/label nil "Operations list")
+                        (dom/div #js {:className "row"}
+                                 (dom/div #js {:className "col-md-6"}
+                                          (dom/h4 nil "Operations list"))
+
+                                 (dom/div #js {:className "col-md-6"}
+                                          (dom/button #js {:className "btn btn-primary pull-right"}
+                                                      "Add operation")))
+                        
                         (om/build pull-request-operation
                                   {:id 1
                                    :file "hello.clj"

@@ -42,7 +42,7 @@
                   #js {:className "btn btn-primary pull-left"
                        :onClick #(action/send-new-action data-pack)} "Submit")
 
-                 (when-not (= :noop type)
+                 (when-not (= :noop (:type data))
                    (dom/button
                     #js {:className "btn btn-default"
                          :onClick #(action/test-action data-pack)} "Test")))))))
@@ -61,7 +61,7 @@
             #js {:className "btn btn-primary pull-left"
                  :onClick #(action/update-action data-pack)} "Update")
 
-           (when-not (= :noop type)
+           (when-not (= :noop (:type data))
              (dom/button
               #js {:className "btn btn-default"
                    :onClick #(action/test-action data-pack)} "Test")))))))

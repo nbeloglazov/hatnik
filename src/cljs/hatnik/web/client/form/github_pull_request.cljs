@@ -89,15 +89,28 @@
                                           (fn [st] (om/set-state! owner :form-status "has-error")))
                                         }))
 
-               (dom/div #js {:className "form-group"}
-                        (dom/label nil "Title")
-                        (dom/input #js {:type "text"
-                                        :className "form-control"}))
+               (dom/div
+                #js {:className "panel-group" :id "github-pull-req-text"}
+                (dom/div #js {:className "panel panel-default"}
+                         (dom/div #js {:className "panel-heading"}
+                                  (dom/h4 #js {:className "panel-title"}
+                                          (dom/a #js {:data-toggle "collapse"
+                                                      :data-parent "#github-pull-req-text"
+                                                      :href "#github-pull-req-text-body"}
+                                                 "GitHub pull request body")))
+                         
+                         (dom/div #js {:className "panel-collapse collapse"
+                                       :id "github-pull-req-text-body"}
+                                  (dom/div #js {:className "panel-body"}
+                                           (dom/div #js {:className "form-group"}
+                                                    (dom/label nil "Title")
+                                                    (dom/input #js {:type "text"
+                                                                    :className "form-control"}))
 
-               (dom/div #js {:className "form-group"}
-                        (dom/label nil "Body")
-                        (dom/textarea #js {:cols "40"
-                                               :className "form-control"}))
+                                           (dom/div #js {:className "form-group"}
+                                                    (dom/label nil "Body")
+                                                    (dom/textarea #js {:cols "40"
+                                                                       :className "form-control"}))))))
 
                (dom/div #js {:className "form-group"}
                         (dom/label nil "Commit message")

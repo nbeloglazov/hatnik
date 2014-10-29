@@ -48,6 +48,14 @@ form textarea.form-control {
     resize: vertical;
 }
 
+.test-spinner {
+    display: inline-block;
+    width: 54px;
+    height: 34px;
+    padding: 5px;
+    text-align: center;
+}
+
 #iProjectList .action {
     cursor: pointer;
     height: 75px;

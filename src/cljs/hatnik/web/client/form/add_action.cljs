@@ -30,8 +30,12 @@
 
 (defn add-action-footer [data owner]
   (reify
-    om/IRender
-    (render [this]
+    om/IInitState
+    (init-state [this]
+      {:test-in-progress? false})
+
+    om/IRenderState
+    (render-state [this state]
       (let [; Make local copy of data to be sure it doesn't play tricks with us.
             data-pack (select-keys data [:type :project-id :artifact-value
                                          :gh-repo :gh-issue-title :gh-issue-body
@@ -43,14 +47,27 @@
                        :onClick #(action/send-new-action data-pack)} "Submit")
 
                  (when-not (= :noop (:type data))
-                   (dom/button
-                    #js {:className "btn btn-default"
-                         :onClick #(action/test-action data-pack)} "Test")))))))
+                   (if (:test-in-progress? state)
+                     (dom/span #js {:className "test-spinner"}
+                               (dom/img #js {:src "/img/ajax-loader.gif"
+                                             :alt "Testing"
+                                             :title "Testing"}))
+                     (dom/button
+                      #js {:className "btn btn-default"
+                           :onClick (fn []
+                                      (om/set-state! owner :test-in-progress? true)
+                                      (action/test-action data-pack
+                                                          #(om/set-state! owner :test-in-progress? false)))}
+                      "Test"))))))))
 
 (defn update-action-footer [data owner]
   (reify
-    om/IRender
-    (render [this]
+    om/IInitState
+    (init-state [this]
+      {:test-in-progress? false})
+
+    om/IRenderState
+    (render-state [this state]
       (let [; Make local copy of data to be sure it doesn't play tricks with us.
             data-pack (select-keys data [:type :project-id :artifact-value
                                          :gh-repo :gh-issue-title :gh-issue-body
@@ -62,9 +79,18 @@
                  :onClick #(action/update-action data-pack)} "Update")
 
            (when-not (= :noop (:type data))
-             (dom/button
-              #js {:className "btn btn-default"
-                   :onClick #(action/test-action data-pack)} "Test")))))))
+             (if (:test-in-progress? state)
+               (dom/span #js {:className "test-spinner"}
+                         (dom/img #js {:src "/img/ajax-loader.gif"
+                                       :alt "Testing"
+                                       :title "Testing"}))
+               (dom/button
+                #js {:className "btn btn-default"
+                     :onClick (fn []
+                                (om/set-state! owner :test-in-progress? true)
+                                (action/test-action data-pack
+                                  #(om/set-state! owner :test-in-progress? false)))}
+                "Test"))))))))
 
 (def default-email-subject "{{library}} {{version}} released")
 

@@ -58,9 +58,14 @@
   (reify
     om/IRender
     (render [this]
-      (dom/div #js {:className "form-group"}
-               (dom/label nil "Operations list")
-               (om/build pull-request-operation {})))))
+      (dom/div nil
+               (dom/div nil
+                        (dom/button
+                         #js {:className "btn btn-primary pull-right"}
+                         "Add operation"))
+               (dom/div #js {:className "form-group"}
+                        (dom/label nil "Operations list")
+                        (om/build pull-request-operation {}))))))
 
 (defn github-pull-request-component [data owner]
   (reify

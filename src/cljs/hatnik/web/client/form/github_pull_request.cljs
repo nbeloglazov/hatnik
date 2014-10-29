@@ -44,14 +44,17 @@
                (dom/div #js {:className "form-group"}
                         (dom/label nil "file")
                         (dom/input #js {:type "text"
+                                        :value (:file data)
                                         :className "form-control"}))
                (dom/div #js {:className "form-group"}
                         (dom/label nil "regex")
                         (dom/input #js {:type "text"
+                                        :value (:regex data)
                                         :className "form-control"}))
                (dom/div #js {:className "form-group"}
                         (dom/label nil "replacement")
                         (dom/input #js {:type "text"
+                                        :value (:replace data)
                                         :className "form-control"}))))))
 
 (defn pull-request-operations-list [data owner]
@@ -65,7 +68,11 @@
                          "Add operation"))
                (dom/div #js {:className "form-group"}
                         (dom/label nil "Operations list")
-                        (om/build pull-request-operation {}))))))
+                        (om/build pull-request-operation
+                                  {:id 1
+                                   :file "hello.clj"
+                                   :regex "regex"
+                                   :replace "{{template}}"}))))))
 
 (defn github-pull-request-component [data owner]
   (reify

@@ -35,7 +35,8 @@
     (render-state [this state]
       (dom/div #js {:className (str "form-group " (:form-status state))
                     :id "artifact-input-group"}
-               (dom/label #js {:htmlFor "artifact-input"} "Library")
+               (dom/label #js {:htmlFor "artifact-input"
+                               :className "control-label"} "Library")
                (dom/input #js {:type "text"
                                :id "artifact-input"
                                :className "form-control"

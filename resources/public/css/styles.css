@@ -39,6 +39,12 @@
     margin-right: 10px;
 }
 
+#artifact-input-group .form-control-feedback img {
+    margin-top: 5px;
+    width: 24px;
+    height: 24px;
+}
+
 #email-input {
     margin-bottom: 10px;
 }

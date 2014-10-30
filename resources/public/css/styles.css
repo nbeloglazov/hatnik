@@ -64,7 +64,7 @@ form textarea.form-control {
 
 #iProjectList .action {
     cursor: pointer;
-    height: 100px;
+    height: 80px;
     color: #444;
 }
 
@@ -80,7 +80,7 @@ form textarea.form-control {
 }
 
 .action .action-name {
-    font-size: 15px;
+    font-size: 14px;
 }
 
 .action .action-info {
@@ -88,11 +88,22 @@ form textarea.form-control {
 }
 
 .action .library-name {
-    font-size: 20px;
+    font-size: 18px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.action .library-name.long-name {
+    font-size: 14px;
 }
 
 .action .version {
-    font-size: 15px;
+    font-size: 14px;
+}
+
+.action .panel-body {
+    padding: 10px;
 }
 
 .add-action {

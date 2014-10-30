@@ -53,7 +53,11 @@
     om/IRender
     (render [this]
       (let [id (:project-id data)
-            email (:user-email data)]
+            email (:user-email data)
+            library (get data "library")
+            library-class (if (< (count library) 27)
+                            "" ; regular class
+                            "long-name")]
         (dom/div #js {:className "panel panel-default action"
                       :onClick #(add-action/show :type :update
                                                  :project-id id
@@ -61,8 +65,9 @@
                                                  :action @data)}
                  (dom/div #js {:className "panel-body bg-success"}
                    (render-action-type (:type data))
-                   (dom/div #js {:className "library-name"}
-                            (get data "library"))
+                   (dom/div #js {:className (str "library-name " library-class)
+                                 :title library}
+                            library)
                    (dom/div #js {:className "version"}
                             (get data "last-processed-version"))))))))
 
@@ -77,14 +82,14 @@
                      (map second))
         rendered
         (map (fn [act]
-               (dom/div #js {:className "col-sm-12 col-md-6 col-lg-4 prj-list-item"}
+               (dom/div #js {:className "col-sm-6 col-md-4 col-lg-3 prj-list-item"}
                         (render-action (assoc act :project-id id 
                                               :type (get act "type")
                                               :user-email email))))
              actions)]
     (apply dom/div #js {:className "row"}
            (concat rendered
-                   [(dom/div #js {:className "col-sm-12 col-md-6 col-lg-4 prj-list-item"}
+                   [(dom/div #js {:className "col-sm-6 col-md-4 col-lg-3 prj-list-item"}
                              (render-action {:type :add 
                                              :project-id id
                                              :user-email email}))]))))

@@ -5,6 +5,8 @@
   (hc/html
    [:head
     [:title "Hatnik"]
+    [:meta {:name "viewport"
+            :content "width=device-width, initial-scale=1.0"}]
     [:link {:rel "stylesheet" :href "/css/bootstrap.min.css"}]
     [:link {:rel "stylesheet" :href "/css/styles.css"}]]))
 
@@ -37,6 +39,13 @@
 (defn page-menu [config user]
   [:nav.navbar.navbar-default {:role "navigation"}
    [:div.navbar-header
+    [:button.navbar-toggle {:type "button"
+                            :data-toggle "collapse"
+                            :data-target ".navbar-collapse"}
+     [:span.sr-only "Toggle navigation"]
+     [:span.icon-bar]
+     [:span.icon-bar]
+     [:span.icon-bar]]
     [:a.navbar-brand {:href "/"} "Hatnik"]]
 
    [:div#navbarCollapse.collapse.navbar-collapse

@@ -9,7 +9,8 @@
   (reify
     om/IInitState
     (init-state [this]
-      {:status "has-success"})
+      {:subject-status "has-success"
+       :body-status "has-success"})
 
     om/IRenderState
     (render-state [this state]
@@ -19,7 +20,8 @@
                         (dom/p #js {:id "email-input"}
                                (:email data)))
                (dom/div #js {:className (str "form-group " (:subject-status state))}
-                        (dom/label #js {:htmlFor "email-subject-input"} "Subject")
+                        (dom/label #js {:htmlFor "email-subject-input"
+                                        :className "control-label"} "Subject")
                         (dom/input #js {:type "text"
                                         :className "form-control"
                                         :id "email-subject-input"
@@ -31,7 +33,8 @@
                                                                       "has-error"
                                                                       "has-success")))}))
                (dom/div #js {:className (str "form-group " (:body-status state))}
-                        (dom/label #js {:htmlFor "email-body-input"} "Body")
+                        (dom/label #js {:htmlFor "email-body-input"
+                                        :className "control-label"} "Body")
                         (dom/textarea #js {:cols "40"
                                            :className "form-control"
                                            :id "email-body-input"

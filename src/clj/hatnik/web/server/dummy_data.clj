@@ -11,7 +11,14 @@
                                     :subject "{{library}} {{version}} released"
                                     :body "Hey {{library}} released. New version {{VERSION}}."
                                     :library "com.nbeloglazov/hatnik-test-lib"
-                                    :last-processed-version "0.0.9"})))
+                                    :last-processed-version "0.0.9"})
+    (stg/create-action! db user-id {:project-id proj-id
+                                    :type "github-issue"
+                                    :repo "nbeloglazov/hatnik"
+                                    :title "{{library}} {{version}} released"
+                                    :body "Hey ho. {{library}} {{version}}, was {{previous-version}}."
+                                    :library "org.clojure/clojure"
+                                    :last-processed-version "1.6.0"})))
 
 (defn create-quil-project [db user-id]
   (let [proj-id (stg/create-project! db {:name "Quil"

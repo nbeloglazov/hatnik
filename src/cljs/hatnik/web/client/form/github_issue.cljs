@@ -7,12 +7,12 @@
   (:use [clojure.string :only [split replace]]))
 
 (defn github-issue-on-change [gh-repo timer form-handler form-status-handler error-handler]
-  (js/clearTimeout timer)  
-  
+  (js/clearTimeout timer)
+
   (let [pr (split gh-repo "/")
         user (first pr)
         repo (second pr)]
-    (form-handler 
+    (form-handler
      (if (or (nil? repo)
              (nil? user)
              (= "" user)
@@ -22,10 +22,10 @@
          nil)
 
        (js/setTimeout
-        (fn [] 
-          (action/get-github-repos 
-           user 
-           (fn [reply] 
+        (fn []
+          (action/get-github-repos
+           user
+           (fn [reply]
              (let [rest (js->clj reply)
                    result (->> rest
                                (map #(get % "name"))
@@ -40,7 +40,7 @@
   (reify
     om/IInitState
     (init-state [this]
-      {:form-status 
+      {:form-status
        (let [v (:value (:repo data))]
          (if (or (nil? v) (= "" v))
            "has-warning"
@@ -51,16 +51,17 @@
        })
     om/IRenderState
     (render-state [this state]
-      (dom/div nil 
+      (dom/div nil
                (dom/div #js {:className (str "form-group " (:form-status state))}
-                        (dom/label #js {:htmlFor "gh-repo"} "GitHub repository")
+                        (dom/label #js {:htmlFor "gh-repo"
+                                        :className "control-label"} "GitHub repository")
                         (dom/input #js {:type "text"
                                         :className "form-control"
                                         :id "gh-repo"
                                         :value (:value (:repo data))
                                         :placeholder "user/repository or organization/repository"
 
-                                        :onChange 
+                                        :onChange
                                         #(github-issue-on-change
                                           (.. % -target -value)
                                           (:timer state)
@@ -71,7 +72,8 @@
                                           (fn [st] (om/set-state! owner :form-status "has-error")))
                                         }))
                (dom/div #js {:className (str "form-group " (:title-status state))}
-                        (dom/label #js {:htmlFor "gh-issue-title"} "Issue title")
+                        (dom/label #js {:htmlFor "gh-issue-title"
+                                        :className "control-label"} "Issue title")
                         (dom/input #js {:type "text"
                                         :className "form-control"
                                         :id "gh-issue-title"
@@ -83,7 +85,8 @@
                                                                       "has-error"
                                                                       "has-success")))}))
                (dom/div #js {:className (str "form-group " (:body-status state))}
-                        (dom/label #js {:htmlFor "gh-issue-body"} "Issue body")
+                        (dom/label #js {:htmlFor "gh-issue-body"
+                                        :className "control-label"} "Issue body")
                         (dom/textarea #js {:cols "40"
                                            :className "form-control"
                                            :id "gh-issue-body"

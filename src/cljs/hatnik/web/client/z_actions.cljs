@@ -109,24 +109,32 @@
               (wrap-error-alert #(create-new-action-callback data %)))))))
 
 
-(defmulti test-action #(:type %))
-(defmethod test-action :email [data-pack]
+(defmulti test-action #(:type %1))
+(defmethod test-action :email [data-pack done-callback]
   (let [data (build-email-action data-pack)]
     (if (s/check schm/EmailAction data)
-      (msg/danger default-error-message)
+      (do (msg/danger default-error-message)
+          (done-callback))
       (do
         (msg/info "Sending test email...")
        (ajax "/api/actions/test" "POST" data
-            (wrap-error-alert (fn [e] (msg/success "The email is sent. Check your inbox."))))))))
+            (wrap-error-alert
+             (fn [e]
+               (done-callback)
+               (msg/success "The email is sent. Check your inbox."))))))))
 
-(defmethod test-action :github-issue [data-pack]
+(defmethod test-action :github-issue [data-pack done-callback]
   (let [data (build-gh-issue-action data-pack)]
     (if (s/check schm/GithubIssueAction data)
-      (msg/danger default-error-message)
+      (do (msg/danger default-error-message)
+          (done-callback))
       (do
         (msg/info "Creating test issue on Github...")
         (ajax "/api/actions/test" "POST" data
-              (wrap-error-alert (fn [e] (msg/success "The issue is created. Check out your project."))))))))
+              (wrap-error-alert
+               (fn [e]
+                 (done-callback)
+                 (msg/success "The issue is created. Check out your project."))))))))
 
 (def action-update-error-message "Couldn't update the action. Please file a bug if the issue persists.")
 

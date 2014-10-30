@@ -30,13 +30,36 @@
     list-style-type: lower-alpha;
 }
 
+#artifact-input-group {
+    position: relative;
+}
+
+#artifact-input-group .form-control-feedback {
+    width: auto;
+    margin-right: 10px;
+}
+
+#artifact-input-group .form-control-feedback img {
+    margin-top: 5px;
+    width: 24px;
+    height: 24px;
+}
+
 #email-input {
     margin-bottom: 10px;
 }
 
-#email-body-input {
+form textarea.form-control {
     height: 150px;
     resize: vertical;
+}
+
+.test-spinner {
+    display: inline-block;
+    width: 54px;
+    height: 34px;
+    padding: 5px;
+    text-align: center;
 }
 
 #iProjectList .action {

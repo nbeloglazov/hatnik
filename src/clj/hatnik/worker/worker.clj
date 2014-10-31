@@ -60,21 +60,25 @@
     (doseq [action actions
             :when (and (= (:library action) library)
                        (ver/first-newer? ver (:last-processed-version action)))]
-      (let [proj (stg/get-project db (:project-id action))
-            user (stg/get-user-by-id db (:user-id proj))
-            error (perform-action action user
-                                  {:library library
-                                   :version ver
-                                   :previous-version (:last-processed-version action)
-                                   :project (:name proj)}
-                                  utils)]
-        (if-not error
-          (do (timbre/debug "Action completed sucessfully. Updating library version in action.")
-              (stg/update-action! db (:id user)
-                                  (:id action) (assoc action
-                                                 :last-processed-version ver))
-              (timbre/debug "Action updated."))
-          (timbre/warn "Error while performing action: " error "Not updating the action."))))))
+      (try
+        (let [proj (stg/get-project db (:project-id action))
+              user (stg/get-user-by-id db (:user-id proj))
+              error (perform-action action user
+                                    {:library library
+                                     :version ver
+                                     :previous-version (:last-processed-version action)
+                                     :project (:name proj)}
+                                    utils)]
+          (if-not error
+            (do (timbre/debug "Action completed sucessfully. Updating library version in action.")
+                (stg/update-action! db (:id user)
+                                    (:id action) (assoc action
+                                                   :last-processed-version ver))
+                (timbre/debug "Action updated."))
+            (timbre/warn "Error while performing action: " error "Not updating the action.")))
+        (catch Exception e
+          (timbre/error "Error in action" (:id action))
+          (throw e))))))
 
 (defn update-all-actions
   "Runs update for all actions by checking latest versions of corresponding

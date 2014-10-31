@@ -34,8 +34,12 @@
 
 (defn add-action-footer [data owner]
   (reify
-    om/IRender
-    (render [this]
+    om/IInitState
+    (init-state [this]
+      {:test-in-progress? false})
+
+    om/IRenderState
+    (render-state [this state]
       (let [; Make local copy of data to be sure it doesn't play tricks with us.
             data-pack (select-keys data [:type :project-id :artifact-value
                                          :gh-repo :gh-issue-title :gh-issue-body
@@ -46,15 +50,28 @@
                   #js {:className "btn btn-primary pull-left"
                        :onClick #(action/send-new-action data-pack)} "Submit")
 
-                 (when-not (= :noop type)
-                   (dom/button
-                    #js {:className "btn btn-default"
-                         :onClick #(action/test-action data-pack)} "Test")))))))
+                 (when-not (= :noop (:type data))
+                   (if (:test-in-progress? state)
+                     (dom/span #js {:className "test-spinner"}
+                               (dom/img #js {:src "/img/ajax-loader.gif"
+                                             :alt "Testing"
+                                             :title "Testing"}))
+                     (dom/button
+                      #js {:className "btn btn-default"
+                           :onClick (fn []
+                                      (om/set-state! owner :test-in-progress? true)
+                                      (action/test-action data-pack
+                                                          #(om/set-state! owner :test-in-progress? false)))}
+                      "Test"))))))))
 
 (defn update-action-footer [data owner]
   (reify
-    om/IRender
-    (render [this]
+    om/IInitState
+    (init-state [this]
+      {:test-in-progress? false})
+
+    om/IRenderState
+    (render-state [this state]
       (let [; Make local copy of data to be sure it doesn't play tricks with us.
             data-pack (select-keys data [:type :project-id :artifact-value
                                          :gh-repo :gh-issue-title :gh-issue-body
@@ -65,10 +82,19 @@
             #js {:className "btn btn-primary pull-left"
                  :onClick #(action/update-action data-pack)} "Update")
 
-           (when-not (= :noop type)
-             (dom/button
-              #js {:className "btn btn-default"
-                   :onClick #(action/test-action data-pack)} "Test")))))))
+           (when-not (= :noop (:type data))
+             (if (:test-in-progress? state)
+               (dom/span #js {:className "test-spinner"}
+                         (dom/img #js {:src "/img/ajax-loader.gif"
+                                       :alt "Testing"
+                                       :title "Testing"}))
+               (dom/button
+                #js {:className "btn btn-default"
+                     :onClick (fn []
+                                (om/set-state! owner :test-in-progress? true)
+                                (action/test-action data-pack
+                                  #(om/set-state! owner :test-in-progress? false)))}
+                "Test"))))))))
 
 (def default-email-subject "{{library}} {{version}} released")
 
@@ -123,6 +149,7 @@
             :project-id (:project-id data)
             :user-email (:user-email data)
             :artifact-value (get action "library")
+            :artifact-version (get action "last-processed-version")
             :action-id (get action "id")}
            (get-init-state-by-action action))))
 
@@ -163,6 +190,7 @@
                  (om/build action-input-form
                            {:artifact-value
                             {:value (:artifact-value state)
+                             :version (:artifact-version state)
                              :handler #(om/set-state! owner :artifact-value %)}
 
                             :action-type

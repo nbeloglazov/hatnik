@@ -72,8 +72,8 @@
                                                    :value (:replace data)
                                                    :className "form-control"})))))))))
 
-(defn add-new-operation [data owner]
-  (.log js/console "Add new operation"))
+(defn add-new-operation [data]
+  ((:handler data) (conj (:value data) {:file "" :regex "" :replace ""})))
 
 (defn pull-request-operations-list [data owner]
   (reify
@@ -87,11 +87,11 @@
 
                                  (dom/div #js {:className "col-md-6"}
                                           (dom/div #js {:className "btn btn-primary pull-right"
-                                                        :onClick #(add-new-operation data owner)}
+                                                        :onClick #(add-new-operation data)}
                                                       "Add operation")))
                         
                         (apply dom/div nil
-                               (map-indexed #(om/build pull-request-operation (merge {:id %1} %2)) data)))))))
+                               (map-indexed #(om/build pull-request-operation (merge {:id %1} %2)) (:value data))))))))
 
 (defn github-pull-request-component [data owner]
   (reify
@@ -159,4 +159,4 @@
                                         :className "form-control"}))
 
                (dom/div nil
-                        (om/build pull-request-operations-list (-> data :operations :value)))))))
+                        (om/build pull-request-operations-list (-> data :operations)))))))

@@ -224,11 +224,11 @@
                              :pull-body {:value (:gh-pull-body state)
                                          :handler #(om/set-state! owner :gh-pull-body %)}
                              :pull-title {:value (:gh-pull-title state)
-                                           :handler #(om/set-state! owner :gh-pull-title %)}
+                                          :handler #(om/set-state! owner :gh-pull-title %)}
                              :commit-msg {:value (:gh-comm-msg state)
-                                          :header #(om/set-state! owner :gh-comm-msg %)}
+                                          :handler #(om/set-state! owner :gh-comm-msg %)}
                              :operations {:value (:gh-operations state)
-                                          :header #(om/set-state! owner :gh-operations %)}}
+                                          :handler #(om/set-state! owner :gh-operations %)}}
                             
                             :email
                             {:body {:value (:email-body state)

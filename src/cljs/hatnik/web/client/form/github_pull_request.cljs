@@ -76,6 +76,7 @@
   (reify
     om/IRender
     (render [this]
+      (.log js/console data)
       (dom/div nil
                (dom/div #js {:className "form-group"}
                         (dom/div #js {:className "row"}
@@ -155,4 +156,4 @@
                                         :className "form-control"}))
 
                (dom/div nil
-                        (om/build pull-request-operations-list (:operations data)))))))
+                        (om/build pull-request-operations-list (-> data :operations :value)))))))

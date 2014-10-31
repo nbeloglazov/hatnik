@@ -72,6 +72,9 @@
                                                    :value (:replace data)
                                                    :className "form-control"})))))))))
 
+(defn add-new-operation [data owner]
+  (.log js/console "Add new operation"))
+
 (defn pull-request-operations-list [data owner]
   (reify
     om/IRender
@@ -83,7 +86,8 @@
                                           (dom/h4 nil "Operations list"))
 
                                  (dom/div #js {:className "col-md-6"}
-                                          (dom/button #js {:className "btn btn-primary pull-right"}
+                                          (dom/div #js {:className "btn btn-primary pull-right"
+                                                        :onClick #(add-new-operation data owner)}
                                                       "Add operation")))
                         
                         (apply dom/div nil

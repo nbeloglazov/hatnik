@@ -50,7 +50,7 @@
                          (dom/a #js {:data-toggle "collapse"
                                      :data-parent (str "#gh-pull-req-op-" (:id data))
                                      :href (str "#gh-pull-req-op-col-" (:id data))}
-                                (str "Operation №" (:id data)))))
+                                (str "Operation №" (+ 1 (:id data))))))
                 
                 (dom/div
                  #js {:className "panel-collapse collapse in"
@@ -76,7 +76,6 @@
   (reify
     om/IRender
     (render [this]
-      (.log js/console data)
       (dom/div nil
                (dom/div #js {:className "form-group"}
                         (dom/div #js {:className "row"}
@@ -88,7 +87,7 @@
                                                       "Add operation")))
                         
                         (apply dom/div nil
-                               (map #(om/build pull-request-operation %) data)))))))
+                               (map-indexed #(om/build pull-request-operation (merge {:id %1} %2)) data)))))))
 
 (defn github-pull-request-component [data owner]
   (reify

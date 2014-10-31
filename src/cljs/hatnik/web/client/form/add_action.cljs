@@ -124,8 +124,7 @@
    :gh-pull-title "Release {{library}} {{version}}"
    :gh-pull-body "Time to update your project.clj to {{library}} {{version}}!"
    :gh-comm-msg "Update {{library}} to {{version}}"
-   :gh-operations [{:id 1
-                    :file "hello.clj"
+   :gh-operations [{:file "hello.clj"
                     :regex "regex"
                     :replace "{{template}}"}]})
 

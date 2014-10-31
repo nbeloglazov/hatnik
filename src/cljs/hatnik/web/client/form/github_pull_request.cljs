@@ -86,11 +86,8 @@
                                           (dom/button #js {:className "btn btn-primary pull-right"}
                                                       "Add operation")))
                         
-                        (om/build pull-request-operation
-                                  {:id 1
-                                   :file "hello.clj"
-                                   :regex "regex"
-                                   :replace "{{template}}"}))))))
+                        (apply dom/div nil
+                               (map #(om/build pull-request-operation %) data)))))))
 
 (defn github-pull-request-component [data owner]
   (reify
@@ -135,17 +132,27 @@
                                            (dom/div #js {:className "form-group"}
                                                     (dom/label nil "Title")
                                                     (dom/input #js {:type "text"
+                                                                    :value (:value (:pull-title data))
+                                                                    :onChange
+                                                                    #((:handler (:pull-title data))
+                                                                      (.. % -target -value))
                                                                     :className "form-control"}))
 
                                            (dom/div #js {:className "form-group"}
                                                     (dom/label nil "Body")
                                                     (dom/textarea #js {:cols "40"
+                                                                       :value (:value (:pull-body data))
+                                                                       :onChange
+                                                                       #((:handler (:pull-body data))
+                                                                         (.. % -target -value))
                                                                        :className "form-control"}))))))
 
                (dom/div #js {:className "form-group"}
                         (dom/label nil "Commit message")
-                        (dom/textarea #js {:cols "40"
-                                               :className "form-control"}))
+                        (dom/input #js {:value (:value (:commit-msg data))
+                                        :onChange #((:handler (:commit-msg data))
+                                                    (.. % -target -value))
+                                        :className "form-control"}))
 
                (dom/div nil
-                        (om/build pull-request-operations-list {}))))))
+                        (om/build pull-request-operations-list (:operations data)))))))

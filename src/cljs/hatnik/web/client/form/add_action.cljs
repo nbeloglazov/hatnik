@@ -110,12 +110,24 @@
 (defmulti get-init-state #(:type %))
 
 (def new-init-state {:artifact-value ""})
+
 (def email-init-state {:email-body default-email-body
                        :email-subject default-email-subject})
+
 (def github-issue-init-state
   {:gh-repo ""
    :gh-issue-title default-github-issue-title
    :gh-issue-body default-github-issue-body})
+
+(def github-pull-request-init-state
+  {:gh-repo ""
+   :gh-pull-title "Release {{library}} {{version}}"
+   :gh-pull-body "Time to update your project.clj to {{library}} {{version}}!"
+   :gh-comm-msg "Update {{library}} to {{version}}"
+   :gh-operations [{:id 1
+                    :file "hello.clj"
+                    :regex "regex"
+                    :replace "{{template}}"}]})
 
 (defmethod get-init-state :add [data _]
   (merge
@@ -124,7 +136,9 @@
     :email-subject default-email-subject
     :user-email (:user-email data)
     :type :email}
-   new-init-state email-init-state github-issue-init-state))
+   new-init-state email-init-state
+   github-issue-init-state
+   github-pull-request-init-state))
 
 (defmulti get-init-state-by-action #(get % "type"))
 (defmethod get-init-state-by-action "noop" [action]
@@ -207,7 +221,15 @@
 
                             :github-pull-request
                             {:repo {:value (:gh-repo state) 
-                                    :handler #(om/set-state! owner :gh-repo %)}}
+                                    :handler #(om/set-state! owner :gh-repo %)}
+                             :pull-body {:value (:gh-pull-body state)
+                                         :handler #(om/set-state! owner :gh-pull-body %)}
+                             :pull-title {:value (:gh-pull-title state)
+                                           :handler #(om/set-state! owner :gh-pull-title %)}
+                             :commit-msg {:value (:gh-comm-msg state)
+                                          :header #(om/set-state! owner :gh-comm-msg %)}
+                             :operations {:value (:gh-operations state)
+                                          :header #(om/set-state! owner :gh-operations %)}}
                             
                             :email
                             {:body {:value (:email-body state)

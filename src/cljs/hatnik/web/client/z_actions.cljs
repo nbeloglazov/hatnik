@@ -191,6 +191,17 @@
          data (wrap-error-alert
                #(common-update-callback action-update-error-message data %)))))))
 
+(defmethod update-action :github-pull-request [data-pack]
+  (let [data (build-gh-pull-req-action data-pack)]
+    (if (s/check schm/GithubPullRequestAction data)
+      (msg/danger default-error-message)
+      (do
+        (.modal ($ :#iModalAddAction) "hide")
+        (ajax
+         (str "/api/actions/" (:action-id data-pack)) "PUT"
+         data (wrap-error-alert
+               #(common-update-callback action-update-error-message data %)))))))
+
 (defn delete-action [action-id]
   (.modal ($ :#iModalAddAction) "hide")
   (ajax

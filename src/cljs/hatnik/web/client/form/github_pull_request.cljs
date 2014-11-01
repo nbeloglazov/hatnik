@@ -36,6 +36,15 @@
            error-handler))
         1000)))))
 
+
+(defn update-operation-item [data key new-val]
+  ((:handler data)
+   (:id data)
+   (assoc {:file (:file data)
+           :regex (:regex data)
+           :replace (:replace data)}
+     key new-val)))
+
 (defn pull-request-operation [data owner]
   (reify
     om/IRender
@@ -60,16 +69,19 @@
                                    (dom/label nil "file")
                                    (dom/input #js {:type "text"
                                                    :value (:file data)
+                                                   :onChange #(update-operation-item data :file (.. % -target -value))
                                                    :className "form-control"}))
                           (dom/div #js {:className "form-group"}
                                    (dom/label nil "regex")
                                    (dom/input #js {:type "text"
                                                    :value (:regex data)
+                                                   :onChange #(update-operation-item data :regex (.. % -target -value))
                                                    :className "form-control"}))
                           (dom/div #js {:className "form-group"}
                                    (dom/label nil "replacement")
                                    (dom/input #js {:type "text"
                                                    :value (:replace data)
+                                                   :onChange #(update-operation-item data :replace (.. % -target -value))
                                                    :className "form-control"})))))))))
 
 (defn add-new-operation [data]
@@ -91,7 +103,13 @@
                                                       "Add operation")))
                         
                         (apply dom/div nil
-                               (map-indexed #(om/build pull-request-operation (merge {:id %1} %2)) (:value data))))))))
+                               (map-indexed #(om/build pull-request-operation
+                                                       (merge {:id %1
+                                                               :handler (fn [id val]
+                                                                          ((:handler data)
+                                                                           (assoc (:value data) id val)))}
+                                                              %2))
+                                            (:value data))))))))
 
 (defn github-pull-request-component [data owner]
   (reify

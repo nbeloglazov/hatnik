@@ -66,6 +66,11 @@ form textarea.form-control {
     cursor: pointer;
     height: 80px;
     color: #444;
+    background-color: #FAFAFA;
+}
+
+#iProjectList .action:hover {
+    background-color: #EEE;
 }
 
 .action .panel-body {

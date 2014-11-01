@@ -149,14 +149,28 @@
   (merge
    {:email-body (get action "body")
     :email-subject (get action "subject")}
-    github-issue-init-state))
+    github-issue-init-state github-pull-request-init-state))
 
 (defmethod get-init-state-by-action "github-issue" [action]
-  (merge
-   {:gh-issue-title (get action "title")
-    :gh-issue-body (get action "body")
-    :gh-repo (get action "repo")}
-   email-init-state))
+  (assoc
+      (merge
+       {:gh-issue-title (get action "title")
+        :gh-issue-body (get action "body")}
+       email-init-state github-pull-request-init-state)
+    :gh-repo (get action "repo")))
+
+(defmethod get-init-state-by-action "github-pull-request" [action]
+  (assoc
+      (merge
+       {:gh-pull-body (get action "body")
+        :gh-pull-title (get action "title")
+        :gh-comm-msg (get action "commit-message")
+        :gh-operations (mapv (fn [x] {:file (get x "file")
+                                      :regex (get x "regex")
+                                      :replacement (get x "replacement")})
+                             (get action "operations"))}
+       email-init-state github-issue-init-state)
+    :gh-repo (get action "repo")))
 
 (defmethod get-init-state :update [data _]
   (let [action (:action data)]

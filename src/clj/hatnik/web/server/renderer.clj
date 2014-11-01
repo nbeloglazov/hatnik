@@ -38,30 +38,31 @@
 
 (defn page-menu [config user]
   [:nav.navbar.navbar-default {:role "navigation"}
-   [:div.navbar-header
-    [:button.navbar-toggle {:type "button"
-                            :data-toggle "collapse"
-                            :data-target ".navbar-collapse"}
-     [:span.sr-only "Toggle navigation"]
-     [:span.icon-bar]
-     [:span.icon-bar]
-     [:span.icon-bar]]
-    [:a.navbar-brand {:href "/"} "Hatnik"]]
+   [:div.container
+    [:div.navbar-header
+     [:button.navbar-toggle {:type "button"
+                             :data-toggle "collapse"
+                             :data-target ".navbar-collapse"}
+      [:span.sr-only "Toggle navigation"]
+      [:span.icon-bar]
+      [:span.icon-bar]
+      [:span.icon-bar]]
+     [:a.navbar-brand {:href "/"} "Hatnik"]]
 
-   [:div#navbarCollapse.collapse.navbar-collapse
-    (if user
-      ; User logged in
-      [:ul.nav.navbar-nav.navbar-right
-       [:li
-        [:a (:github-login user)]]
-       [:li
-        [:a.btn {:href "/api/logout"} "Logout"]]]
+    [:div#navbarCollapse.collapse.navbar-collapse
+     (if user
+                                        ; User logged in
+       [:ul.nav.navbar-nav.navbar-right
+        [:li
+         [:a (:github-login user)]]
+        [:li
+         [:a.btn {:href "/api/logout"} "Logout"]]]
 
-      ; User is not logged in
-      [:ul.nav.navbar-nav.navbar-right
-       [:li
-        [:a.btn
-         {:href (github-link config)} "Login via GitHub"]]])]])
+                                        ; User is not logged in
+       [:ul.nav.navbar-nav.navbar-right
+        [:li
+         [:a.btn
+          {:href (github-link config)} "Login via GitHub"]]])]]])
 
 (defn work-main-page []
   (hc/html
@@ -120,8 +121,9 @@
    (page-html-head)
 
    [:body
+    (page-menu config user)
+
     [:div.container
-     (page-menu config user)
 
      (if user
        (work-main-page)

@@ -80,8 +80,9 @@
                           (dom/div #js {:className "form-group"}
                                    (dom/label nil "replacement")
                                    (dom/input #js {:type "text"
-                                                   :value (:replace data)
-                                                   :onChange #(update-operation-item data :replace (.. % -target -value))
+                                                   :value (:replacement data)
+                                                   :onChange #(update-operation-item
+                                                               data :replacement (.. % -target -value))
                                                    :className "form-control"})))))))))
 
 (defn add-new-operation [data]

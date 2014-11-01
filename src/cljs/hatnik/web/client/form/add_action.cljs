@@ -128,7 +128,7 @@
    :gh-comm-msg "Update {{library}} to {{version}}"
    :gh-operations [{:file "hello.clj"
                     :regex "regex"
-                    :replace "{{template}}"}]})
+                    :replacement "{{template}}"}]})
 
 (defmethod get-init-state :add [data _]
   (merge

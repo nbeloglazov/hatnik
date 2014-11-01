@@ -78,6 +78,16 @@
    :project-id (:project-id data-pack)
    :library (:artifact-value data-pack)})
 
+(defn build-gh-pull-req-action [data-pack]
+  {:project-id (:project-id data-pack)
+   :type "github-pull-request"
+   :library (:artifact-value data-pack)
+   :repo (:gh-repo data-pack)
+   :title (:gh-pull-title data-pack)
+   :body (:gh-pull-body data-pack)
+   :commit-message (:gh-comm-msg data-pack)
+   :operations (:gh-operations data-pack)})
+
 
 (defmulti send-new-action #(:type %))
 
@@ -102,6 +112,15 @@
 (defmethod send-new-action :github-issue [data-pack]
   (let [data (build-gh-issue-action data-pack)]
     (if (s/check schm/GithubIssueAction data)
+      (msg/danger default-error-message)
+      (do
+        (.modal ($ :#iModalAddAction) "hide")
+        (ajax "/api/actions" "POST" data
+              (wrap-error-alert #(create-new-action-callback data %)))))))
+
+(defmethod send-new-action :github-pull-request [data-pack]
+  (let [data (build-gh-pull-req-action data-pack)]
+    (if (s/check schm/GithubPullRequestAction data)
       (msg/danger default-error-message)
       (do
         (.modal ($ :#iModalAddAction) "hide")

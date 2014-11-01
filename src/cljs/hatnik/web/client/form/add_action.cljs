@@ -43,7 +43,8 @@
       (let [; Make local copy of data to be sure it doesn't play tricks with us.
             data-pack (select-keys data [:type :project-id :artifact-value
                                          :gh-repo :gh-issue-title :gh-issue-body
-                                         :email-body :email-subject])]
+                                         :email-body :email-subject
+                                         :gh-pull-body :gh-pull-title :gh-comm-msg :gh-operations])]
         (dom/div nil
                  (dom/button
 
@@ -75,7 +76,8 @@
       (let [; Make local copy of data to be sure it doesn't play tricks with us.
             data-pack (select-keys data [:type :project-id :artifact-value
                                          :gh-repo :gh-issue-title :gh-issue-body
-                                         :email-body :email-subject :action-id])]
+                                         :email-body :email-subject :action-id
+                                         :gh-pull-body :gh-pull-title :gh-comm-msg :gh-operations])]
           (dom/div
            nil
            (dom/button

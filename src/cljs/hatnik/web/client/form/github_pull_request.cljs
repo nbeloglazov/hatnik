@@ -59,7 +59,7 @@
                          (dom/a #js {:data-toggle "collapse"
                                      :data-parent (str "#gh-pull-req-op-" (:id data))
                                      :href (str "#gh-pull-req-op-col-" (:id data))}
-                                (str "Operation №" (+ 1 (:id data))))))
+                                (str "Operation No. " (+ 1 (:id data))))))
                 
                 (dom/div
                  #js {:className "panel-collapse collapse in"

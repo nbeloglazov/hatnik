@@ -121,7 +121,10 @@
 (defmethod send-new-action :github-pull-request [data-pack]
   (let [data (build-gh-pull-req-action data-pack)]
     (if (s/check schm/GithubPullRequestAction data)
-      (msg/danger default-error-message)
+      (do
+        (.log js/console (clj->js data))
+        (.log js/console (s/check schm/GithubPullRequestAction data))
+        (msg/danger default-error-message))
       (do
         (.modal ($ :#iModalAddAction) "hide")
         (ajax "/api/actions" "POST" data
@@ -154,6 +157,22 @@
                (fn [e]
                  (done-callback)
                  (msg/success "The issue is created. Check out your project."))))))))
+
+(defmethod test-action :github-pull-request [data-pack done-callback]
+  (let [data (build-gh-pull-req-action data-pack)]
+    (if (s/check schm/GithubPullRequestAction data)
+      (do
+        (.log js/console (clj->js data))
+        (msg/danger default-error-message)
+        (done-callback))
+      (do
+        (msg/info "Creating test pull request on Github...")
+        (ajax "/api/actions/test" "POST" data
+              (wrap-error-alert
+               (fn [e]
+                 (done-callback)
+                 (msg/success "The issue is created. Check out your project."))))))))
+
 
 (def action-update-error-message "Couldn't update the action. Please file a bug if the issue persists.")
 

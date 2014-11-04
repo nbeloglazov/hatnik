@@ -42,7 +42,7 @@
    (:id data)
    (assoc {:file (:file data)
            :regex (:regex data)
-           :replace (:replace data)}
+           :replacement (:replacement data)}
      key new-val)))
 
 (defn pull-request-operation [data owner]
@@ -86,7 +86,7 @@
                                                    :className "form-control"})))))))))
 
 (defn add-new-operation [data]
-  ((:handler data) (conj (:value data) {:file "" :regex "" :replace ""})))
+  ((:handler data) (conj (:value data) {:file "" :regex "" :replacement ""})))
 
 (defn pull-request-operations-list [data owner]
   (reify

@@ -97,7 +97,7 @@
 (defn project-header-menu-button [project]
   (let [id (get project "id")
         name (get project "name")]
-    (dom/div #js {:className "dropdown"}
+    (dom/div #js {:className "dropdown pull-right"}
              (dom/button
               #js {:className "btn btn-default"
                    :type "button"
@@ -109,30 +109,24 @@
   (reify
     om/IRender
     (render [_]
-      (dom/div
-       #js {:className "panel panel-default panel-primary"}
+      (let [id (str "__PrjList" (get prj "id"))]
        (dom/div
-        #js {:className "panel-heading"}
+        #js {:className "panel panel-default panel-primary"}
         (dom/div
-         nil
+         #js {:className "panel-heading clearfix"}
          (dom/h4
-          #js {:className "panel-title"}
-          (dom/div #js {:className "row"}
-                   (dom/div #js {:className "col-sm-8 col-md-8 col-lg-8"}
-                            (dom/a
-                             #js {:data-parent "#accrodion"
-                                  :data-toggle "collapse"
-                                  :href (str "#" (str "__PrjList" (get prj "id")))}
-                             (dom/div #js {:className "bg-primary"} (get prj "name"))))
-                   (dom/div
-                    #js {:className "col-sm-2 col-md-1 col-lg-1 pull-right"}
-                    (project-header-menu-button prj))))))
-       (dom/div #js {:className "panel-collapse collapse in"
-                     :id (str "__PrjList" (get prj "id"))}
-                (dom/div #js {:className "panel-body"}
-                         (actions-table (get prj "id") 
-                                        (get prj "actions") 
-                                        (-> prj :user :email))))))))
+          #js {:className "panel-title pull-left project-name"}
+          (dom/a
+           #js {:data-toggle "collapse"
+                :href (str "#" id)}
+           (dom/div #js {:className "bg-primary"} (get prj "name"))))
+         (project-header-menu-button prj))
+        (dom/div #js {:className "panel-collapse collapse in"
+                      :id id}
+                 (dom/div #js {:className "panel-body"}
+                          (actions-table (get prj "id") 
+                                         (get prj "actions") 
+                                         (-> prj :user :email)))))))))
 
 (defn project-list [data owner]
   (reify

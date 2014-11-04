@@ -15,7 +15,7 @@
                  [com.draines/postal "1.11.2"]
                  [version-clj "0.1.0"]
                  [clojurewerkz/quartzite "1.3.0"]
-                 [prismatic/schema "0.3.1"]
+                 [prismatic/schema "0.3.2"]
                  [com.stuartsierra/component "0.2.2"]
                  [me.raynes/fs "1.4.5"]
                  [com.googlecode.streamflyer/streamflyer-core "1.1.2"]

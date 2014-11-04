@@ -7,7 +7,7 @@
                  [compojure "1.2.1"]
                  [hiccup "1.0.5"]
                  [ring/ring-json "0.3.1"]
-                 [clj-http "1.0.0"]
+                 [clj-http "1.0.1"]
                  [tentacles "0.2.5"]
                  [com.taoensso/timbre "3.3.1"]
                  [com.novemberain/monger "2.0.0"]

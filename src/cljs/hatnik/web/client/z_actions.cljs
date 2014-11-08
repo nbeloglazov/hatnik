@@ -78,92 +78,48 @@
    :project-id (:project-id data-pack)
    :library (:artifact-value data-pack)})
 
+(def actions-config
+  {:noop {:build build-noop-action
+          :schema schm/NoopAction}
+   :email {:build build-email-action
+           :schema schm/EmailAction
+           :text-progress "Sending test email..."
+           :text-done "The email is sent. Check your inbox."}
+   :github-issue {:build build-gh-issue-action
+                  :schema schm/GithubIssueAction
+                  :text-progress "Creating test issue on Github..."
+                  :text-done "The issue is created. Check out your project."}})
 
-(defmulti send-new-action #(:type %))
-
-(defmethod send-new-action :email [data-pack]
-  (let [data (build-email-action data-pack)]
-    (if (s/check schm/EmailAction data)
+(defn send-new-action [data-pack]
+  (let [{:keys [build schema]} (actions-config (:type data-pack))
+        data (build data-pack)]
+    (if (s/check schema data)
       (msg/danger default-error-message)
       (do
         (.modal ($ :#iModalAddAction) "hide")
         (ajax "/api/actions" "POST" data
               (wrap-error-alert #(create-new-action-callback data %)))))))
 
-(defmethod send-new-action :noop [data-pack]
-  (let [data (build-noop-action data-pack)]
-    (if (s/check schm/NoopAction data)
-      (msg/danger default-error-message)
-      (do
-        (.modal ($ :#iModalAddAction) "hide")
-        (ajax "/api/actions" "POST" data
-              (wrap-error-alert #(create-new-action-callback data %)))))))
-
-(defmethod send-new-action :github-issue [data-pack]
-  (let [data (build-gh-issue-action data-pack)]
-    (if (s/check schm/GithubIssueAction data)
-      (msg/danger default-error-message)
-      (do
-        (.modal ($ :#iModalAddAction) "hide")
-        (ajax "/api/actions" "POST" data
-              (wrap-error-alert #(create-new-action-callback data %)))))))
-
-
-(defmulti test-action #(:type %1))
-(defmethod test-action :email [data-pack done-callback]
-  (let [data (build-email-action data-pack)]
-    (if (s/check schm/EmailAction data)
+(defn test-action [data-pack done-callback]
+  (let [config (actions-config (:type data-pack))
+        data ((:build config) data-pack)]
+    (if (s/check (:schema config) data)
       (do (msg/danger default-error-message)
           (done-callback))
       (do
-        (msg/info "Sending test email...")
+        (msg/info (:text-progress config))
        (ajax "/api/actions/test" "POST" data
             (wrap-error-alert
              (fn [e]
                (done-callback)
-               (msg/success "The email is sent. Check your inbox."))))))))
-
-(defmethod test-action :github-issue [data-pack done-callback]
-  (let [data (build-gh-issue-action data-pack)]
-    (if (s/check schm/GithubIssueAction data)
-      (do (msg/danger default-error-message)
-          (done-callback))
-      (do
-        (msg/info "Creating test issue on Github...")
-        (ajax "/api/actions/test" "POST" data
-              (wrap-error-alert
-               (fn [e]
-                 (done-callback)
-                 (msg/success "The issue is created. Check out your project."))))))))
+               (msg/success (:text-done config)))))))))
 
 (def action-update-error-message "Couldn't update the action. Please file a bug if the issue persists.")
 
-(defmulti update-action #(:type %))
-(defmethod update-action :email [data-pack]
-  (let [data (build-email-action data-pack)]
-    (if (s/check schm/EmailAction data)
-      (msg/danger default-error-message)
-      (do
-        (.modal ($ :#iModalAddAction) "hide")
-        (ajax
-         (str "/api/actions/" (:action-id data-pack)) "PUT"
-         data (wrap-error-alert
-               #(common-update-callback action-update-error-message data %)))))))
-
-(defmethod update-action :noop [data-pack]
-  (let [data (build-noop-action data-pack)]
-    (if (s/check schm/NoopAction data)
-      (msg/danger default-error-message)
-      (do
-        (.modal ($ :#iModalAddAction) "hide")
-        (ajax
-         (str "/api/actions/" (:action-id data-pack)) "PUT"
-         data (wrap-error-alert
-               #(common-update-callback action-update-error-message data %)))))))
-
-(defmethod update-action :github-issue [data-pack]
-  (let [data (build-gh-issue-action data-pack)]
-    (if (s/check schm/GithubIssueAction data)
+(defn update-action [data-pack]
+  (let [{:keys [build schema]} (actions-config (:type data-pack))
+        data (build data-pack)]
+    (if (s/check schema data)
       (msg/danger default-error-message)
       (do
         (.modal ($ :#iModalAddAction) "hide")

@@ -6,41 +6,35 @@
             [schema.core :as s])
   (:use [clojure.string :only [split replace]]))
 
-(defn github-issue-on-change [gh-repo timer form-handler form-status-handler error-handler]
+(defn set-repo-status [owner status]
+  (om/set-state! owner :repo-status status))
+
+(defn github-repos-handler [reply owner repo]
+  (let [rest (js->clj reply)
+        exists? (some #(= repo (get % "name")) rest)]
+    (set-repo-status owner
+                     (if exists? "has-success" "has-error"))))
+
+(defn github-issue-on-change [gh-repo timer owner]
   (js/clearTimeout timer)
-
-  (let [pr (split gh-repo "/")
-        user (first pr)
-        repo (second pr)]
-    (form-handler
-     (if (or (nil? repo)
-             (nil? user)
-             (= "" user)
-             (= "" repo))
-       (do
-         (form-status-handler "has-warning")
-         nil)
-
-       (js/setTimeout
-        (fn []
-          (action/get-github-repos
-           user
-           (fn [reply]
-             (let [rest (js->clj reply)
-                   result (->> rest
-                               (map #(get % "name"))
-                               (filter #(= % repo)))]
-               (if (first result)
-                 (form-status-handler "has-success")
-                 (form-status-handler "has-error"))))
-           error-handler))
-        1000)))))
+  (set-repo-status owner "has-warning")
+  (let [[user repo] (split gh-repo "/")]
+    (when-not (or (nil? repo) (nil? user)
+                  (= "" user) (= "" repo))
+      (let [timer (js/setTimeout
+                   (fn []
+                     (action/get-github-repos
+                      user
+                      #(github-repos-handler % owner repo)
+                      #(set-repo-status owner "has-error")))
+                   1000)]
+        (om/set-state! owner :timer timer)))))
 
 (defn github-issue-component [data owner]
   (reify
     om/IInitState
     (init-state [this]
-      {:form-status
+      {:repo-status
        (let [v (:value (:repo data))]
          (if (or (nil? v) (= "" v))
            "has-warning"
@@ -52,7 +46,7 @@
     om/IRenderState
     (render-state [this state]
       (dom/div nil
-               (dom/div #js {:className (str "form-group " (:form-status state))}
+               (dom/div #js {:className (str "form-group " (:repo-status state))}
                         (dom/label #js {:htmlFor "gh-repo"
                                         :className "control-label"} "GitHub repository")
                         (dom/input #js {:type "text"
@@ -62,15 +56,10 @@
                                         :placeholder "user/repository or organization/repository"
 
                                         :onChange
-                                        #(github-issue-on-change
-                                          (.. % -target -value)
-                                          (:timer state)
-                                          (fn [t]
-                                            ((:handler (:repo data)) (.. % -target -value))
-                                            (om/set-state! owner :timer t))
-                                          (fn [st] (om/set-state! owner :form-status st))
-                                          (fn [st] (om/set-state! owner :form-status "has-error")))
-                                        }))
+                                        #(let [repo (.. % -target -value)]
+                                           (github-issue-on-change repo (:timer state) owner)
+                                           ((-> data :repo :handler) repo))}))
+
                (dom/div #js {:className (str "form-group " (:title-status state))}
                         (dom/label #js {:htmlFor "gh-issue-title"
                                         :className "control-label"} "Issue title")

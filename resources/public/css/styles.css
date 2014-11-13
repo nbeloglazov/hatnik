@@ -62,24 +62,35 @@ form textarea.form-control {
     text-align: center;
 }
 
+.project-name {
+    font-size: 20px;
+    padding: 2px 0px;
+}
+
 #iProjectList .action {
     cursor: pointer;
-    height: 75px;
+    height: 80px;
     color: #444;
+    background-color: #FAFAFA;
+}
+
+#iProjectList .action:hover {
+    background-color: #EEE;
 }
 
 .action .panel-body {
     height: 100%;
 }
 
-.action .action-type, .action .action-info {
-    height: 100%;
-    float: left;
+.action .action-icon {
+    font-size: 16px;
+    margin-right: 5px;
+    max-width: 16px;
+    max-height: 16px;
 }
 
-.action .action-type {
-    font-size: 20px;
-    padding-top: 5px;
+.action .action-name {
+    font-size: 14px;
 }
 
 .action .action-info {
@@ -87,11 +98,22 @@ form textarea.form-control {
 }
 
 .action .library-name {
-    font-size: 20px;
+    font-size: 18px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.action .library-name.long-name {
+    font-size: 14px;
 }
 
 .action .version {
-    font-size: 15px;
+    font-size: 14px;
+}
+
+.action .panel-body {
+    padding: 10px;
 }
 
 .add-action {
@@ -99,6 +121,6 @@ form textarea.form-control {
 }
 
 .action.add-action .panel-body {
-    padding-top: 23px;
+    padding: 27px;
     text-align: center;
 }

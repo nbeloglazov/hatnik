@@ -5,23 +5,27 @@
             [hatnik.schema :as schm]
             [schema.core :as s]))
 
-(defn library-check-handler [reply callback]
-  (let [resp (js->clj reply)]
-    (if (= "ok" (get resp "result"))
-      (callback "has-success" (get resp "version") nil)
-      (callback "has-error" nil nil))))
+(defn set-state [owner status version in-progress?]
+  (om/set-state! owner :form-status status)
+  (om/set-state! owner :version version)
+  (om/set-state! owner :request-in-progress? in-progress?))
 
-(defn check-input-value [data-handler check-handler started-handler timer new-val]
+(defn library-check-handler [reply owner]
+  (let [resp (js->clj reply)
+        status (if (= "ok" (get resp "result"))
+                 "has-success"
+                 "has-error")]
+    (set-state owner status (get resp "version") false)))
+
+(defn check-library-exists [owner timer library]
   (js/clearTimeout timer)
-  (check-handler
-   "has-warning"
-   nil
-   (js/setTimeout
-    (fn []
-      (started-handler)
-      (action/get-library new-val #(library-check-handler % check-handler)))
-    1000))
-  (data-handler new-val))
+  (set-state owner "has-warning" nil false)
+  (let [timer (js/setTimeout
+               (fn []
+                 (om/set-state! owner :request-in-progress? true)
+                 (action/get-library library #(library-check-handler % owner)))
+               1000)]
+    (om/set-state! owner :timer timer)))
 
 (defn artifact-input-component [data owner]
   (reify
@@ -45,17 +49,9 @@
                         :id "artifact-input"
                         :className "form-control"
                         :placeholder "e.g. org.clojure/clojure"
-                        :onChange #(check-input-value
-                                    (:handler data)
-                                    (fn [result version timer]
-                                      (om/set-state! owner :form-status result)
-                                      (om/set-state! owner :version version)
-                                      (om/set-state! owner :timer timer)
-                                      (om/set-state! owner :request-in-progress? false))
-                                    (fn []
-                                      (om/set-state! owner :request-in-progress? true))
-                                    (:timer state)
-                                    (.. % -target -value))
+                        :onChange #(let [library (.. % -target -value)]
+                                     (check-library-exists owner (:timer state) library)
+                                     ((:handler data) library))
                         :value (:value data)})
                (dom/span #js {:className "form-control-feedback"}
                  (cond (= (:form-status state) "has-error") "Not found"

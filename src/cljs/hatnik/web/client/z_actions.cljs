@@ -109,9 +109,7 @@
   (let [{:keys [build schema]} (actions-config (:type data-pack))
         data (build data-pack)]
     (if (s/check schema data)
-      (do
-        (.log js/console (s/check schema data))
-        (msg/danger default-error-message))
+      (msg/danger default-error-message)
       (do
         (.modal ($ :#iModalAddAction) "hide")
         (ajax "/api/actions" "POST" data

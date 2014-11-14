@@ -73,6 +73,16 @@
    :body (:gh-issue-body data-pack)
    :library (:artifact-value data-pack)})
 
+(defn build-gh-pull-request [data-pack]
+  {:project-id (:project-id data-pack)
+   :library (:artifact-value data-pack)
+   :type "github-pull-request"
+   :repo (:gh-repo data-pack)
+   :title (:gh-pull-title data-pack)
+   :body (:gh-pull-body data-pack)
+   :commit-message (:gh-comm-msg data-pack)
+   :operations (:gh-operations data-pack)})
+
 (defn build-noop-action [data-pack]
   {:type "noop"
    :project-id (:project-id data-pack)
@@ -88,13 +98,20 @@
    :github-issue {:build build-gh-issue-action
                   :schema schm/GithubIssueAction
                   :text-progress "Creating test issue on Github..."
-                  :text-done "The issue is created. Check out your project."}})
+                  :text-done "The issue is created. Check out your project."}
+   :github-pull-request {:build build-gh-pull-request
+                         :schema schm/GithubPullRequestAction
+                         :text-progress "Creating pull request on Github..."
+                         :text-done "The pull request is created. Check out your project."
+                         }})
 
 (defn send-new-action [data-pack]
   (let [{:keys [build schema]} (actions-config (:type data-pack))
         data (build data-pack)]
     (if (s/check schema data)
-      (msg/danger default-error-message)
+      (do
+        (.log js/console (s/check schema data))
+        (msg/danger default-error-message))
       (do
         (.modal ($ :#iModalAddAction) "hide")
         (ajax "/api/actions" "POST" data

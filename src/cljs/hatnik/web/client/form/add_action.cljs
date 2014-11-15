@@ -1,9 +1,7 @@
 (ns hatnik.web.client.form.add-action
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [hatnik.web.client.z-actions :as action]
-            [hatnik.schema :as schm]
-            [schema.core :as s])
+            [hatnik.web.client.z-actions :as action])
   (:use [jayq.core :only [$]]
         [hatnik.web.client.form.artifact-input :only [artifact-input-component]]
         [hatnik.web.client.form.action-type :only [action-type-component]]

@@ -2,8 +2,8 @@
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [hatnik.web.client.z-actions :as action]
-            [hatnik.schema :as schm]
-            [schema.core :as s]))
+            [hatnik.web.client.utils :as u]
+            [hatnik.schema :as schm]))
 
 (defn email-component [data owner]
   (reify
@@ -29,9 +29,7 @@
                                         :onChange #(do
                                                      ((-> data :subject :handler) (.. % -target -value))
                                                      (om/set-state! owner :subject-status
-                                                                    (if (s/check schm/TemplateTitle (.. % -target -value))
-                                                                      "has-error"
-                                                                      "has-success")))}))
+                                                                    (u/validate schm/TemplateTitle (.. % -target -value))))}))
                (dom/div #js {:className (str "form-group " (:body-status state))}
                         (dom/label #js {:htmlFor "email-body-input"
                                         :className "control-label"} "Body")
@@ -42,6 +40,4 @@
                                            :onChange #(do
                                                         ((-> data :body :handler) (.. % -target -value))
                                                         (om/set-state! owner :body-status
-                                                                       (if (s/check schm/TemplateBody (.. % -target -value))
-                                                                         "has-error"
-                                                                         "has-success")))}))))))
+                                                                       (u/validate schm/TemplateBody (.. % -target -value))))}))))))

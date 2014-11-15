@@ -2,8 +2,8 @@
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [hatnik.web.client.z-actions :as action]
-            [hatnik.schema :as schm]
-            [schema.core :as s])
+            [hatnik.web.client.utils :as u]
+            [hatnik.schema :as schm])
   (:use [clojure.string :only [split replace]]))
 
 (defn update-operation-item [data key new-val]
@@ -18,15 +18,9 @@
   (reify
     om/IInitState
     (init-state [this]
-      {:file-status (if (s/check (schm/string-of-length 1 1024) (:file data))
-                      "has-error"
-                      "has-success")
-       :regex-status (if (s/check (schm/string-of-length 1 128) (:regex data))
-                       "has-error"
-                       "has-success")
-       :replacement-status (if (s/check (schm/string-of-length 1 128) (:replacement data))
-                             "has-error"
-                             "has-success")})
+      {:file-status (u/validate (schm/string-of-length 1 1024) (:file data))
+       :regex-status (u/validate (schm/string-of-length 1 128) (:regex data))
+       :replacement-status (u/validate (schm/string-of-length 1 128) (:replacement data))})
 
     om/IRenderState
     (render-state [this state]
@@ -65,11 +59,10 @@
                                                      :id file-id
                                                      :value (:file data)
                                                      :placeholder "e.g. project.clj"
-                                                     :onChange #(do
-                                                                  (update-operation-item data :file (.. % -target -value))
-                                                                  (if (s/check (schm/string-of-length 1 1024) (.. % -target -value))
-                                                                    (om/set-state! owner :file-status "has-error")
-                                                                    (om/set-state! owner :file-status "has-success")))
+                                                     :onChange #(let [file (.. % -target -value)]
+                                                                  (update-operation-item data :file file)
+                                                                  (om/set-state! owner :file-status
+                                                                                 (u/validate (schm/string-of-length 1 1024) file)))
                                                      :className "form-control"}))
 
                             (dom/div #js {:className (str "form-group " (:regex-status state))}
@@ -80,11 +73,10 @@
                                                      :id regex-id
                                                      :value (:regex data)
                                                      :placeholder "e.g. {{library}} \"[^\"]+\""
-                                                     :onChange #(do
-                                                                  (update-operation-item data :regex (.. % -target -value))
-                                                                  (if (s/check (schm/string-of-length 1 128) (.. % -target -value))
-                                                                    (om/set-state! owner :regex-status "has-error")
-                                                                    (om/set-state! owner :regex-status "has-success")))
+                                                     :onChange #(let [regex (.. % -target -value)]
+                                                                  (update-operation-item data :regex regex)
+                                                                  (om/set-state! owner :regex-status
+                                                                                 (u/validate (schm/string-of-length 1 128) regex)))
                                                      :className "form-control"}))
 
                             (dom/div #js {:className (str "form-group " (:replacement-status state))}
@@ -95,11 +87,10 @@
                                                      :id replacement-id
                                                      :value (:replacement data)
                                                      :placeholder "e.g. {{library}} \"{{version}}\""
-                                                     :onChange #(do
-                                                                  (update-operation-item data :replacement (.. % -target -value))
-                                                                  (if (s/check (schm/string-of-length 1 128) (.. % -target -value))
-                                                                    (om/set-state! owner :replacement-status "has-error")
-                                                                    (om/set-state! owner :replacement-status "has-success")))
+                                                     :onChange #(let [repl (.. % -target -value)]
+                                                                  (update-operation-item data :replacement repl)
+                                                                  (om/set-state! owner :replacement-status
+                                                                                 (u/validate (schm/string-of-length 1 128) repl)))
                                                      :className "form-control"}))))))))))
 
 (defn add-new-operation [data]
@@ -142,15 +133,9 @@
                       (if (or (nil? v) (= "" v))
                         "has-warning"
                         "has-success"))
-       :body-status (if (s/check schm/TemplateBody (:value (:pull-body data)))
-                      "has-error"
-                      "has-success")
-       :title-status (if (s/check schm/TemplateTitle (:value (:pull-title data)))
-                       "has-error"
-                       "has-success")
-       :commit-msg-status (if (s/check (schm/string-of-length 1 2000) (:value (:commit-msg data)))
-                            "has-error"
-                            "has-success")})
+       :body-status (u/validate schm/TemplateBody (:value (:pull-body data)))
+       :title-status (u/validate schm/TemplateTitle (:value (:pull-title data)))
+       :commit-msg-status (u/validate (schm/string-of-length 1 2000) (:value (:commit-msg data)))})
 
     om/IRenderState
     (render-state [this state]
@@ -166,11 +151,10 @@
                                         :placeholder "user/repository or organization/repository"
 
                                         :onChange
-                                        #(do
-                                           ((:handler (:repo data)) (.. % -target -value))
-                                           (if (s/check schm/GithubRepository (.. % -target -value))
-                                             (om/set-state! owner :repo-status "has-error")
-                                             (om/set-state! owner :repo-status "has-success")))}))
+                                        #(let [repo (.. % -target -value)]
+                                           ((:handler (:repo data)) repo)
+                                           (om/set-state! owner :repo-status
+                                                          (u/validate schm/GithubRepository repo)))}))
 
                (dom/div
                 #js {:className "panel-group" :id "github-pull-req-text"}
@@ -193,12 +177,9 @@
                                                                     :id "gh-title"
                                                                     :value (:value (:pull-title data))
                                                                     :onChange
-                                                                    #(do
-                                                                       ((:handler (:pull-title data))
-                                                                        (.. % -target -value))
-                                                                       (if (s/check schm/TemplateTitle (.. % -target -value))
-                                                                         (om/set-state! owner :title-status "has-error")
-                                                                         (om/set-state! owner :title-status "has-success")))
+                                                                    #(let [title (.. % -target -value)]
+                                                                       ((:handler (:pull-title data)) title)
+                                                                       (om/set-state! owner :title-status (u/validate schm/TemplateTitle title)))
                                                                     :className "form-control"}))
 
                                            (dom/div #js {:className (str "form-group " (:body-status state))}
@@ -209,12 +190,9 @@
                                                                        :id "gh-body"
                                                                        :value (:value (:pull-body data))
                                                                        :onChange
-                                                                       #(do
-                                                                          ((:handler (:pull-body data))
-                                                                           (.. % -target -value))
-                                                                          (if (s/check schm/TemplateBody (.. % -target -value))
-                                                                            (om/set-state! owner :body-status "has-error")
-                                                                            (om/set-state! owner :body-status "has-success")))
+                                                                       #(let [body (.. % -target -value)]
+                                                                          ((:handler (:pull-body data)) body)
+                                                                          (om/set-state! owner :body-status (u/validate schm/TemplateBody body)))
                                                                        :className "form-control"}))))))
 
                (dom/div #js {:className (str "form-group " (:commit-msg-status state))}
@@ -224,12 +202,10 @@
                         (dom/input #js {:type "text"
                                         :id "gh-commit-message"
                                         :value (:value (:commit-msg data))
-                                        :onChange #(do
-                                                     ((:handler (:commit-msg data))
-                                                      (.. % -target -value))
-                                                     (if (s/check (schm/string-of-length 1 2000) (.. % -target -value))
-                                                       (om/set-state! owner :commit-msg-status "has-error")
-                                                       (om/set-state! owner :commit-msg-status "has-success")))
+                                        :onChange #(let [commit-msg  (.. % -target -value)]
+                                                     ((:handler (:commit-msg data)) commit-msg)
+                                                     (om/set-state! owner :commit-msg-status
+                                                                    (u/validate (schm/string-of-length 1 2000) commit-msg)))
                                         :className "form-control"}))
 
                (dom/div nil

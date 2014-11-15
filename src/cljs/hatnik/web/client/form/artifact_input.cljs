@@ -2,8 +2,7 @@
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [hatnik.web.client.z-actions :as action]
-            [hatnik.schema :as schm]
-            [schema.core :as s]))
+            [hatnik.schema :as schm]))
 
 (defn set-state [owner status version in-progress?]
   (om/set-state! owner :form-status status)

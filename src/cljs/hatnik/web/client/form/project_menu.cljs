@@ -2,8 +2,8 @@
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [hatnik.web.client.z-actions :as action]
-            [hatnik.schema :as schm]
-            [schema.core :as s])
+            [hatnik.web.client.utils :as u]
+            [hatnik.schema :as schm])
   (:use [jayq.core :only [$]]))
 
 
@@ -43,10 +43,9 @@
                                               :value (:name state)
                                               :onChange #(do
                                                            (om/set-state! owner :name (.. % -target -value))
-                                                           (om/set-state! owner :status 
-                                                                          (if (s/check (schm/string-of-length 1 128) (.. % -target -value))
-                                                                            "has-error" 
-                                                                            "has-success")))}))))
+                                                           (om/set-state! owner :status
+                                                                          (u/validate (schm/string-of-length 1 128) (.. % -target -value))
+))}))))
 
           (dom/div #js {:className "modal-footer"}
                    (dom/div #js {:className "btn btn-primary pull-left"

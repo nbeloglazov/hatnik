@@ -2,8 +2,8 @@
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [hatnik.web.client.z-actions :as action]
-            [hatnik.schema :as schm]
-            [schema.core :as s])
+            [hatnik.web.client.utils :as u]
+            [hatnik.schema :as schm])
   (:use [clojure.string :only [split replace]]))
 
 (defn set-repo-status [owner status]
@@ -69,9 +69,7 @@
                                         :onChange #(do
                                                      ((:handler (:title data)) (.. % -target -value))
                                                      (om/set-state! owner :title-status
-                                                                    (if (s/check schm/TemplateTitle (.. % -target -value))
-                                                                      "has-error"
-                                                                      "has-success")))}))
+                                                                    (u/validate schm/TemplateTitle (.. % -target -value))))}))
                (dom/div #js {:className (str "form-group " (:body-status state))}
                         (dom/label #js {:htmlFor "gh-issue-body"
                                         :className "control-label"} "Body")
@@ -82,6 +80,4 @@
                                            :onChange #(do
                                                         ((:handler (:body data)) (.. % -target -value))
                                                         (om/set-state! owner :body-status
-                                                                       (if (s/check schm/TemplateBody (.. % -target -value))
-                                                                         "has-error"
-                                                                         "has-success")))}))))))
+                                                                       (u/validate schm/TemplateBody (.. % -target -value))))}))))))

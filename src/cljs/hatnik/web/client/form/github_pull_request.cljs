@@ -116,7 +116,7 @@
   (reify
     om/IInitState
     (init-state [this] 
-      {})
+      {:form-status "has-success"})
 
     om/IRenderState
     (render-state [this state]
@@ -129,14 +129,11 @@
                                         :placeholder "user/repository or organization/repository"
 
                                         :onChange 
-                                        #(github-issue-on-change
-                                          (.. % -target -value)
-                                          (:timer state)
-                                          (fn [t]
-                                            ((:handler (:repo data)) (.. % -target -value))
-                                            (om/set-state! owner :timer t))
-                                          (fn [st] (om/set-state! owner :form-status st))
-                                          (fn [st] (om/set-state! owner :form-status "has-error")))
+                                        #(do
+                                           ((:handler (:repo data)) (.. % -target -value))
+                                           (if (s/check schm/GithubRepository (.. % -target -value))
+                                             (om/set-state! owner :form-status "has-error")
+                                             (om/set-state! owner :form-status "has-success")))
                                         }))
 
                (dom/div

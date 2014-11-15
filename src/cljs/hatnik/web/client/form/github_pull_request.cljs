@@ -116,7 +116,13 @@
   (reify
     om/IInitState
     (init-state [this] 
-      {:form-status "has-success"})
+      {:form-status "has-success"
+       :body-status (if (s/check schm/TemplateBody (:value (:pull-body data)))
+                      "has-error"
+                      "has-success")
+       :title-status (if (s/check schm/TemplateTitle (:value (:pull-title data)))
+                       "has-error"
+                       "has-success")})
 
     om/IRenderState
     (render-state [this state]
@@ -149,22 +155,30 @@
                          (dom/div #js {:className "panel-collapse collapse"
                                        :id "github-pull-req-text-body"}
                                   (dom/div #js {:className "panel-body"}
-                                           (dom/div #js {:className "form-group"}
+                                           (dom/div #js {:className (str "form-group " (:title-status state))}
                                                     (dom/label nil "Title")
                                                     (dom/input #js {:type "text"
                                                                     :value (:value (:pull-title data))
                                                                     :onChange
-                                                                    #((:handler (:pull-title data))
-                                                                      (.. % -target -value))
+                                                                    #(do
+                                                                       ((:handler (:pull-title data))
+                                                                        (.. % -target -value))
+                                                                       (if (s/check schm/TemplateTitle (.. % -target -value))
+                                                                         (om/set-state! owner :title-status "has-error")
+                                                                         (om/set-state! owner :title-status "has-success")))
                                                                     :className "form-control"}))
 
-                                           (dom/div #js {:className "form-group"}
+                                           (dom/div #js {:className (str "form-group " (:body-status state))}
                                                     (dom/label nil "Body")
                                                     (dom/textarea #js {:cols "40"
                                                                        :value (:value (:pull-body data))
                                                                        :onChange
-                                                                       #((:handler (:pull-body data))
-                                                                         (.. % -target -value))
+                                                                       #(do
+                                                                          ((:handler (:pull-body data))
+                                                                           (.. % -target -value))
+                                                                          (if (s/check schm/TemplateBody (.. % -target -value))
+                                                                            (om/set-state! owner :body-status "has-error")
+                                                                            (om/set-state! owner :body-status "has-success")))
                                                                        :className "form-control"}))))))
 
                (dom/div #js {:className "form-group"}

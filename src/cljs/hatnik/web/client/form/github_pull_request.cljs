@@ -122,7 +122,10 @@
                       "has-success")
        :title-status (if (s/check schm/TemplateTitle (:value (:pull-title data)))
                        "has-error"
-                       "has-success")})
+                       "has-success")
+       :commit-msg-status (if (s/check (schm/string-of-length 1 2000) (:value (:commit-msg data)))
+                            "has-error"
+                            "has-success")})
 
     om/IRenderState
     (render-state [this state]
@@ -181,11 +184,15 @@
                                                                             (om/set-state! owner :body-status "has-success")))
                                                                        :className "form-control"}))))))
 
-               (dom/div #js {:className "form-group"}
+               (dom/div #js {:className (str "form-group " (:commit-msg-status state))}
                         (dom/label nil "Commit message")
                         (dom/input #js {:value (:value (:commit-msg data))
-                                        :onChange #((:handler (:commit-msg data))
-                                                    (.. % -target -value))
+                                        :onChange #(do
+                                                     ((:handler (:commit-msg data))
+                                                      (.. % -target -value))
+                                                     (if (s/check (schm/string-of-length 1 2000) (.. % -target -value))
+                                                       (om/set-state! owner :commit-msg-status "has-error")
+                                                       (om/set-state! owner :commit-msg-status "has-success")))
                                         :className "form-control"}))
 
                (dom/div nil

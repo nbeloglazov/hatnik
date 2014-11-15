@@ -12,10 +12,10 @@
   (.-value (.getElementById js/document id)))
 
 (defn wrap-error-alert [callback]
-  (fn [reply]
-    (let [resp (js->clj reply)]
-      (when (= "error" (get resp "result")) (msg/danger (get resp "message")))
-      (callback reply))))
+  (fn [response]
+    (when (= "error" (get response "result"))
+      (msg/danger (get response "message")))
+    (callback response)))
 
 (defn ajax [url type data callback]
   (jq/ajax url
@@ -26,7 +26,7 @@
             :dataType "json"
             :async true
             :error #(msg/danger "Invalid request. Please, check out request data.")
-            :success callback}))
+            :success #(callback (js->clj %))}))
 
 (defn get-github-repos [github-name callback error-handler]
   (jq/ajax (str "https://api.github.com/users/" github-name "/repos")
@@ -34,16 +34,14 @@
             :success callback
             :error error-handler}))
 
-(defn common-update-callback [msg data reply]
-  (let [resp (js->clj reply)]
-    (when (= "ok" (get resp "result"))
-      (state/update-all-view))))
+(defn common-update-callback [msg data response]
+  (when (= "ok" (get response "result"))
+    (.modal ($ :#iModalAddAction) "hide")
+    (state/update-all-view)))
 
-(defn create-new-project-callback [name reply]
-  (let [resp (js->clj reply)]
-    (when (= "ok" (get resp "result"))
-      (state/update-all-view))))
-
+(defn create-new-project-callback [name response]
+  (when (= "ok" (get response "result"))
+    (state/update-all-view)))
 
 (defn ^:export send-new-project-request []
   (let [name (.-value (.getElementById js/document "project-name-input"))]
@@ -53,10 +51,10 @@
         (.modal ($ :#iModalProject) "hide")
         (ajax  "/api/projects" "POST" {:name name} #(create-new-project-callback name %))))))
 
-(defn create-new-action-callback [data reply]
-  (let [resp (js->clj reply)]
-    (when (= "ok" (get resp "result"))
-      (state/update-all-view))))
+(defn create-new-action-callback [data response]
+  (when (= "ok" (get response "result"))
+    (.modal ($ :#iModalAddAction) "hide")
+    (state/update-all-view)))
 
 (defn build-email-action [data-pack]
   {:project-id (:project-id data-pack)
@@ -101,7 +99,7 @@
                   :text-done "The issue is created. Check out the repository."}
    :github-pull-request {:build build-gh-pull-request
                          :schema schm/GithubPullRequestAction
-                         :text-progress "Creating pull request on Github..."
+                         :text-progress "Creating test pull request on GitHub..."
                          :text-done "The pull request is created. Check out the repository."}})
 
 (defn send-new-action [data-pack]
@@ -109,10 +107,8 @@
         data (build data-pack)]
     (if (s/check schema data)
       (msg/danger default-error-message)
-      (do
-        (.modal ($ :#iModalAddAction) "hide")
-        (ajax "/api/actions" "POST" data
-              (wrap-error-alert #(create-new-action-callback data %)))))))
+      (ajax "/api/actions" "POST" data
+            (wrap-error-alert #(create-new-action-callback data %))))))
 
 (defn test-action [data-pack done-callback]
   (let [config (actions-config (:type data-pack))
@@ -123,10 +119,11 @@
       (do
         (msg/info (:text-progress config))
        (ajax "/api/actions/test" "POST" data
-            (wrap-error-alert
-             (fn [e]
-               (done-callback)
-               (msg/success (:text-done config)))))))))
+            (fn [response]
+              (done-callback)
+              (case (get response "result")
+                "ok" (msg/success (:text-done config))
+                "error" (msg/danger (get response "message")))))))))
 
 (def action-update-error-message "Couldn't update the action. Please file a bug if the issue persists.")
 
@@ -135,12 +132,10 @@
         data (build data-pack)]
     (if (s/check schema data)
       (msg/danger default-error-message)
-      (do
-        (.modal ($ :#iModalAddAction) "hide")
-        (ajax
-         (str "/api/actions/" (:action-id data-pack)) "PUT"
-         data (wrap-error-alert
-               #(common-update-callback action-update-error-message data %)))))))
+      (ajax
+       (str "/api/actions/" (:action-id data-pack)) "PUT"
+       data (wrap-error-alert
+             #(common-update-callback action-update-error-message data %))))))
 
 (defn delete-action [action-id]
   (.modal ($ :#iModalAddAction) "hide")

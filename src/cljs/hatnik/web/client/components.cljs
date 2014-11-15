@@ -35,7 +35,10 @@
             :alt "email"}
    "github-issue" {:text "issue"
                    :icon "/img/github-icon.png"
-                   :alt "github"}})
+                   :alt "github"}
+   "github-pull-request" {:text "pull requst"
+                          :icon "/img/github-icon.png"
+                          :alt "github"}})
 
 (defn render-action-type [type]
   (let [{:keys [text icon alt]} (action-types type)]

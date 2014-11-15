@@ -67,12 +67,17 @@
             :id (str "gh-pull-req-op-" (:id data))}
        (dom/div #js {:className "panel panel-default"}
                 (dom/div
-                 #js {:className "panel-heading"}
-                 (dom/h4 #js {:className "panel-title"}
+                 #js {:className "panel-heading clearfix"}
+                 (dom/h4 #js {:className "panel-title pull-left"}
                          (dom/a #js {:data-toggle "collapse"
                                      :data-parent (str "#gh-pull-req-op-" (:id data))
                                      :href (str "#gh-pull-req-op-col-" (:id data))}
-                                (str "Operation No. " (+ 1 (:id data))))))
+                                (str "Operation No. " (+ 1 (:id data)))))
+
+                 (dom/div #js {:className "dropdown pull-right"}
+                          (dom/div #js {:className "btn btn-danger"
+                                        :onClick #((:delete-handler data) (:id data))}
+                                   "Delete")))
                 
                 (dom/div
                  #js {:className "panel-collapse collapse in"
@@ -134,7 +139,12 @@
                                                        (merge {:id %1
                                                                :handler (fn [id val]
                                                                           ((:handler data)
-                                                                           (assoc (:value data) id val)))}
+                                                                           (assoc (:value data) id val)))
+                                                               :delete-handler (fn [id]
+                                                                                 ((:handler data)
+                                                                                  (mapv second
+                                                                                        (filter (fn [pr] (not= (first pr) id))
+                                                                                                (map-indexed (fn [i e] (list i e)) (:value data))))))}
                                                               %2))
                                             (:value data))))))))
 

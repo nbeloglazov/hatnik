@@ -41,14 +41,13 @@
            "has-success"))
        :title-status "has-success"
        :body-status "has-success"
-       :timer nil
-       })
+       :timer nil})
     om/IRenderState
     (render-state [this state]
       (dom/div nil
                (dom/div #js {:className (str "form-group " (:repo-status state))}
                         (dom/label #js {:htmlFor "gh-repo"
-                                        :className "control-label"} "GitHub repository")
+                                        :className "control-label"} "Repository")
                         (dom/input #js {:type "text"
                                         :className "form-control"
                                         :id "gh-repo"
@@ -62,7 +61,7 @@
 
                (dom/div #js {:className (str "form-group " (:title-status state))}
                         (dom/label #js {:htmlFor "gh-issue-title"
-                                        :className "control-label"} "Issue title")
+                                        :className "control-label"} "Title")
                         (dom/input #js {:type "text"
                                         :className "form-control"
                                         :id "gh-issue-title"
@@ -75,7 +74,7 @@
                                                                       "has-success")))}))
                (dom/div #js {:className (str "form-group " (:body-status state))}
                         (dom/label #js {:htmlFor "gh-issue-body"
-                                        :className "control-label"} "Issue body")
+                                        :className "control-label"} "Body")
                         (dom/textarea #js {:cols "40"
                                            :className "form-control"
                                            :id "gh-issue-body"

@@ -98,12 +98,11 @@
    :github-issue {:build build-gh-issue-action
                   :schema schm/GithubIssueAction
                   :text-progress "Creating test issue on Github..."
-                  :text-done "The issue is created. Check out your project."}
+                  :text-done "The issue is created. Check out the repository."}
    :github-pull-request {:build build-gh-pull-request
                          :schema schm/GithubPullRequestAction
                          :text-progress "Creating pull request on Github..."
-                         :text-done "The pull request is created. Check out your project."
-                         }})
+                         :text-done "The pull request is created. Check out the repository."}})
 
 (defn send-new-action [data-pack]
   (let [{:keys [build schema]} (actions-config (:type data-pack))

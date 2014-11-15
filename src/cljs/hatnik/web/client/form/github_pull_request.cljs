@@ -64,6 +64,7 @@
                                      (dom/input #js {:type "text"
                                                      :id file-id
                                                      :value (:file data)
+                                                     :placeholder "e.g. project.clj"
                                                      :onChange #(do
                                                                   (update-operation-item data :file (.. % -target -value))
                                                                   (if (s/check (schm/string-of-length 1 1024) (.. % -target -value))
@@ -78,6 +79,7 @@
                                      (dom/input #js {:type "text"
                                                      :id regex-id
                                                      :value (:regex data)
+                                                     :placeholder "e.g. {{library}} \"[^\"]+\""
                                                      :onChange #(do
                                                                   (update-operation-item data :regex (.. % -target -value))
                                                                   (if (s/check (schm/string-of-length 1 128) (.. % -target -value))
@@ -92,6 +94,7 @@
                                      (dom/input #js {:type "text"
                                                      :id replacement-id
                                                      :value (:replacement data)
+                                                     :placeholder "e.g. {{library}} \"{{version}}\""
                                                      :onChange #(do
                                                                   (update-operation-item data :replacement (.. % -target -value))
                                                                   (if (s/check (schm/string-of-length 1 128) (.. % -target -value))

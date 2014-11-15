@@ -126,9 +126,9 @@
    :gh-pull-title "Release {{library}} {{version}}"
    :gh-pull-body "Time to update your project.clj to {{library}} {{version}}!"
    :gh-comm-msg "Update {{library}} to {{version}}"
-   :gh-operations [{:file "hello.clj"
-                    :regex "regex"
-                    :replacement "{{template}}"}]})
+   :gh-operations [{:file ""
+                    :regex ""
+                    :replacement ""}]})
 
 (defmethod get-init-state :add [data _]
   (merge

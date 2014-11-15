@@ -16,14 +16,8 @@
 
 (defn pull-request-operation [data owner]
   (reify
-    om/IInitState
-    (init-state [this]
-      {:file-status (u/validate (schm/string-of-length 1 1024) (:file data))
-       :regex-status (u/validate (schm/string-of-length 1 128) (:regex data))
-       :replacement-status (u/validate (schm/string-of-length 1 128) (:replacement data))})
-
-    om/IRenderState
-    (render-state [this state]
+    om/IRender
+    (render [this]
       (let [id (:id data)
             div-id (str "gh-pull-req-op-" id)
             content-div-id (str "gh-pull-req-op-col-" id)
@@ -51,7 +45,8 @@
                    #js {:className "panel-collapse collapse in"
                         :id content-div-id}
                    (dom/div #js {:className "panel-body"}
-                            (dom/div #js {:className (str "form-group " (:file-status state))}
+                            (dom/div #js {:className (str "form-group "
+                                                          (u/validate (schm/string-of-length 1 1024) (:file data)))}
                                      (dom/label #js {:htmlFor file-id
                                                      :className "control-label"}
                                                 "File")
@@ -59,13 +54,11 @@
                                                      :id file-id
                                                      :value (:file data)
                                                      :placeholder "e.g. project.clj"
-                                                     :onChange #(let [file (.. % -target -value)]
-                                                                  (update-operation-item data :file file)
-                                                                  (om/set-state! owner :file-status
-                                                                                 (u/validate (schm/string-of-length 1 1024) file)))
+                                                     :onChange #(update-operation-item data :file (.. % -target -value))
                                                      :className "form-control"}))
 
-                            (dom/div #js {:className (str "form-group " (:regex-status state))}
+                            (dom/div #js {:className (str "form-group "
+                                                          (u/validate (schm/string-of-length 1 128) (:regex data)))}
                                      (dom/label #js {:htmlFor regex-id
                                                      :className "control-label"}
                                                 "Regex")
@@ -73,13 +66,11 @@
                                                      :id regex-id
                                                      :value (:regex data)
                                                      :placeholder "e.g. {{library}} \"[^\"]+\""
-                                                     :onChange #(let [regex (.. % -target -value)]
-                                                                  (update-operation-item data :regex regex)
-                                                                  (om/set-state! owner :regex-status
-                                                                                 (u/validate (schm/string-of-length 1 128) regex)))
+                                                     :onChange #(update-operation-item data :regex (.. % -target -value))
                                                      :className "form-control"}))
 
-                            (dom/div #js {:className (str "form-group " (:replacement-status state))}
+                            (dom/div #js {:className (str "form-group "
+                                                          (u/validate (schm/string-of-length 1 128) (:replacement data)))}
                                      (dom/label #js {:htmlFor replacement-id
                                                      :className "control-label"}
                                                 "Replacement")
@@ -87,10 +78,7 @@
                                                      :id replacement-id
                                                      :value (:replacement data)
                                                      :placeholder "e.g. {{library}} \"{{version}}\""
-                                                     :onChange #(let [repl (.. % -target -value)]
-                                                                  (update-operation-item data :replacement repl)
-                                                                  (om/set-state! owner :replacement-status
-                                                                                 (u/validate (schm/string-of-length 1 128) repl)))
+                                                     :onChange #(update-operation-item data :replacement (.. % -target -value))
                                                      :className "form-control"}))))))))))
 
 (defn add-new-operation [data]
@@ -127,20 +115,11 @@
 
 (defn github-pull-request-component [data owner]
   (reify
-    om/IInitState
-    (init-state [this]
-      {:repo-status (let [v (:value (:repo data))]
-                      (if (or (nil? v) (= "" v))
-                        "has-warning"
-                        "has-success"))
-       :body-status (u/validate schm/TemplateBody (:value (:pull-body data)))
-       :title-status (u/validate schm/TemplateTitle (:value (:pull-title data)))
-       :commit-msg-status (u/validate (schm/string-of-length 1 2000) (:value (:commit-msg data)))})
-
-    om/IRenderState
-    (render-state [this state]
+    om/IRender
+    (render [this]
       (dom/div nil
-               (dom/div #js {:className (str "form-group " (:repo-status state))}
+               (dom/div #js {:className (str "form-group "
+                                             (u/validate schm/GithubRepository (-> data :repo :value)))}
                         (dom/label #js {:htmlFor "gh-repo"
                                         :className "control-label"}
                                    "Repository")
@@ -151,10 +130,7 @@
                                         :placeholder "user/repository or organization/repository"
 
                                         :onChange
-                                        #(let [repo (.. % -target -value)]
-                                           ((:handler (:repo data)) repo)
-                                           (om/set-state! owner :repo-status
-                                                          (u/validate schm/GithubRepository repo)))}))
+                                        #((:handler (:repo data)) (.. % -target -value))}))
 
                (dom/div
                 #js {:className "panel-group" :id "github-pull-req-text"}
@@ -169,7 +145,8 @@
                          (dom/div #js {:className "panel-collapse collapse"
                                        :id "github-pull-req-text-body"}
                                   (dom/div #js {:className "panel-body"}
-                                           (dom/div #js {:className (str "form-group " (:title-status state))}
+                                           (dom/div #js {:className (str "form-group "
+                                                                         (u/validate schm/TemplateTitle (:value (:pull-title data))))}
                                                     (dom/label #js {:htmlFor "gh-title"
                                                                     :className "control-label"}
                                                                "Title")
@@ -177,12 +154,11 @@
                                                                     :id "gh-title"
                                                                     :value (:value (:pull-title data))
                                                                     :onChange
-                                                                    #(let [title (.. % -target -value)]
-                                                                       ((:handler (:pull-title data)) title)
-                                                                       (om/set-state! owner :title-status (u/validate schm/TemplateTitle title)))
+                                                                    #((:handler (:pull-title data)) (.. % -target -value))
                                                                     :className "form-control"}))
 
-                                           (dom/div #js {:className (str "form-group " (:body-status state))}
+                                           (dom/div #js {:className (str "form-group "
+                                                                         (u/validate schm/TemplateBody (:value (:pull-body data))))}
                                                     (dom/label #js {:htmlFor "gh-body"
                                                                     :className "control-label"}
                                                                "Body")
@@ -190,22 +166,18 @@
                                                                        :id "gh-body"
                                                                        :value (:value (:pull-body data))
                                                                        :onChange
-                                                                       #(let [body (.. % -target -value)]
-                                                                          ((:handler (:pull-body data)) body)
-                                                                          (om/set-state! owner :body-status (u/validate schm/TemplateBody body)))
+                                                                       #((:handler (:pull-body data)) (.. % -target -value))
                                                                        :className "form-control"}))))))
 
-               (dom/div #js {:className (str "form-group " (:commit-msg-status state))}
+               (dom/div #js {:className (str "form-group "
+                                             (u/validate (schm/string-of-length 1 2000) (:value (:commit-msg data))))}
                         (dom/label #js {:htmlFor "gh-commit-message"
                                         :className "control-label"}
                                    "Commit message")
                         (dom/input #js {:type "text"
                                         :id "gh-commit-message"
                                         :value (:value (:commit-msg data))
-                                        :onChange #(let [commit-msg  (.. % -target -value)]
-                                                     ((:handler (:commit-msg data)) commit-msg)
-                                                     (om/set-state! owner :commit-msg-status
-                                                                    (u/validate (schm/string-of-length 1 2000) commit-msg)))
+                                        :onChange #((:handler (:commit-msg data)) (.. % -target -value))
                                         :className "form-control"}))
 
                (dom/div nil

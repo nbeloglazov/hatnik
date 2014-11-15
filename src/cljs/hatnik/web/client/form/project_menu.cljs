@@ -14,18 +14,9 @@
       (let [modal-window ($ (:modal-jq-id data))]
         (.modal modal-window)))
 
-    om/IInitState 
-    (init-state [this]
-      (let [name (:name data)]
-        {:name name
-         :status (if (or (nil? name)
-                         (= "" name))
-                   "has-warning"
-                   "has-success")}))
-
-    om/IRenderState
-    (render-state [this state]
-      (let [name (:name state)
+    om/IRender
+    (render [this]
+      (let [name (:name data)
             id (:project-id data)]
         (dom/div
          #js {:className "modal-dialog"}
@@ -34,25 +25,22 @@
           (dom/div #js {:className "modal-header"}
                    (dom/h4 #js {:className "modal-title"} "Project menu"))
 
-          (dom/div 
+          (dom/div
            #js {:className "modal-body"}
            (dom/form nil
-                     (dom/div #js {:className (str "form-group " (:status state))}
+                     (dom/div #js {:className (str "form-group "
+                                                   (u/validate (schm/string-of-length 1 128) name))}
                               (dom/input #js {:className "form-control"
                                               :type "text"
-                                              :value (:name state)
-                                              :onChange #(do
-                                                           (om/set-state! owner :name (.. % -target -value))
-                                                           (om/set-state! owner :status
-                                                                          (u/validate (schm/string-of-length 1 128) (.. % -target -value))
-))}))))
+                                              :value name
+                                              :onChange #(om/update! data :name (.. % -target -value))}))))
 
           (dom/div #js {:className "modal-footer"}
                    (dom/div #js {:className "btn btn-primary pull-left"
-                                 :onClick #(action/update-project id name)} 
+                                 :onClick #(action/update-project id name)}
                             "Update")
                    (dom/div #js {:className "btn btn-danger pull-right"
-                                 :onClick #(action/delete-project id)} 
+                                 :onClick #(action/delete-project id)}
                             "Delete"))))))))
 
 (defn show [& data-pack]

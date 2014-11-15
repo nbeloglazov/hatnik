@@ -7,37 +7,28 @@
 
 (defn email-component [data owner]
   (reify
-    om/IInitState
-    (init-state [this]
-      {:subject-status "has-success"
-       :body-status "has-success"})
-
-    om/IRenderState
-    (render-state [this state]
+    om/IRender
+    (render [this]
       (dom/div nil
                (dom/div #js {:className "form-group"}
                         (dom/label nil "Address")
                         (dom/p #js {:id "email-input"}
                                (:email data)))
-               (dom/div #js {:className (str "form-group " (:subject-status state))}
+               (dom/div #js {:className (str "form-group " (u/validate schm/TemplateTitle
+                                                                       (-> data :subject :value)))}
                         (dom/label #js {:htmlFor "email-subject-input"
                                         :className "control-label"} "Subject")
                         (dom/input #js {:type "text"
                                         :className "form-control"
                                         :id "email-subject-input"
                                         :value (-> data :subject :value)
-                                        :onChange #(do
-                                                     ((-> data :subject :handler) (.. % -target -value))
-                                                     (om/set-state! owner :subject-status
-                                                                    (u/validate schm/TemplateTitle (.. % -target -value))))}))
-               (dom/div #js {:className (str "form-group " (:body-status state))}
+                                        :onChange #((-> data :subject :handler) (.. % -target -value))}))
+               (dom/div #js {:className (str "form-group " (u/validate schm/TemplateBody
+                                                                       (-> data :body :value)))}
                         (dom/label #js {:htmlFor "email-body-input"
                                         :className "control-label"} "Body")
                         (dom/textarea #js {:cols "40"
                                            :className "form-control"
                                            :id "email-body-input"
                                            :value (-> data :body :value)
-                                           :onChange #(do
-                                                        ((-> data :body :handler) (.. % -target -value))
-                                                        (om/set-state! owner :body-status
-                                                                       (u/validate schm/TemplateBody (.. % -target -value))))}))))))
+                                           :onChange #((-> data :body :handler) (.. % -target -value))}))))))

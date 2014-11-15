@@ -67,7 +67,8 @@
                    :as :json}
                   (client/post url)
                   :body)]
-    (if (= (:result resp) "ok")
+    (if (and (= (:result resp) "ok")
+             (not= (:result-for-user resp) "error"))
       (resp/response {:result :ok})
       (resp/response {:result :error
                       :message (:message resp)}))))

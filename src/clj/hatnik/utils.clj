@@ -14,14 +14,18 @@
     config - configs for email connection, should contain :host, :user, :pass
     to - address to whom send email
     subject - email subject
-    body - email body"
+    body - email body. Can be a string or a collection of maps.
+           Check postal documentation."
   [config to subject body]
   (p/send-message (select-keys config
                                [:host :user :ssl :pass])
                   {:from (:from config)
                    :to to
                    :subject subject
-                   :body body}))
+                   :body (if (string? body)
+                           [{:type "text/plain; charset=utf-8"
+                             :content body}]
+                           body)}))
 
 (defn map-value
   "Iterates through the map and applies given function to each value,

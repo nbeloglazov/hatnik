@@ -2,7 +2,7 @@
   :description "Web app for tracking library releases."
   :url "http://hatnik.com"
   :dependencies [; Clojure
-                 [org.clojure/clojure "1.7.0-alpha3"]
+                 [org.clojure/clojure "1.7.0-alpha4"]
                  [ring "1.3.1"]
                  [compojure "1.2.1"]
                  [hiccup "1.0.5"]
@@ -12,10 +12,10 @@
                  [com.taoensso/timbre "3.3.1"]
                  [com.novemberain/monger "2.0.0"]
                  [ancient-clj "0.2.1"]
-                 [com.draines/postal "1.11.2"]
+                 [com.draines/postal "1.11.3"]
                  [version-clj "0.1.0"]
                  [clojurewerkz/quartzite "1.3.0"]
-                 [prismatic/schema "0.3.2"]
+                 [prismatic/schema "0.3.3"]
                  [com.stuartsierra/component "0.2.2"]
                  [me.raynes/fs "1.4.5"]
                  [com.googlecode.streamflyer/streamflyer-core "1.1.2"]

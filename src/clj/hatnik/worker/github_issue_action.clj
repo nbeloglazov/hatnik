@@ -16,7 +16,7 @@
       :title title
       :user target-user
       :repo target-repo})
-    nil))
+    {:result :ok}))
 
 (comment
 

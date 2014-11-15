@@ -6,37 +6,6 @@
             [schema.core :as s])
   (:use [clojure.string :only [split replace]]))
 
-(defn github-issue-on-change [gh-repo timer form-handler form-status-handler error-handler]
-  (js/clearTimeout timer)  
-  
-  (let [pr (split gh-repo "/")
-        user (first pr)
-        repo (second pr)]
-    (form-handler 
-     (if (or (nil? repo)
-             (nil? user)
-             (= "" user)
-             (= "" repo))
-       (do
-         (form-status-handler "has-warning")
-         nil)
-
-       (js/setTimeout
-        (fn [] 
-          (action/get-github-repos 
-           user 
-           (fn [reply] 
-             (let [rest (js->clj reply)
-                   result (->> rest
-                               (map #(get % "name"))
-                               (filter #(= % repo)))]
-               (if (first result)
-                 (form-status-handler "has-success")
-                 (form-status-handler "has-error"))))
-           error-handler))
-        1000)))))
-
-
 (defn update-operation-item [data key new-val]
   ((:handler data)
    (:id data)

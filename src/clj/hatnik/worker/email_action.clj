@@ -12,13 +12,14 @@
         send-email (:send-email utils)]
     (try
       (send-email (:email user) subject body)
-      nil
+      {:result :ok}
       (catch Exception e
         (timbre/error e "Couldn't send email"
                       "Address:" (:email user)
                       "Subject:" subject
                       "Body:" body)
-        "Couldn't send email."))))
+        {:result :error
+         :message "Couldn't send email."}))))
 
 (comment
 

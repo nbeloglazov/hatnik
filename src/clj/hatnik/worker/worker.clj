@@ -22,7 +22,8 @@
   [action user variables utils]
   (timbre/debug "Performing action for user" user
                 " Variables: " variables)
-  (timbre/debug "Action disabled. Set :enable-actions to true in config.clj. Action: " action))
+  (timbre/debug "Action disabled. Set :enable-actions to true in config.clj. Action: " action)
+  {:result :ok})
 
 (defn perform-action
   "Perform action if library was updated. Or if user requested test action.
@@ -32,13 +33,16 @@
     variables - map of variables that can be substitued in action test,
                 for example library name, version, previous version.
     utils - functions that include external communications. For example
-            sending emails."
+            sending emails.
+
+  Returns a map containing :result (:ok or :error) and optional :message
+  if result is :error"
   [action user variables utils]
   (timbre/debug "Performing action for user" user
                 " Variables: " variables)
   (case (:type action)
     "email" (email/perform action user variables utils)
-    "noop" nil ; doing nothing
+    "noop" {:result :ok} ; doing nothing
     "github-issue" (github-issue/perform action user variables utils)
     "github-pull-request" (github-pull-request/perform action user
                                                        variables utils)))
@@ -63,19 +67,19 @@
       (try
         (let [proj (stg/get-project db (:project-id action))
               user (stg/get-user-by-id db (:user-id proj))
-              error (perform-action action user
-                                    {:library library
-                                     :version ver
-                                     :previous-version (:last-processed-version action)
-                                     :project (:name proj)}
-                                    utils)]
-          (if-not error
+              result (perform-action action user
+                                     {:library library
+                                      :version ver
+                                      :previous-version (:last-processed-version action)
+                                      :project (:name proj)}
+                                     utils)]
+          (if (= (:result result) :ok)
             (do (timbre/debug "Action completed sucessfully. Updating library version in action.")
                 (stg/update-action! db (:id user)
                                     (:id action) (assoc action
                                                    :last-processed-version ver))
                 (timbre/debug "Action updated."))
-            (timbre/warn "Error while performing action: " error "Not updating the action.")))
+            (timbre/warn "Error while performing action: " (:message result) "Not updating the action.")))
         (catch Exception e
           (timbre/error "Error in action" (:id action))
           (throw e))))))

@@ -146,10 +146,11 @@
           (do (commit-and-push action variables repo-dir branch fork-url)
               (open-pull-request action user variables results branch utils))
           (create-github-issue repo results utils)))
-      nil
+      {:result :ok}
       (catch Exception e
         (timbre/error e "Error in pull-request action. Action: " action "Variables: " variables)
-        :error)
+        {:result :error
+         :message (.getMessage e)})
       (finally
         (fs/delete-dir repo-dir)))))
 

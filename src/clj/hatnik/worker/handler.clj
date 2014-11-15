@@ -15,18 +15,13 @@
   (timbre/info "Running test action for user" (:user action))
   (let [project (stg/get-project db (:project-id action))
         user (stg/get-user-by-id db (:user-id project))
-        error (perform-action action user
-                              {:library (:library action)
-                               :version (:version action)
-                               :previous-version (:previous-version action)
-                               :project (:name project)}
-                              utils)]
-    (if error
-      (resp/response
-       {:result :error
-        :message error})
-      (resp/response
-       {:result :ok}))))
+        result (perform-action action user
+                               {:library (:library action)
+                                :version (:version action)
+                                :previous-version (:previous-version action)
+                                :project (:name project)}
+                               utils)]
+    (resp/response result)))
 
 (defn app
   "Creates routes for worker web server."

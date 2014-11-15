@@ -47,8 +47,21 @@
 
 (defn pull-request-operation [data owner]
   (reify
-    om/IRender
-    (render [this]
+    om/IInitState
+    (init-state [this]
+      {:file-status (if (s/check (schm/string-of-length 1 2000) (:file data))
+                      "has-error"
+                      "has-success")
+       :regex-status (if (s/check (schm/string-of-length 1 2000) (:regex data))
+                       "has-error"
+                       "has-success")
+       :replacement-status (if (s/check (schm/string-of-length 1 2000) (:replacement data))
+                             "has-error"
+                             "has-success")
+       })
+    
+    om/IRenderState
+    (render-state [this state]
       (dom/div
        #js {:className "panel-group"
             :id (str "gh-pull-req-op-" (:id data))}
@@ -65,24 +78,37 @@
                  #js {:className "panel-collapse collapse in"
                       :id (str "gh-pull-req-op-col-" (:id data))}
                  (dom/div #js {:className "panel-body"}
-                          (dom/div #js {:className "form-group"}
+                          (dom/div #js {:className (str "form-group " (:file-status state))}
                                    (dom/label nil "file")
                                    (dom/input #js {:type "text"
                                                    :value (:file data)
-                                                   :onChange #(update-operation-item data :file (.. % -target -value))
+                                                   :onChange #(do
+                                                                (update-operation-item data :file (.. % -target -value))
+                                                                (if (s/check (schm/string-of-length 1 1024) (.. % -target -value))
+                                                                  (om/set-state! owner :file-status "has-error")
+                                                                  (om/set-state! owner :file-status "has-success")))
                                                    :className "form-control"}))
-                          (dom/div #js {:className "form-group"}
+                          
+                          (dom/div #js {:className (str "form-group " (:regex-status state))}
                                    (dom/label nil "regex")
                                    (dom/input #js {:type "text"
                                                    :value (:regex data)
-                                                   :onChange #(update-operation-item data :regex (.. % -target -value))
+                                                   :onChange #(do
+                                                                (update-operation-item data :regex (.. % -target -value))
+                                                                (if (s/check (schm/string-of-length 1 128) (.. % -target -value))
+                                                                  (om/set-state! owner :regex-status "has-error")
+                                                                  (om/set-state! owner :regex-status "has-success")))
                                                    :className "form-control"}))
-                          (dom/div #js {:className "form-group"}
+                          
+                          (dom/div #js {:className (str "form-group " (:replacement-status state))}
                                    (dom/label nil "replacement")
                                    (dom/input #js {:type "text"
                                                    :value (:replacement data)
-                                                   :onChange #(update-operation-item
-                                                               data :replacement (.. % -target -value))
+                                                   :onChange #(do
+                                                                (update-operation-item data :replacement (.. % -target -value))
+                                                                (if (s/check (schm/string-of-length 1 128) (.. % -target -value))
+                                                                  (om/set-state! owner :replacement-status "has-error")
+                                                                  (om/set-state! owner :replacement-status "has-success")))
                                                    :className "form-control"})))))))))
 
 (defn add-new-operation [data]

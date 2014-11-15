@@ -3,8 +3,10 @@
             [me.raynes.fs :as fs]
             [tentacles.repos :as repos]
             [hatnik.utils :as u]
+            [hatnik.worker.email-action :as email-action]
             [clojure.java.io :as io]
             [clojure.java.shell :refer [sh with-sh-dir]]
+            [clojure.string :refer [join]]
             [hiccup.core :refer [html]]
             [hiccup.util :refer [escape-html]])
   (:import [java.util.regex Pattern Matcher]
@@ -79,17 +81,19 @@
        (doall)))
 
 (defn build-results-table
-  "Creates markdown table that shows results of each operation.
+  "Creates html table that shows results of each operation.
   It has 4 columns: file, regex, replacemenet, result."
   [operations results]
-  (let [to-row (fn [tag values]
+  (let [cell-style "border: 1px solid black; padding: 5px;"
+        to-row (fn [tag values]
                  [:tr
-                  (map #(vector tag (escape-html %)) values)])
+                  (map #(vector tag {:style cell-style} (escape-html %))
+                       values)])
         result-to-text {:updated "Updated"
                         :unmodified "Not changed"
                         :error "Error"
                         :file-not-found "File not found"}]
-   (html [:table
+   (html [:table {:style "border: 1px solid black; border-collapse: collapse;"}
           (to-row :th ["File" "Regex" "Replacement" "Result"])
           (map (fn [{:keys [file regex replacement]} result]
                  (to-row :td
@@ -110,12 +114,9 @@
 
 (defn open-pull-request
   "Opens pull request based on changed files."
-  [action orig-user variables operation-results branch utils]
+  [action orig-user variables branch utils]
   (timbre/info "Opening pull request to" (:repo action) "from branch" branch)
-  (let [variables (assoc variables
-                    :results-table (build-results-table (:operations action)
-                                                        operation-results))
-        [user repo] (u/split-repo (:repo action))]
+  (let [[user repo] (u/split-repo (:repo action))]
     ((:create-github-pull-request utils)
      {:user user
       :repo repo
@@ -125,12 +126,36 @@
                  (:github-login orig-user))
       :branch branch})))
 
-(defn create-github-issue
-  "Creates github issue instead of pull request because no files
-  were modified."
-  [repo operation-results utils]
-  (timbre/info "Creating issue for repo" repo "with results"
-               operation-results))
+(def email-body
+  (->> [(str "No files were changed. You can find results of executing "
+             "file-change operations below.")
+        "Library: {{library}}, version {{version}}, previous version {{previous-version}}"
+        "Operations results:"
+        "{{results-table}}"
+        ""
+        "Hatnik Team"]
+       (map #(str "<p>" % "</p>"))
+       (join \newline)))
+
+(defn send-email
+  "Sends an email instead of pull request because no files
+  were modified. Probably operations are not configures correctly.
+  Notify the user so she is aware.."
+  [action user variables utils]
+  (let [subject "[Hatnik] Pull request to {{repo}} failed"
+        variables (assoc variables
+                    :repo (:repo action))
+        action {:subject subject
+                :body email-body
+                :type :html}]
+    (email-action/perform action user variables utils)))
+
+(defn add-results-table
+  "Adds results table to the variables map."
+  [variables action results]
+  (let [results-table (build-results-table (:operations action)
+                                           results)]
+    (assoc variables :results-table results-table)))
 
 (defn perform
   "Modifies github repo and opens pull request."
@@ -141,12 +166,23 @@
     (try
       (let [fork-url (ensure-repo-is-forked repo utils)
             _ (clone-repo repo repo-dir)
-            results (update-files action variables repo-dir)]
+            results (update-files action variables repo-dir)
+            variables (add-results-table variables action results)]
         (if (some #(= :updated %) results)
           (do (commit-and-push action variables repo-dir branch fork-url)
-              (open-pull-request action user variables results branch utils))
-          (create-github-issue repo results utils)))
-      {:result :ok}
+              (open-pull-request action user variables branch utils)
+              {:result :ok})
+          (let [result (send-email action user variables utils)]
+            (if (= (:result result) :ok)
+              {:result :ok
+               :message (str "Couldn't create pull request. Email with "
+                             "details has been sent. Check your inbox.")
+               ; We want to show this as error for user when she tests pull request
+               ; action. We can't mark the whole response with :result :error as
+               ; it is normal workflow and not exceptional situation.
+               :result-for-user :error}
+              {:result :error
+               :message "Server error. Couldn't create pull request."}))))
       (catch Exception e
         (timbre/error e "Error in pull-request action. Action: " action "Variables: " variables)
         {:result :error
@@ -175,12 +211,14 @@
                          {:file "README.md"
                           :regex "hello"
                           :replacement "world"}]}
-           {:github-login "nbeloglazov"}
+           {:github-login "nbeloglazov"
+            :email "me@nbeloglazov.com"}
            {:library "org.clojure/clojure"
             :version "1.7.0"
             :previous-version "1.6.0"}
            {:fork-github-repo (partial u/fork-github-repo token)
-            :create-github-pull-request (partial u/create-github-pull-request token)})
+            :create-github-pull-request (partial u/create-github-pull-request token)
+            :send-email (partial u/send-email (-> "config.clj" slurp read-string :email))})
 
   (def opts {:oauth-token token})
 

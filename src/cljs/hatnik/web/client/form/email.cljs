@@ -2,46 +2,33 @@
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [hatnik.web.client.z-actions :as action]
-            [hatnik.schema :as schm]
-            [schema.core :as s]))
+            [hatnik.web.client.utils :as u]
+            [hatnik.schema :as schm]))
 
 (defn email-component [data owner]
   (reify
-    om/IInitState
-    (init-state [this]
-      {:subject-status "has-success"
-       :body-status "has-success"})
-
-    om/IRenderState
-    (render-state [this state]
+    om/IRender
+    (render [this]
       (dom/div nil
                (dom/div #js {:className "form-group"}
                         (dom/label nil "Address")
                         (dom/p #js {:id "email-input"}
                                (:email data)))
-               (dom/div #js {:className (str "form-group " (:subject-status state))}
+               (dom/div #js {:className (str "form-group " (u/validate schm/TemplateTitle
+                                                                       (-> data :subject :value)))}
                         (dom/label #js {:htmlFor "email-subject-input"
                                         :className "control-label"} "Subject")
                         (dom/input #js {:type "text"
                                         :className "form-control"
                                         :id "email-subject-input"
                                         :value (-> data :subject :value)
-                                        :onChange #(do
-                                                     ((-> data :subject :handler) (.. % -target -value))
-                                                     (om/set-state! owner :subject-status
-                                                                    (if (s/check schm/TemplateTitle (.. % -target -value))
-                                                                      "has-error"
-                                                                      "has-success")))}))
-               (dom/div #js {:className (str "form-group " (:body-status state))}
+                                        :onChange #((-> data :subject :handler) (.. % -target -value))}))
+               (dom/div #js {:className (str "form-group " (u/validate schm/TemplateBody
+                                                                       (-> data :body :value)))}
                         (dom/label #js {:htmlFor "email-body-input"
                                         :className "control-label"} "Body")
                         (dom/textarea #js {:cols "40"
                                            :className "form-control"
                                            :id "email-body-input"
                                            :value (-> data :body :value)
-                                           :onChange #(do
-                                                        ((-> data :body :handler) (.. % -target -value))
-                                                        (om/set-state! owner :body-status
-                                                                       (if (s/check schm/TemplateBody (.. % -target -value))
-                                                                         "has-error"
-                                                                         "has-success")))}))))))
+                                           :onChange #((-> data :body :handler) (.. % -target -value))}))))))

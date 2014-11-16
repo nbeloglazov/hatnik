@@ -2,8 +2,8 @@
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [hatnik.web.client.z-actions :as action]
-            [hatnik.schema :as schm]
-            [schema.core :as s])
+            [hatnik.web.client.utils :as u]
+            [hatnik.schema :as schm])
   (:use [clojure.string :only [split replace]]))
 
 (defn set-repo-status [owner status]
@@ -39,16 +39,13 @@
          (if (or (nil? v) (= "" v))
            "has-warning"
            "has-success"))
-       :title-status "has-success"
-       :body-status "has-success"
-       :timer nil
-       })
+       :timer nil})
     om/IRenderState
     (render-state [this state]
       (dom/div nil
                (dom/div #js {:className (str "form-group " (:repo-status state))}
                         (dom/label #js {:htmlFor "gh-repo"
-                                        :className "control-label"} "GitHub repository")
+                                        :className "control-label"} "Repository")
                         (dom/input #js {:type "text"
                                         :className "form-control"
                                         :id "gh-repo"
@@ -60,29 +57,21 @@
                                            (github-issue-on-change repo (:timer state) owner)
                                            ((-> data :repo :handler) repo))}))
 
-               (dom/div #js {:className (str "form-group " (:title-status state))}
+               (dom/div #js {:className (str "form-group "
+                                             (u/validate schm/TemplateTitle (-> data :title :value)))}
                         (dom/label #js {:htmlFor "gh-issue-title"
-                                        :className "control-label"} "Issue title")
+                                        :className "control-label"} "Title")
                         (dom/input #js {:type "text"
                                         :className "form-control"
                                         :id "gh-issue-title"
                                         :value (:value (:title data))
-                                        :onChange #(do
-                                                     ((:handler (:title data)) (.. % -target -value))
-                                                     (om/set-state! owner :title-status
-                                                                    (if (s/check schm/TemplateTitle (.. % -target -value))
-                                                                      "has-error"
-                                                                      "has-success")))}))
-               (dom/div #js {:className (str "form-group " (:body-status state))}
+                                        :onChange #((:handler (:title data)) (.. % -target -value))}))
+               (dom/div #js {:className (str "form-group "
+                                             (u/validate schm/TemplateBody (-> data :body :value)))}
                         (dom/label #js {:htmlFor "gh-issue-body"
-                                        :className "control-label"} "Issue body")
+                                        :className "control-label"} "Body")
                         (dom/textarea #js {:cols "40"
                                            :className "form-control"
                                            :id "gh-issue-body"
                                            :value (:value (:body data))
-                                           :onChange #(do
-                                                        ((:handler (:body data)) (.. % -target -value))
-                                                        (om/set-state! owner :body-status
-                                                                       (if (s/check schm/TemplateBody (.. % -target -value))
-                                                                         "has-error"
-                                                                         "has-success")))}))))))
+                                           :onChange #((:handler (:body data)) (.. % -target -value))}))))))

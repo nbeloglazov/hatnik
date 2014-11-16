@@ -206,7 +206,7 @@
                           :regex "regex"
                           :replacement "replacement"}
                          {:file "project.clj"
-                          :regex "{{library}} \"[a-zA-Z0-9.-_]+\""
+                          :regex "{{library}} \"[^\"]+\""
                           :replacement "{{library}} \"{{version}}\""}
                          {:file "README.md"
                           :regex "hello"

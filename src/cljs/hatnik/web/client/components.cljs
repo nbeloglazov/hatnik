@@ -36,7 +36,7 @@
    "github-issue" {:text "issue"
                    :icon "/img/github-icon.png"
                    :alt "github"}
-   "github-pull-request" {:text "pull requst"
+   "github-pull-request" {:text "pull request"
                           :icon "/img/github-icon.png"
                           :alt "github"}})
 
@@ -86,14 +86,14 @@
         rendered
         (map (fn [act]
                (dom/div #js {:className "col-sm-6 col-md-4 col-lg-3 prj-list-item"}
-                        (render-action (assoc act :project-id id 
+                        (render-action (assoc act :project-id id
                                               :type (get act "type")
                                               :user-email email))))
              actions)]
     (apply dom/div #js {:className "row"}
            (concat rendered
                    [(dom/div #js {:className "col-sm-6 col-md-4 col-lg-3 prj-list-item"}
-                             (render-action {:type :add 
+                             (render-action {:type :add
                                              :project-id id
                                              :user-email email}))]))))
 

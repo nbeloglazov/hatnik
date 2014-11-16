@@ -1,9 +1,7 @@
 (ns hatnik.web.client.form.add-action
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [hatnik.web.client.z-actions :as action]
-            [hatnik.schema :as schm]
-            [schema.core :as s])
+            [hatnik.web.client.z-actions :as action])
   (:use [jayq.core :only [$]]
         [hatnik.web.client.form.artifact-input :only [artifact-input-component]]
         [hatnik.web.client.form.action-type :only [action-type-component]]
@@ -126,9 +124,9 @@
    :gh-pull-title "Release {{library}} {{version}}"
    :gh-pull-body "Time to update your project.clj to {{library}} {{version}}!"
    :gh-comm-msg "Update {{library}} to {{version}}"
-   :gh-operations [{:file "hello.clj"
-                    :regex "regex"
-                    :replacement "{{template}}"}]})
+   :gh-operations [{:file ""
+                    :regex ""
+                    :replacement ""}]})
 
 (defmethod get-init-state :add [data _]
   (merge

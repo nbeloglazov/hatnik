@@ -8,8 +8,8 @@
 
 * Email - sends a customized email.
 * Noop - does nothing.
-* GitHub Issue - creates an issue in a selected repo. Not started.
-* GitHub Pull Request - creates a pull request with a simple modification like "set version of library N to XYZ in project.clj". Not started.
+* GitHub Issue - creates an issue in a selected repo.
+* GitHub Pull Request - creates a pull request with a simple modification like "set version of library N to XYZ in project.clj".
 * GitHub Wiki - changes a wiki page using a string find-and-replace algorithm. Not started.
 
 #### How to run locally

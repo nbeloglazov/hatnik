@@ -78,53 +78,54 @@
   (hc/html
    [:div#iAppView ""]))
 
-(defn about-page []
+(defn about-page [config]
   [:div.about
-   [:div.page-header
-    [:h1 "Hatnik " [:small "Don't miss a release"]]
-    [:p "Hatnik is a web app that helps you to track library releases. Choose a library to track and setup an action that sends emails or creates Github issues when a new release of the library is published."]]
+   [:div.image
+    [:img {:src "/img/landing-image.svg"}]]
+
+   [:div.signin
+    [:span "Never miss a release"]
+    [:a.btn-success.btn-lg
+     {:role "button"
+      :href (github-link config)}
+     "Login via GitHub"]]
 
    [:div.row
-    [:div.col-md-6.col-xs-12.use-cases
-     [:h3 "When to use"]
-     [:p "Use cases might be different. Here is some of them:"]
+    [:div.col-md-4
+     [:h3 "Use cases"]
      [:ul
-      [:li "You want to stay on the cutting edge and use the latest release of ClojureScript."]
-      [:li "You keep forgetting to update wiki tutorials and examples "
-       "to use the new version when you release your library."]
-      [:li "You want to have a place shows the latest version of your favourite "
-       "libraries."]
-      [:li "You want your project to automatically update to the latest version of its dependencies."]]]
-    [:div.col-md-6.col-xs-12.how-to
-     [:h3 "How to start"]
-     [:ol
-      [:li "Login via GitHub. Sorry can't do without it."]
-      [:li "Create and setup an action"
-       [:ol
-        [:li "Choose a library, for example " [:code "org.clojure/clojurescript"] "."]
-        [:li "Fill in the action settings. For example send an email with custom text."]]]]
-     [:p "That's all! Now you forget about Hatnik until the library you're tracking is released. "
-      "You'll get an email with your text. You can create multiple actions and group them by projects. "
-      "A project is simply a group of actions related to each other."]]]
+      [:li "Automatically update project dependencies"]
+      [:li "Automatically update README when you release library"]
+      [:li "Create tracking issues for maintenance tasks when you release library"]]]
 
-   [:div.separator]
-
-   [:h3 "Actions"]
-   [:p "Hatnik is going to support multiple types of actions. Currently they're "
-    "limited only to sending emails, but we're working on it! Here's the initial set of actions:"]
-   [:ul.actions
-    [:li.available [:strong  "Email"]
-     " - send an email with custom text. You can use template variables to substitute the library name or the version."]
-    [:li.available {:title "Work in progress"} [:strong "Noop"]
-     " - does nothing. Useful if you want to "
-     "have a place that lists the latest versions for selected libraries."]
-    [:li.available {:title "Work in progress"} [:strong "GitHub Issue"]
-     " - create an issue in the selected repo. The text can be customized just like in email."]
-    [:li.available {:title "Work in progress"} [:strong "GitHub Pull Request"]
-     " - create a pull request in selected repo using simple find-and-replace-in-file operations."]
-    [:li.unavailable {:title "Work in progress"} [:strong "GitHub Wiki"]
-     " - update a wiki page using the same find-and-replace operations."]]
-   ])
+    [:div.col-md-4
+     [:h3 "Actions"]
+     [:ul.actions
+      [:li.available [:strong  "Email"]
+       " - send an email with custom text."]
+      [:li.available [:strong "GitHub Issue"]
+       " - create an issue in the selected repo."]
+      [:li.available  [:strong "GitHub Pull Request"]
+       " - modify files and open pull request."]
+      [:li.available [:strong "Noop"]
+       " - does nothing. Simply shows latest version."]]]
+    [:div.col-md-4
+     [:h3 "Supported languages"]
+     [:p "Only JVM-based languages are currently supported"]
+     [:div.langs
+      [:div.lang
+       [:img {:src "/img/langs/java.png"
+              :alt "java"}]
+       "java"]
+      [:div.lang
+       [:img {:src "/img/langs/clojure.gif"
+              :alt "clojure"}]
+       "clojure"]
+      [:div.lang
+       [:img {:src "/img/langs/scala.png"
+              :alt "scala"}]
+       "scala"]]]
+]])
 
 (defn core-page [config user]
   (hc/html
@@ -137,7 +138,7 @@
 
      (if user
        (work-main-page)
-       (about-page))]
+       (about-page config))]
 
     (when user (modal-frames))
 

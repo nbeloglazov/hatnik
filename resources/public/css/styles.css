@@ -30,6 +30,46 @@
     list-style-type: lower-alpha;
 }
 
+.about .image {
+    text-align: center;
+    margin-top: 0px;
+}
+
+.about .image img {
+    max-width: 700px;
+    width: 100%;
+}
+
+.about .signin {
+    margin: 50px 0px;
+    text-align: center;
+}
+
+.about .langs {
+    display: flex;
+    justify-content: space-around;
+}
+
+.about .lang img {
+    max-height: 30px;
+    margin-right: 5px;
+}
+
+.about .lang {
+    font-size: 20px;
+}
+
+.about .signin span {
+    font-size: 24px;
+}
+
+.about .signin a {
+    padding: 20px;
+    margin-left: 20px;
+    display: inline-block;
+    text-decoration: none;
+}
+
 #artifact-input-group {
     position: relative;
 }

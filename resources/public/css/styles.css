@@ -92,7 +92,7 @@
 }
 
 form textarea.form-control {
-    height: 150px;
+    height: 100px;
     resize: vertical;
 }
 

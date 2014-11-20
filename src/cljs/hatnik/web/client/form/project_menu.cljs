@@ -11,8 +11,7 @@
   (reify
     om/IDidMount
     (did-mount [this]
-      (let [modal-window ($ (:modal-jq-id data))]
-        (.modal modal-window)))
+      (.modal ($ :#iModalProjectMenu)))
 
     om/IRender
     (render [this]
@@ -36,14 +35,19 @@
                                               :onChange #(om/update! data :name (.. % -target -value))}))))
 
           (dom/div #js {:className "modal-footer"}
-                   (dom/div #js {:className "btn btn-primary pull-left"
-                                 :onClick #(action/update-project id name)}
-                            "Update")
-                   (dom/div #js {:className "btn btn-danger pull-right"
-                                 :onClick #(action/delete-project id)}
-                            "Delete"))))))))
 
-(defn show [& data-pack]
-  (om/root project-menu (assoc (into {} (map vec (partition-all 2 data-pack)))
-                          :modal-jq-id :#iModalProjectMenu)
+                   (dom/div #js {:className "btn btn-primary pull-left"
+                                 :onClick (if id
+                                            #(action/update-project id name)
+                                            #(action/send-new-project-request name))}
+                            (if id
+                              "Update"
+                              "Create"))
+                   (when id
+                     (dom/div #js {:className "btn btn-danger pull-right"
+                                   :onClick #(action/delete-project id)}
+                              "Delete")))))))))
+
+(defn show [project]
+  (om/root project-menu project
            {:target (.getElementById js/document "iModalProjectMenu")}))

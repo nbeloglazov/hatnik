@@ -37,19 +37,18 @@
 (defn common-update-callback [msg data response]
   (when (= "ok" (get response "result"))
     (.modal ($ :#iModalAddAction) "hide")
+    (.modal ($ :#iModalProjectMenu) "hide")
     (state/update-all-view)))
 
 (defn create-new-project-callback [name response]
   (when (= "ok" (get response "result"))
+    (.modal ($ :#iModalProjectMenu) "hide")
     (state/update-all-view)))
 
-(defn ^:export send-new-project-request []
-  (let [name (.-value (.getElementById js/document "project-name-input"))]
-    (if (s/check schm/Project {:name name})
-      (msg/danger "Project name cannot be empty.")
-      (do
-        (.modal ($ :#iModalProject) "hide")
-        (ajax  "/api/projects" "POST" {:name name} #(create-new-project-callback name %))))))
+(defn send-new-project-request [name]
+  (if (s/check schm/Project {:name name})
+    (msg/danger default-error-message)
+    (ajax "/api/projects" "POST" {:name name} #(create-new-project-callback name %))))
 
 (defn create-new-action-callback [data response]
   (when (= "ok" (get response "result"))
@@ -155,11 +154,9 @@
   (let [data {:name new-name}]
     (if (s/check schm/Project data)
       (msg/danger default-error-message)
-      (do
-        (.modal ($ :#iModalProjectMenu) "hide")
-        (ajax
-         (str "/api/projects/" project-id) "PUT"  data
-         (wrap-error-alert #(common-update-callback "Couldn't rename the project. Please file a bug if the issue persists." {} %)))))))
+      (ajax
+       (str "/api/projects/" project-id) "PUT"  data
+       (wrap-error-alert #(common-update-callback "Couldn't rename the project. Please file a bug if the issue persists." {} %))))))
 
 
 (defn get-library [library callback]

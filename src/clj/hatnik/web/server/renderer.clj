@@ -30,20 +30,6 @@
   (hc/html
    [:div#iModal.modal.fade {:data-keyboard "true"}]
    [:div#iModalAddAction.modal.fade {:data-keyboard "true"}]
-
-   [:div#iModalProject.modal.fade {:data-keyboard "true"}
-    [:div.modal-dialog
-     [:div.modal-content
-      [:div.modal-header
-       [:h4.modal-title "Create a new project"]]
-      [:div.modal-body
-       [:form
-        [:input#project-name-input.form-control
-         {:type "text"
-          :placeholder "Project name"}]]]
-      [:div.modal-footer
-       [:button.btn.btn-primary {:onClick "hatnik.web.client.z_actions.send_new_project_request()"} "Create"]]]]]
-
    [:div#iModalProjectMenu.modal.fade ]))
 
 (defn page-menu [config user]

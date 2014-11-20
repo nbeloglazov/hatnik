@@ -8,9 +8,7 @@
   (:use [jayq.core :only [$]]))
 
 (defn ^:export add-new-project []
-  (let [project-name-input (.getElementById js/document "project-name-input")]
-    (set! (.-value project-name-input) "")
-    (.modal ($ :#iModalProject))))
+  (pmenu/show {:name ""}))
 
 (defn add-new-action-card [data owner]
   (reify
@@ -104,8 +102,8 @@
              (dom/button
               #js {:className "btn btn-default"
                    :type "button"
-                   :onClick #(pmenu/show :project-id id
-                                         :name name)}
+                   :onClick #(pmenu/show {:project-id id
+                                          :name name})}
               (dom/span #js {:className "glyphicon glyphicon-pencil pull-right"})))))
 
 (defn project-view [prj owner]

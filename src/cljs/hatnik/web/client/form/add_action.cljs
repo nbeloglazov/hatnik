@@ -4,7 +4,7 @@
             [hatnik.web.client.z-actions :as action]
             [hatnik.web.client.utils :as u])
   (:use [jayq.core :only [$]]
-        [hatnik.web.client.form.artifact-input :only [artifact-input-component]]
+        [hatnik.web.client.form.library-input :only [library-input-component]]
         [hatnik.web.client.form.action-type :only [action-type-component]]
         [hatnik.web.client.form.email :only [email-component]]
         [hatnik.web.client.form.github-issue :only [github-issue-component]]
@@ -15,7 +15,7 @@
     om/IRender
     (render [this]
       (dom/form nil
-                (om/build artifact-input-component (:artifact-value data))
+                (om/build library-input-component (:library-value data))
                 (om/build action-type-component (:action-type data))
 
                 (when (= :email (-> data :action-type :type))
@@ -36,7 +36,7 @@
     om/IRenderState
     (render-state [this state]
       (let [; Make local copy of data to be sure it doesn't play tricks with us.
-            data-pack (select-keys data [:type :project-id :artifact-value
+            data-pack (select-keys data [:type :project-id :library-value
                                          :gh-repo :gh-issue-title :gh-issue-body
                                          :email-body :email-subject
                                          :gh-pull-body :gh-pull-title :gh-comm-msg :gh-operations])]
@@ -69,7 +69,7 @@
     om/IRenderState
     (render-state [this state]
       (let [; Make local copy of data to be sure it doesn't play tricks with us.
-            data-pack (select-keys data [:type :project-id :artifact-value
+            data-pack (select-keys data [:type :project-id :library-value
                                          :gh-repo :gh-issue-title :gh-issue-body
                                          :email-body :email-subject :action-id
                                          :gh-pull-body :gh-pull-title :gh-comm-msg :gh-operations])]
@@ -106,7 +106,7 @@
 
 (defmulti get-init-state #(:type %))
 
-(def new-init-state {:artifact-value ""})
+(def new-init-state {:library-value ""})
 
 (def email-init-state {:email-body default-email-body
                        :email-subject default-email-subject})
@@ -172,8 +172,8 @@
     (merge {:type (keyword (get action "type"))
             :project-id (:project-id data)
             :user-email (:user-email data)
-            :artifact-value (get action "library")
-            :artifact-version (get action "last-processed-version")
+            :library-value (get action "library")
+            :library-version (get action "last-processed-version")
             :action-id (get action "id")}
            (get-init-state-by-action action))))
 
@@ -224,10 +224,10 @@
 
         (dom/div #js {:className "modal-body"}
                  (om/build action-input-form
-                           {:artifact-value
-                            {:value (:artifact-value state)
-                             :version (:artifact-version state)
-                             :handler #(om/set-state! owner :artifact-value %)}
+                           {:library-value
+                            {:value (:library-value state)
+                             :version (:library-version state)
+                             :handler #(om/set-state! owner :library-value %)}
 
                             :action-type
                             {:type (:type state)

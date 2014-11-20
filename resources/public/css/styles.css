@@ -70,16 +70,16 @@
     text-decoration: none;
 }
 
-#artifact-input-group {
+#library-input-group {
     position: relative;
 }
 
-#artifact-input-group .form-control-feedback {
+#library-input-group .form-control-feedback {
     width: auto;
     margin-right: 10px;
 }
 
-#artifact-input-group .form-control-feedback img {
+#library-input-group .form-control-feedback img {
     margin-top: 5px;
     width: 24px;
     height: 24px;

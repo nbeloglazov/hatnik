@@ -60,7 +60,7 @@
    :type "email"
    :body (:email-body data-pack)
    :subject (:email-subject data-pack)
-   :library (:artifact-value data-pack)})
+   :library (:library-value data-pack)})
 
 (defn build-gh-issue-action [data-pack]
   {:project-id (:project-id data-pack)
@@ -68,11 +68,11 @@
    :repo (:gh-repo data-pack)
    :title (:gh-issue-title data-pack)
    :body (:gh-issue-body data-pack)
-   :library (:artifact-value data-pack)})
+   :library (:library-value data-pack)})
 
 (defn build-gh-pull-request [data-pack]
   {:project-id (:project-id data-pack)
-   :library (:artifact-value data-pack)
+   :library (:library-value data-pack)
    :type "github-pull-request"
    :repo (:gh-repo data-pack)
    :title (:gh-pull-title data-pack)
@@ -83,7 +83,7 @@
 (defn build-noop-action [data-pack]
   {:type "noop"
    :project-id (:project-id data-pack)
-   :library (:artifact-value data-pack)})
+   :library (:library-value data-pack)})
 
 (def actions-config
   {:noop {:build build-noop-action

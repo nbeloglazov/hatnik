@@ -1,4 +1,4 @@
-(ns hatnik.web.client.form.artifact-input
+(ns hatnik.web.client.form.library-input
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [hatnik.web.client.z-actions :as action]
@@ -26,7 +26,7 @@
                1000)]
     (om/set-state! owner :timer timer)))
 
-(defn artifact-input-component [data owner]
+(defn library-input-component [data owner]
   (reify
     om/IInitState
     (init-state [this]
@@ -41,11 +41,11 @@
     om/IRenderState
     (render-state [this state]
       (dom/div #js {:className (str "form-group " (:form-status state))
-                    :id "artifact-input-group"}
-        (dom/label #js {:htmlFor "artifact-input"
+                    :id "library-input-group"}
+        (dom/label #js {:htmlFor "library-input"
                         :className "control-label"} "Library")
         (dom/input #js {:type "text"
-                        :id "artifact-input"
+                        :id "library-input"
                         :className "form-control"
                         :placeholder "e.g. org.clojure/clojure"
                         :onChange #(let [library (.. % -target -value)]

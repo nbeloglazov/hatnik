@@ -17,9 +17,9 @@
       (let [id (:project-id data)
             email (:user-email data)]
       (dom/div #js {:className "panel panel-default action add-action"
-                    :onClick #(add-action/show :type :add 
-                                               :project-id id
-                                               :user-email email)}
+                    :onClick #(add-action/show {:type :add
+                                                :project-id id
+                                                :user-email email})}
                (dom/div #js {:className "panel-body"}
                         (dom/span #js {:className "glyphicon glyphicon-plus"})
                         " Add action"))))))
@@ -60,10 +60,10 @@
                             "" ; regular class
                             "long-name")]
         (dom/div #js {:className "panel panel-default action"
-                      :onClick #(add-action/show :type :update
-                                                 :project-id id
-                                                 :user-email email
-                                                 :action @data)}
+                      :onClick #(add-action/show {:type :update
+                                                  :project-id id
+                                                  :user-email email
+                                                  :action @data})}
                  (dom/div #js {:className "panel-body"}
                    (render-action-type (:type data))
                    (dom/div #js {:className (str "library-name " library-class)

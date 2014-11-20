@@ -35,10 +35,9 @@
     om/IInitState
     (init-state [this]
       {:repo-status
-       (let [v (:value (:repo data))]
-         (if (or (nil? v) (= "" v))
-           "has-warning"
-           "has-success"))
+       (if (empty? (:gh-repo data))
+         "has-warning"
+         "has-success")
        :timer nil})
     om/IRenderState
     (render-state [this state]
@@ -49,29 +48,29 @@
                         (dom/input #js {:type "text"
                                         :className "form-control"
                                         :id "gh-repo"
-                                        :value (:value (:repo data))
+                                        :value (:gh-repo data)
                                         :placeholder "user/repository or organization/repository"
 
                                         :onChange
                                         #(let [repo (.. % -target -value)]
                                            (github-issue-on-change repo (:timer state) owner)
-                                           ((-> data :repo :handler) repo))}))
+                                           (om/update! data :gh-repo repo))}))
 
                (dom/div #js {:className (str "form-group "
-                                             (u/validate schm/TemplateTitle (-> data :title :value)))}
+                                             (u/validate schm/TemplateTitle (:title data)))}
                         (dom/label #js {:htmlFor "gh-issue-title"
                                         :className "control-label"} "Title")
                         (dom/input #js {:type "text"
                                         :className "form-control"
                                         :id "gh-issue-title"
-                                        :value (:value (:title data))
-                                        :onChange #((:handler (:title data)) (.. % -target -value))}))
+                                        :value (:title data)
+                                        :onChange #(om/update! data :title (.. % -target -value))}))
                (dom/div #js {:className (str "form-group "
-                                             (u/validate schm/TemplateBody (-> data :body :value)))}
+                                             (u/validate schm/TemplateBody (:body data)))}
                         (dom/label #js {:htmlFor "gh-issue-body"
                                         :className "control-label"} "Body")
                         (dom/textarea #js {:cols "40"
                                            :className "form-control"
                                            :id "gh-issue-body"
-                                           :value (:value (:body data))
-                                           :onChange #((:handler (:body data)) (.. % -target -value))}))))))
+                                           :value (:body data)
+                                           :onChange #(om/update! data :body (.. % -target -value))}))))))

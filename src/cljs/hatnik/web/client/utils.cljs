@@ -2,6 +2,8 @@
   (:require [schema.core :as s]
             [goog.dom :as dom]))
 
+(enable-console-print!)
+
 (defn validate
   "Validates data using given schema. Returns one of two
   css classes: has-success or has-error"

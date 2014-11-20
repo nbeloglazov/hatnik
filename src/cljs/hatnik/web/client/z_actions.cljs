@@ -58,48 +58,48 @@
 (defn build-email-action [data-pack]
   {:project-id (:project-id data-pack)
    :type "email"
-   :body (:email-body data-pack)
-   :subject (:email-subject data-pack)
-   :library (:library-value data-pack)})
+   :body (:body data-pack)
+   :subject (:title data-pack)
+   :library (:library data-pack)})
 
 (defn build-gh-issue-action [data-pack]
   {:project-id (:project-id data-pack)
    :type "github-issue"
    :repo (:gh-repo data-pack)
-   :title (:gh-issue-title data-pack)
-   :body (:gh-issue-body data-pack)
-   :library (:library-value data-pack)})
+   :title (:title data-pack)
+   :body (:body data-pack)
+   :library (:library data-pack)})
 
 (defn build-gh-pull-request [data-pack]
   {:project-id (:project-id data-pack)
-   :library (:library-value data-pack)
+   :library (:library data-pack)
    :type "github-pull-request"
    :repo (:gh-repo data-pack)
-   :title (:gh-pull-title data-pack)
-   :body (:gh-pull-body data-pack)
-   :commit-message (:gh-comm-msg data-pack)
-   :operations (:gh-operations data-pack)})
+   :title (:title data-pack)
+   :body (:body data-pack)
+   :commit-message (:commit-message data-pack)
+   :operations (:file-operations data-pack)})
 
 (defn build-noop-action [data-pack]
   {:type "noop"
    :project-id (:project-id data-pack)
-   :library (:library-value data-pack)})
+   :library (:library data-pack)})
 
 (def actions-config
-  {:noop {:build build-noop-action
-          :schema schm/NoopAction}
-   :email {:build build-email-action
-           :schema schm/EmailAction
-           :text-progress "Sending test email..."
-           :text-done "The email is sent. Check your inbox."}
-   :github-issue {:build build-gh-issue-action
-                  :schema schm/GithubIssueAction
-                  :text-progress "Creating test issue on Github..."
-                  :text-done "The issue is created. Check out the repository."}
-   :github-pull-request {:build build-gh-pull-request
-                         :schema schm/GithubPullRequestAction
-                         :text-progress "Creating test pull request on GitHub..."
-                         :text-done "The pull request is created. Check out the repository."}})
+  {"noop" {:build build-noop-action
+           :schema schm/NoopAction}
+   "email" {:build build-email-action
+            :schema schm/EmailAction
+            :text-progress "Sending test email..."
+            :text-done "The email is sent. Check your inbox."}
+   "github-issue" {:build build-gh-issue-action
+                   :schema schm/GithubIssueAction
+                   :text-progress "Creating test issue on Github..."
+                   :text-done "The issue is created. Check out the repository."}
+   "github-pull-request" {:build build-gh-pull-request
+                          :schema schm/GithubPullRequestAction
+                          :text-progress "Creating test pull request on GitHub..."
+                          :text-done "The pull request is created. Check out the repository."}})
 
 (defn send-new-action [data-pack]
   (let [{:keys [build schema]} (actions-config (:type data-pack))
@@ -132,7 +132,7 @@
     (if (s/check schema data)
       (msg/danger default-error-message)
       (ajax
-       (str "/api/actions/" (:action-id data-pack)) "PUT"
+       (str "/api/actions/" (:id data-pack)) "PUT"
        data (wrap-error-alert
              #(common-update-callback action-update-error-message data %))))))
 

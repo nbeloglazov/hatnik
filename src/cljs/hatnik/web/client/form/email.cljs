@@ -15,20 +15,20 @@
                         (dom/p #js {:id "email-input"}
                                (:email data)))
                (dom/div #js {:className (str "form-group " (u/validate schm/TemplateTitle
-                                                                       (-> data :subject :value)))}
+                                                                       (:title data)))}
                         (dom/label #js {:htmlFor "email-subject-input"
                                         :className "control-label"} "Subject")
                         (dom/input #js {:type "text"
                                         :className "form-control"
                                         :id "email-subject-input"
-                                        :value (-> data :subject :value)
-                                        :onChange #((-> data :subject :handler) (.. % -target -value))}))
+                                        :value (:title data)
+                                        :onChange #(om/update! data :title (.. % -target -value))}))
                (dom/div #js {:className (str "form-group " (u/validate schm/TemplateBody
-                                                                       (-> data :body :value)))}
+                                                                       (:body data)))}
                         (dom/label #js {:htmlFor "email-body-input"
                                         :className "control-label"} "Body")
                         (dom/textarea #js {:cols "40"
                                            :className "form-control"
                                            :id "email-body-input"
-                                           :value (-> data :body :value)
-                                           :onChange #((-> data :body :handler) (.. % -target -value))}))))))
+                                           :value (:body data)
+                                           :onChange #(om/update! data :body (.. % -target -value))}))))))

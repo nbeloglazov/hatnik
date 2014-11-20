@@ -5,8 +5,8 @@
             [hatnik.schema :as schm]
             [schema.core :as s]))
 
-(defn option-element-map [val pred]
-  (if pred
+(defn option-element-map [val cur]
+  (if (= val cur)
     #js {:className "form-control" :selected "selected" :value val}
     #js {:className "form-control" :value val}))
 
@@ -14,18 +14,17 @@
   (reify
     om/IRender
     (render [this]
-      (let [callback (:handler data)]
-        (dom/div #js {:className "form-group action-type-component"}
-                 (dom/label #js {:htmlFor "action-type"
-                                 :className "control-label"} "Action type")
-                 (dom/select #js {:className "form-control"
-                                  :id "action-type"
-                                  :defaultValue (name (:type data))
-                                  :onChange #(callback (keyword (.. % -target -value)))}
-                             (dom/option (option-element-map "email" (= :email (:type data)))  "Email")
-                             (dom/option (option-element-map "noop" (= :noop (:type data))) "Noop")
-                             (dom/option (option-element-map "github-issue" (= :github-issue (:type data))) "GitHub issue")
-                             (dom/option (option-element-map "github-pull-request" 
-                                                             (= :github-pull-request (:type data)))
-                                         "GitHub pull request")))))))
+      (let [type (:type data)]
+       (dom/div #js {:className "form-group action-type-component"}
+                (dom/label #js {:htmlFor "action-type"
+                                :className "control-label"} "Action type")
+                (dom/select #js {:className "form-control"
+                                 :id "action-type"
+                                 :defaultValue type
+                                 :onChange #(om/update! data :type (.. % -target -value))}
+                            (dom/option (option-element-map "email" type)  "Email")
+                            (dom/option (option-element-map "noop" type) "Noop")
+                            (dom/option (option-element-map "github-issue" type) "GitHub issue")
+                            (dom/option (option-element-map "github-pull-request" type)
+                                        "GitHub pull request")))))))
 

@@ -2,7 +2,8 @@
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [hatnik.web.client.z-actions :as action]
-            [hatnik.web.client.utils :as u])
+            [hatnik.web.client.utils :as u]
+            [clojure.walk :refer [keywordize-keys]])
   (:use [jayq.core :only [$]]
         [hatnik.web.client.form.library-input :only [library-input-component]]
         [hatnik.web.client.form.action-type :only [action-type-component]]
@@ -15,19 +16,19 @@
     om/IRender
     (render [this]
       (dom/form nil
-                (om/build library-input-component (:library-value data))
-                (om/build action-type-component (:action-type data))
+                (om/build library-input-component data)
+                (om/build action-type-component data)
 
-                (when (= :email (-> data :action-type :type))
-                  (om/build email-component (:email data)))
+                (when (= "email" (:type data))
+                  (om/build email-component data))
 
-                (when (= :github-issue (-> data :action-type :type))
-                  (om/build github-issue-component (:github-issue data)))
+                (when (= "github-issue" (:type data))
+                  (om/build github-issue-component data))
 
-                (when (= :github-pull-request (-> data :action-type :type))
-                  (om/build github-pull-request-component (:github-pull-request data)))))))
+                (when (= "github-pull-request" (:type data))
+                  (om/build github-pull-request-component data))))))
 
-(defn add-action-footer [data owner]
+(defn action-footer [data owner]
   (reify
     om/IInitState
     (init-state [this]
@@ -35,16 +36,15 @@
 
     om/IRenderState
     (render-state [this state]
-      (let [; Make local copy of data to be sure it doesn't play tricks with us.
-            data-pack (select-keys data [:type :project-id :library-value
-                                         :gh-repo :gh-issue-title :gh-issue-body
-                                         :email-body :email-subject
-                                         :gh-pull-body :gh-pull-title :gh-comm-msg :gh-operations])]
+      (let [add? (nil? (:id data))]
         (dom/div nil
                  (dom/button
 
                   #js {:className "btn btn-primary pull-left"
-                       :onClick #(action/send-new-action data-pack)} "Submit")
+                       :onClick #(if add?
+                                   (action/send-new-action @data)
+                                   (action/update-action @data))}
+                  (if add? "Create" "Update"))
 
                  (when-not (= :noop (:type data))
                    (if (:test-in-progress? state)
@@ -56,220 +56,97 @@
                       #js {:className "btn btn-default"
                            :onClick (fn []
                                       (om/set-state! owner :test-in-progress? true)
-                                      (action/test-action data-pack
+                                      (action/test-action @data
                                                           #(om/set-state! owner :test-in-progress? false)))}
                       "Test"))))))))
 
-(defn update-action-footer [data owner]
-  (reify
-    om/IInitState
-    (init-state [this]
-      {:test-in-progress? false})
+(def default-state
+  {:library ""
+   :library-version ""
+   :body (str "{{library}} {{version}} has been released. "
+              "Previous version was {{previous-version}}.")
+   :title "Release {{library}} {{version}}"
+   :commit-message "Update {{library}} to {{version}}"
+   :gh-repo ""
+   :file-operations [{:file ""
+                      :regex ""
+                      :replacement ""}]})
 
-    om/IRenderState
-    (render-state [this state]
-      (let [; Make local copy of data to be sure it doesn't play tricks with us.
-            data-pack (select-keys data [:type :project-id :library-value
-                                         :gh-repo :gh-issue-title :gh-issue-body
-                                         :email-body :email-subject :action-id
-                                         :gh-pull-body :gh-pull-title :gh-comm-msg :gh-operations])]
-          (dom/div
-           nil
-           (dom/button
-            #js {:className "btn btn-primary pull-left"
-                 :onClick #(action/update-action data-pack)} "Update")
+(defmulti get-state-from-action #(get % "type"))
 
-           (when-not (= :noop (:type data))
-             (if (:test-in-progress? state)
-               (dom/span #js {:className "test-spinner"}
-                         (dom/img #js {:src "/img/ajax-loader.gif"
-                                       :alt "Testing"
-                                       :title "Testing"}))
-               (dom/button
-                #js {:className "btn btn-default"
-                     :onClick (fn []
-                                (om/set-state! owner :test-in-progress? true)
-                                (action/test-action data-pack
-                                  #(om/set-state! owner :test-in-progress? false)))}
-                "Test"))))))))
+(defmethod get-state-from-action "noop" [action]
+  {})
 
-(def default-email-subject "{{library}} {{version}} released")
+(defmethod get-state-from-action "email" [action]
+  {:body (get action "body")
+   :title (get action "subject")})
 
-(def default-email-body
-  (str "Hello there\n\n"
-       "{{library}} {{version}} has been released! "
-       "Previous version was {{previous-version}}\n\n"
-       "Your Hatnik"))
+(defmethod get-state-from-action "github-issue" [action]
+  {:title (get action "title")
+   :body (get action "body")
+   :gh-repo (get action "repo")})
 
-(def default-github-issue-title "Release {{library}} {{version}}")
-(def default-github-issue-body "Time to update your project.clj to {{library}} {{version}}")
+(defmethod get-state-from-action "github-pull-request" [action]
+  {:body (get action "body")
+   :title (get action "title")
+   :commit-message (get action "commit-message")
+   :file-operations (keywordize-keys (get action "operations"))
+   :gh-repo (get action "repo")})
 
 (defmulti get-init-state #(:type %))
 
-(def new-init-state {:library-value ""})
-
-(def email-init-state {:email-body default-email-body
-                       :email-subject default-email-subject})
-
-(def github-issue-init-state
-  {:gh-repo ""
-   :gh-issue-title default-github-issue-title
-   :gh-issue-body default-github-issue-body})
-
-(def github-pull-request-init-state
-  {:gh-repo ""
-   :gh-pull-title "Release {{library}} {{version}}"
-   :gh-pull-body "Time to update your project.clj to {{library}} {{version}}!"
-   :gh-comm-msg "Update {{library}} to {{version}}"
-   :gh-operations [{:file ""
-                    :regex ""
-                    :replacement ""}]})
-
 (defmethod get-init-state :add [data _]
-  (merge
-   {:project-id (:project-id data)
-    :email-body default-email-body
-    :email-subject default-email-subject
-    :user-email (:user-email data)
-    :type :email}
-   new-init-state email-init-state
-   github-issue-init-state
-   github-pull-request-init-state))
-
-(defmulti get-init-state-by-action #(get % "type"))
-(defmethod get-init-state-by-action "noop" [action]
-  (merge email-init-state github-issue-init-state))
-
-(defmethod get-init-state-by-action "email" [action]
-  (merge
-   {:email-body (get action "body")
-    :email-subject (get action "subject")}
-    github-issue-init-state github-pull-request-init-state))
-
-(defmethod get-init-state-by-action "github-issue" [action]
-  (assoc
-      (merge
-       {:gh-issue-title (get action "title")
-        :gh-issue-body (get action "body")}
-       email-init-state github-pull-request-init-state)
-    :gh-repo (get action "repo")))
-
-(defmethod get-init-state-by-action "github-pull-request" [action]
-  (assoc
-      (merge
-       {:gh-pull-body (get action "body")
-        :gh-pull-title (get action "title")
-        :gh-comm-msg (get action "commit-message")
-        :gh-operations (mapv (fn [x] {:file (get x "file")
-                                      :regex (get x "regex")
-                                      :replacement (get x "replacement")})
-                             (get action "operations"))}
-       email-init-state github-issue-init-state)
-    :gh-repo (get action "repo")))
+  (merge default-state
+         {:project-id (:project-id data)
+          :user-email (:user-email data)
+          :type :email}))
 
 (defmethod get-init-state :update [data _]
   (let [action (:action data)]
-    (merge {:type (keyword (get action "type"))
+    (merge default-state
+           (get-state-from-action action)
+           {:type (get action "type")
             :project-id (:project-id data)
             :user-email (:user-email data)
-            :library-value (get action "library")
+            :library (get action "library")
             :library-version (get action "last-processed-version")
-            :action-id (get action "id")}
-           (get-init-state-by-action action))))
+            :id (get action "id")})))
 
-(defmulti get-action-header #(:type %))
-(defmethod get-action-header :add [_ _]
-  (dom/h4 #js {:className "modal-title"} "Add new action"
+(defn get-action-header [data]
+  (let [add? (nil? (:id data))]
+    (dom/h4 #js {:className "modal-title"}
+            (if add? "Add new action" "Update action")
           (when (u/mobile?)
             (dom/button
              #js {:className "btn btn-default close-btn"
                   :onClick #(.modal ($ :#iModalAddAction) "hide")}
-             "Close"))))
-
-(defmethod get-action-header :update [data _]
-  (let [action-id (:action-id data)]
-    (dom/h4 #js {:className "modal-title"} "Update action"
-            (when (u/mobile?)
-              (dom/button
-               #js {:className "btn btn-default close-btn"
-                    :onClick #(.modal ($ :#iModalAddAction) "hide")}
-               "Close"))
+             "Close"))
+          (when-not add?
             (dom/button
              #js {:className "btn btn-danger pull-right"
-                  :onClick #(action/delete-action action-id)}
-             "Delete"))))
-
-(defmulti get-action-footer #(:type %))
-
-(defmethod get-action-footer :add [data state _]
-  (om/build add-action-footer state))
-
-(defmethod get-action-footer :update [data state _]
-  (om/build update-action-footer state))
+                  :onClick #(action/delete-action (:id @data))}
+             "Delete")))))
 
 (defn- add-action-component [data owner]
   (reify
-    om/IInitState
-    (init-state [_]
-      (get-init-state data owner))
-
-    om/IRenderState
-    (render-state [this state]
+    om/IRender
+    (render [this]
       (dom/div
        #js {:className "modal-dialog"}
        (dom/div
         #js {:className "modal-content"}
         (dom/div #js {:className "modal-header"}
-                 (get-action-header {:type (:type data) :action-id (:action-id state)} owner))
-
+                 (get-action-header data))
         (dom/div #js {:className "modal-body"}
-                 (om/build action-input-form
-                           {:library-value
-                            {:value (:library-value state)
-                             :version (:library-version state)
-                             :handler #(om/set-state! owner :library-value %)}
-
-                            :action-type
-                            {:type (:type state)
-                             :handler #(om/set-state! owner :type %)}
-
-                            :github-issue
-                            {:repo {:value (:gh-repo state)
-                                    :handler #(om/set-state! owner :gh-repo %)}
-                             :title {:value (:gh-issue-title state)
-                                     :handler #(om/set-state! owner :gh-issue-title %)}
-                             :body {:value (:gh-issue-body state)
-                                    :handler #(om/set-state! owner :gh-issue-body %)}}
-
-                            :github-pull-request
-                            {:repo {:value (:gh-repo state) 
-                                    :handler #(om/set-state! owner :gh-repo %)}
-                             :pull-body {:value (:gh-pull-body state)
-                                         :handler #(om/set-state! owner :gh-pull-body %)}
-                             :pull-title {:value (:gh-pull-title state)
-                                          :handler #(om/set-state! owner :gh-pull-title %)}
-                             :commit-msg {:value (:gh-comm-msg state)
-                                          :handler #(om/set-state! owner :gh-comm-msg %)}
-                             :operations {:value (:gh-operations state)
-                                          :handler #(om/set-state! owner :gh-operations %)}}
-                            
-                            :email
-                            {:body {:value (:email-body state)
-                                    :handler #(om/set-state! owner :email-body %)}
-                             :subject {:value (:email-subject state)
-                                       :handler #(om/set-state! owner :email-subject %)}
-                             :email (:user-email state)}}))
+                 (om/build action-input-form data))
         (dom/div #js {:className "modal-footer"}
-                 (get-action-footer data state owner)))))
+                 (om/build action-footer data)))))
 
     om/IDidMount
     (did-mount [this]
-      (let [modal-window ($ (:modal-jq-id data))]
-        (.modal modal-window)))))
+      (.modal ($ "#iModalAddAction")))))
 
-(defn show [& data-pack]
+(defn show [data]
   (om/root add-action-component
-           (assoc
-               (into {} (map vec (partition-all 2 data-pack)))
-             :modal-jq-id :#iModalAddAction)
+           (get-init-state data)
            {:target (.getElementById js/document "iModalAddAction")}))

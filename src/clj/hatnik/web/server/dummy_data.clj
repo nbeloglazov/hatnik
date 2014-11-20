@@ -24,7 +24,6 @@
                                     :repo "nbeloglazov/hatnik-test-lib"
                                     :title "Update {{library}} to {{version}}"
                                     :body "Results \n {{results-table}}"
-                                    :commit-message "Update {{library}} to {{version}}\n\nTest"
                                     :operations [{:file "some/file"
                                                   :regex "regex"
                                                   :replacement "replacement"}

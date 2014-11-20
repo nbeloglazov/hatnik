@@ -110,7 +110,6 @@
                        :repo "quil/quil"
                        :body "Template body PR"
                        :title "Template title PR"
-                       :commit-message "Commit message"
                        :operations [{:file "project.clj"
                                      :regex "hello"
                                      :replacement "world"}]
@@ -236,7 +235,6 @@
                :repo "nbeloglazov/hatnik"
                :title "Hello {{library}}"
                :body "Hello"
-               :commit-message "Commit"
                :operations [{:file "some/file"
                              :regex "regex"
                              :replacement "replacement"}]}]
@@ -245,7 +243,6 @@
                  [{:repo "invalid$repo%1"}
                   {:title long-string}
                   {:body long-string}
-                  {:commit-message long-string}
                   {:operations [{:regex "regex"
                                  :replacement "repl"}]}
                   {:operations [{:file "some/file"

@@ -65,8 +65,7 @@
    :library-version ""
    :body (str "{{library}} {{version}} has been released. "
               "Previous version was {{previous-version}}.")
-   :title "Release {{library}} {{version}}"
-   :commit-message "Update {{library}} to {{version}}"
+   :title "{{library}} {{version}} released"
    :gh-repo ""
    :file-operations [{:file ""
                       :regex ""
@@ -89,7 +88,6 @@
 (defmethod get-state-from-action "github-pull-request" [action]
   {:body (get action "body")
    :title (get action "title")
-   :commit-message (get action "commit-message")
    :file-operations (keywordize-keys (get action "operations"))
    :gh-repo (get action "repo")})
 

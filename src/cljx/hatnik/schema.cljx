@@ -71,7 +71,6 @@
    :type (s/eq "github-pull-request")
    :title TemplateTitle
    :body TemplateBody
-   :commit-message (string-of-length 1 2000)
    :repo GithubRepository
    :operations [ReplaceOperation]})
 

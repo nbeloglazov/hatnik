@@ -83,7 +83,7 @@
                (u/form-field {:data data
                               :field :title
                               :id "gh-title"
-                              :title "Title"
+                              :title "Title & commit"
                               :validator schm/TemplateTitle
                               :type :text})
                (u/form-field {:data data
@@ -92,10 +92,4 @@
                               :title "Body"
                               :validator schm/TemplateBody
                               :type :textarea})
-               (u/form-field {:data data
-                              :field :commit-message
-                              :id "gh-commit-message"
-                              :title "Commit message"
-                              :validator (schm/string-of-length 1 2000)
-                              :type :text})
                (om/build pull-request-operations-list (:file-operations data))))))

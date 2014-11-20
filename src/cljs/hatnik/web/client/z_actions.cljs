@@ -77,7 +77,6 @@
    :repo (:gh-repo data-pack)
    :title (:title data-pack)
    :body (:body data-pack)
-   :commit-message (:commit-message data-pack)
    :operations (:file-operations data-pack)})
 
 (defn build-noop-action [data-pack]

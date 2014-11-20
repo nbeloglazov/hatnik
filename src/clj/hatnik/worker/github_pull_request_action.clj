@@ -105,7 +105,7 @@
   [action variables repo-dir branch fork-url]
   (timbre/info "Commiting, pushing" repo-dir "to remote branch" branch
                "fork" fork-url)
-  (let [message (-> (:commit-message action)
+  (let [message (-> (:title action)
                     (u/fill-template variables))]
     (with-sh-dir repo-dir
       (sh "git" "commit" "-am" message)
@@ -201,7 +201,6 @@
             :repo "nbeloglazov/hatnik-test-lib"
             :title "Update {{library}} to {{version}}"
             :body "Results \n {{results-table}}"
-            :commit-message "Update {{library}} to {{version}}\n\nTest"
             :operations [{:file "some/file"
                           :regex "regex"
                           :replacement "replacement"}

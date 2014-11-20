@@ -1,17 +1,14 @@
 (ns hatnik.web.client.form.add-action
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [hatnik.web.client.z-actions :as action])
+            [hatnik.web.client.z-actions :as action]
+            [hatnik.web.client.utils :as u])
   (:use [jayq.core :only [$]]
         [hatnik.web.client.form.artifact-input :only [artifact-input-component]]
         [hatnik.web.client.form.action-type :only [action-type-component]]
         [hatnik.web.client.form.email :only [email-component]]
         [hatnik.web.client.form.github-issue :only [github-issue-component]]
         [hatnik.web.client.form.github-pull-request :only [github-pull-request-component]]))
-
-(defn on-modal-close [component]
-  (om/detach-root
-   (om/get-node component)))
 
 (defn action-input-form [data owner]
   (reify
@@ -181,10 +178,22 @@
            (get-init-state-by-action action))))
 
 (defmulti get-action-header #(:type %))
-(defmethod get-action-header :add [_ _] (dom/h4 nil "Add new action"))
+(defmethod get-action-header :add [_ _]
+  (dom/h4 #js {:className "modal-title"} "Add new action"
+          (when (u/mobile?)
+            (dom/button
+             #js {:className "btn btn-default close-btn"
+                  :onClick #(.modal ($ :#iModalAddAction) "hide")}
+             "Close"))))
+
 (defmethod get-action-header :update [data _]
   (let [action-id (:action-id data)]
     (dom/h4 #js {:className "modal-title"} "Update action"
+            (when (u/mobile?)
+              (dom/button
+               #js {:className "btn btn-default close-btn"
+                    :onClick #(.modal ($ :#iModalAddAction) "hide")}
+               "Close"))
             (dom/button
              #js {:className "btn btn-danger pull-right"
                   :onClick #(action/delete-action action-id)}

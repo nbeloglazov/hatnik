@@ -22,7 +22,15 @@
          (dom/div
           #js {:className "modal-content"}
           (dom/div #js {:className "modal-header"}
-                   (dom/h4 #js {:className "modal-title"} "Project menu"))
+                   (dom/h4 #js {:className "modal-title"}
+                           (if id
+                             "Update project"
+                             "Create project")
+                           (when (u/mobile?)
+                             (dom/button
+                              #js {:className "btn btn-default close-btn"
+                                   :onClick #(.modal ($ :#iModalProjectMenu) "hide")}
+                              "Close"))))
 
           (dom/div
            #js {:className "modal-body"}

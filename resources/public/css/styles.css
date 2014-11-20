@@ -70,16 +70,12 @@
     text-decoration: none;
 }
 
-#library-input-group {
-    position: relative;
-}
-
-#library-input-group .form-control-feedback {
+.form-control-feedback {
     width: auto;
     margin-right: 10px;
 }
 
-#library-input-group .form-control-feedback img {
+.form-control-feedback img {
     margin-top: 5px;
     width: 24px;
     height: 24px;

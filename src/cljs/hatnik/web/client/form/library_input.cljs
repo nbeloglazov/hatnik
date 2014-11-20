@@ -2,7 +2,7 @@
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [hatnik.web.client.z-actions :as action]
-            [hatnik.schema :as schm]))
+            [hatnik.web.client.utils :as u]))
 
 (defn set-state [owner status version in-progress?]
   (om/set-state! owner :form-status status)
@@ -39,20 +39,18 @@
 
     om/IRenderState
     (render-state [this state]
-      (dom/div #js {:className (str "form-group " (:form-status state))
-                    :id "library-input-group"}
-        (dom/label #js {:htmlFor "library-input"
-                        :className "control-label"} "Library")
-        (dom/input #js {:type "text"
-                        :id "library-input"
-                        :className "form-control"
-                        :placeholder "e.g. org.clojure/clojure"
-                        :value (:library data)
-                        :onChange #(let [library (.. % -target -value)]
-                                     (check-library-exists owner (:timer state) library)
-                                     (om/update! data :library library))})
-               (dom/span #js {:className "form-control-feedback"}
-                 (cond (= (:form-status state) "has-error") "Not found"
-                       (= (:form-status state) "has-success") (:version state)
-                       (:request-in-progress? state) (dom/img #js {:src "/img/ajax-loader.gif"})
-                       :else nil))))))
+      (u/form-field {:data data
+                     :field :library
+                     :id "library-input"
+                     :title "Library"
+                     :placeholder "e.g. org.clojure/clojure"
+                     :type :text
+                     :validator #(:form-status state)
+                     :on-change #(let [library (.. % -target -value)]
+                                   (check-library-exists owner (:timer state) library)
+                                   (om/update! data :library library))
+                     :feedback (dom/span #js {:className "form-control-feedback"}
+                                         (cond (= (:form-status state) "has-error") "Not found"
+                                               (= (:form-status state) "has-success") (:version state)
+                                               (:request-in-progress? state) (dom/img #js {:src "/img/ajax-loader.gif"})
+                                               :else nil))}))))

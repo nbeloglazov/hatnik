@@ -42,35 +42,24 @@
     om/IRenderState
     (render-state [this state]
       (dom/div nil
-               (dom/div #js {:className (str "form-group " (:repo-status state))}
-                        (dom/label #js {:htmlFor "gh-repo"
-                                        :className "control-label"} "Repository")
-                        (dom/input #js {:type "text"
-                                        :className "form-control"
-                                        :id "gh-repo"
-                                        :value (:gh-repo data)
-                                        :placeholder "user/repository or organization/repository"
-
-                                        :onChange
-                                        #(let [repo (.. % -target -value)]
-                                           (github-issue-on-change repo (:timer state) owner)
-                                           (om/update! data :gh-repo repo))}))
-
-               (dom/div #js {:className (str "form-group "
-                                             (u/validate schm/TemplateTitle (:title data)))}
-                        (dom/label #js {:htmlFor "gh-issue-title"
-                                        :className "control-label"} "Title")
-                        (dom/input #js {:type "text"
-                                        :className "form-control"
-                                        :id "gh-issue-title"
-                                        :value (:title data)
-                                        :onChange #(om/update! data :title (.. % -target -value))}))
-               (dom/div #js {:className (str "form-group "
-                                             (u/validate schm/TemplateBody (:body data)))}
-                        (dom/label #js {:htmlFor "gh-issue-body"
-                                        :className "control-label"} "Body")
-                        (dom/textarea #js {:cols "40"
-                                           :className "form-control"
-                                           :id "gh-issue-body"
-                                           :value (:body data)
-                                           :onChange #(om/update! data :body (.. % -target -value))}))))))
+               (u/form-field {:data data
+                              :field :gh-repo
+                              :id "gh-repo"
+                              :title "Repository"
+                              :validator #(:repo-status state)
+                              :type :text
+                              :on-change #(let [repo (.. % -target -value)]
+                                            (github-issue-on-change repo (:timer state) owner)
+                                            (om/update! data :gh-repo repo))})
+               (u/form-field {:data data
+                              :field :title
+                              :id "gh-issue-title"
+                              :title "Title"
+                              :validator schm/TemplateTitle
+                              :type :text})
+               (u/form-field {:data data
+                              :field :body
+                              :id "gh-issue-body"
+                              :title "Body"
+                              :validator schm/TemplateBody
+                              :type :textarea})))))

@@ -13,10 +13,7 @@
       (let [id (:id data)
             oper (:data data)
             div-id (str "gh-pull-req-op-" id)
-            content-div-id (str "gh-pull-req-op-col-" id)
-            file-id (str "gh-pull-req-op-file-" id)
-            regex-id (str "gh-pull-req-op-regex-" id)
-            replacement-id (str "gh-pull-req-op-repl-" id)]
+            content-div-id (str "gh-pull-req-op-col-" id)]
         (dom/div
          #js {:className "panel-group"
               :id id}
@@ -38,41 +35,27 @@
                    #js {:className "panel-collapse collapse in"
                         :id content-div-id}
                    (dom/div #js {:className "panel-body"}
-                            (dom/div #js {:className (str "form-group "
-                                                          (u/validate (schm/string-of-length 1 1024) (:file oper)))}
-                                     (dom/label #js {:htmlFor file-id
-                                                     :className "control-label"}
-                                                "File")
-                                     (dom/input #js {:type "text"
-                                                     :id file-id
-                                                     :value (:file oper)
-                                                     :placeholder "e.g. project.clj"
-                                                     :onChange #(om/update! oper :file (.. % -target -value))
-                                                     :className "form-control"}))
-
-                            (dom/div #js {:className (str "form-group "
-                                                          (u/validate (schm/string-of-length 1 128) (:regex oper)))}
-                                     (dom/label #js {:htmlFor regex-id
-                                                     :className "control-label"}
-                                                "Regex")
-                                     (dom/input #js {:type "text"
-                                                     :id regex-id
-                                                     :value (:regex oper)
-                                                     :placeholder "e.g. {{library}} \"[^\"]+\""
-                                                     :onChange #(om/update! oper :regex (.. % -target -value))
-                                                     :className "form-control"}))
-
-                            (dom/div #js {:className (str "form-group "
-                                                          (u/validate (schm/string-of-length 1 128) (:replacement oper)))}
-                                     (dom/label #js {:htmlFor replacement-id
-                                                     :className "control-label"}
-                                                "Replacement")
-                                     (dom/input #js {:type "text"
-                                                     :id replacement-id
-                                                     :value (:replacement oper)
-                                                     :placeholder "e.g. {{library}} \"{{version}}\""
-                                                     :onChange #(om/update! oper :replacement (.. % -target -value))
-                                                     :className "form-control"}))))))))))
+                            (u/form-field {:data oper
+                                           :field :file
+                                           :id (str "gh-pull-req-op-file-" id)
+                                           :title "File"
+                                           :validator (schm/string-of-length 1 1024)
+                                           :placeholder "e.g. project.clj"
+                                           :type :text})
+                            (u/form-field {:data oper
+                                           :field :regex
+                                           :id (str "gh-pull-req-op-regex-" id)
+                                           :title "Regex"
+                                           :validator (schm/string-of-length 1 128)
+                                           :placeholder "e.g. {{library}} \"[^\"]+\""
+                                           :type :text})
+                            (u/form-field {:data oper
+                                           :field :replacement
+                                           :id (str "gh-pull-req-op-repl-" id)
+                                           :title "Replacement"
+                                           :validator (schm/string-of-length 1 128)
+                                           :placeholder "e.g. {{library}} \"{{version}}\""
+                                           :type :text})))))))))
 
 (defn add-new-operation [data]
   (om/transact! data #(conj % {:file "" :regex "" :replacement ""})))
@@ -111,20 +94,12 @@
     om/IRender
     (render [this]
       (dom/div nil
-               (dom/div #js {:className (str "form-group "
-                                             (u/validate schm/GithubRepository (:gh-repo data)))}
-                        (dom/label #js {:htmlFor "gh-repo"
-                                        :className "control-label"}
-                                   "Repository")
-                        (dom/input #js {:type "text"
-                                        :id "gh-repo"
-                                        :className "form-control"
-                                        :value (:gh-repo data)
-                                        :placeholder "user/repository or organization/repository"
-
-                                        :onChange
-                                        #(om/update! data :gh-repo (.. % -target -value))}))
-
+               (u/form-field {:data data
+                              :field :gh-repo
+                              :id "gh-repo"
+                              :title "Reposotiry"
+                              :validator schm/GithubRepository
+                              :type :text})
                (dom/div
                 #js {:className "panel-group" :id "github-pull-req-text"}
                 (dom/div #js {:className "panel panel-default"}
@@ -138,40 +113,23 @@
                          (dom/div #js {:className "panel-collapse collapse"
                                        :id "github-pull-req-text-body"}
                                   (dom/div #js {:className "panel-body"}
-                                           (dom/div #js {:className (str "form-group "
-                                                                         (u/validate schm/TemplateTitle (:title data)))}
-                                                    (dom/label #js {:htmlFor "gh-title"
-                                                                    :className "control-label"}
-                                                               "Title")
-                                                    (dom/input #js {:type "text"
-                                                                    :id "gh-title"
-                                                                    :value (:title data)
-                                                                    :onChange
-                                                                    #(om/update! data :title (.. % -target -value))
-                                                                    :className "form-control"}))
-
-                                           (dom/div #js {:className (str "form-group "
-                                                                         (u/validate schm/TemplateBody (:body data)))}
-                                                    (dom/label #js {:htmlFor "gh-body"
-                                                                    :className "control-label"}
-                                                               "Body")
-                                                    (dom/textarea #js {:cols "40"
-                                                                       :id "gh-body"
-                                                                       :value (:body data)
-                                                                       :onChange
-                                                                       #(om/update! data :body (.. % -target -value))
-                                                                       :className "form-control"}))))))
-
-               (dom/div #js {:className (str "form-group "
-                                             (u/validate (schm/string-of-length 1 2000) (:commit-message data)))}
-                        (dom/label #js {:htmlFor "gh-commit-message"
-                                        :className "control-label"}
-                                   "Commit message")
-                        (dom/input #js {:type "text"
-                                        :id "gh-commit-message"
-                                        :value (:commit-message data)
-                                        :onChange #(om/update! data :commit-message (.. % -target -value))
-                                        :className "form-control"}))
-
+                                           (u/form-field {:data data
+                                                          :field :title
+                                                          :id "gh-title"
+                                                          :title "Title"
+                                                          :validator schm/TemplateTitle
+                                                          :type :text})
+                                           (u/form-field {:data data
+                                                          :field :body
+                                                          :id "gh-body"
+                                                          :title "Body"
+                                                          :validator schm/TemplateBody
+                                                          :type :textarea})))))
+               (u/form-field {:data data
+                              :field :commit-message
+                              :id "gh-commit-message"
+                              :title "Commit message"
+                              :validator (schm/string-of-length 1 2000)
+                              :type :text})
                (dom/div nil
                         (om/build pull-request-operations-list (:file-operations data)))))))

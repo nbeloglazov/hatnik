@@ -34,22 +34,23 @@
                                   (validate validator
                                             (field data))))}
            (dom/label #js {:htmlFor id
-                           :className "control-label"}
+                           :className "control-label col-sm-2"}
                       title)
-           (case type
-             :text
-             (dom/input #js {:type "text"
-                             :className "form-control"
-                             :id id
-                             :value (field data)
-                             :placeholder placeholder
-                             :onChange (or on-change
-                                           #(om/update! data field (.. % -target -value)))})
+           (dom/div #js {:className "col-sm-10"}
+            (case type
+              :text
+              (dom/input #js {:type "text"
+                              :className "form-control"
+                              :id id
+                              :value (field data)
+                              :placeholder placeholder
+                              :onChange (or on-change
+                                            #(om/update! data field (.. % -target -value)))})
 
-             :textarea
-             (dom/textarea #js {:cols "40"
-                                :className "form-control"
-                                :id "gh-issue-body"
-                                :value (:body data)
-                                :onChange #(om/update! data :body (.. % -target -value))}))
-           feedback))
+              :textarea
+              (dom/textarea #js {:cols "40"
+                                 :className "form-control"
+                                 :id "gh-issue-body"
+                                 :value (:body data)
+                                 :onChange #(om/update! data :body (.. % -target -value))}))
+            feedback)))

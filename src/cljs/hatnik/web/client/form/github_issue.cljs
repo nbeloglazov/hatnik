@@ -47,6 +47,7 @@
                               :id "gh-repo"
                               :title "Repository"
                               :validator #(:repo-status state)
+                              :placeholder "user/repo or organization/repo"
                               :type :text
                               :on-change #(let [repo (.. % -target -value)]
                                             (github-issue-on-change repo (:timer state) owner)

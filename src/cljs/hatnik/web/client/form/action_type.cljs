@@ -17,14 +17,15 @@
       (let [type (:type data)]
        (dom/div #js {:className "form-group action-type-component"}
                 (dom/label #js {:htmlFor "action-type"
-                                :className "control-label"} "Action type")
-                (dom/select #js {:className "form-control"
-                                 :id "action-type"
-                                 :defaultValue type
-                                 :onChange #(om/update! data :type (.. % -target -value))}
-                            (dom/option (option-element-map "email" type)  "Email")
-                            (dom/option (option-element-map "noop" type) "Noop")
-                            (dom/option (option-element-map "github-issue" type) "GitHub issue")
-                            (dom/option (option-element-map "github-pull-request" type)
-                                        "GitHub pull request")))))))
+                                :className "control-label col-sm-2"} "Type")
+                (dom/div #js {:className "col-sm-10"}
+                         (dom/select #js {:className "form-control"
+                                          :id "action-type"
+                                          :defaultValue type
+                                          :onChange #(om/update! data :type (.. % -target -value))}
+                                     (dom/option (option-element-map "email" type)  "Email")
+                                     (dom/option (option-element-map "noop" type) "Noop")
+                                     (dom/option (option-element-map "github-issue" type) "GitHub issue")
+                                     (dom/option (option-element-map "github-pull-request" type)
+                                                 "GitHub pull request"))))))))
 

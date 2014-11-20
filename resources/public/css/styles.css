@@ -81,8 +81,14 @@
     height: 24px;
 }
 
-#email-input {
-    margin-bottom: 10px;
+.operation {
+    padding: 20px 0px;
+    border-bottom: 1px solid #ccc;
+}
+
+.operations {
+    margin: 10px 0px;
+    border-top: 1px solid #ccc;
 }
 
 form textarea.form-control {

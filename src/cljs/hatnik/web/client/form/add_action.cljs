@@ -15,7 +15,7 @@
   (reify
     om/IRender
     (render [this]
-      (dom/form nil
+      (dom/form #js {:className "form-horizontal"}
                 (om/build library-input-component data)
                 (om/build action-type-component data)
 
@@ -98,7 +98,7 @@
 (defmethod get-init-state :add [data _]
   (merge default-state
          {:project-id (:project-id data)
-          :user-email (:user-email data)
+          :email-address (:user-email data)
           :type :email}))
 
 (defmethod get-init-state :update [data _]
@@ -107,7 +107,7 @@
            (get-state-from-action action)
            {:type (get action "type")
             :project-id (:project-id data)
-            :user-email (:user-email data)
+            :email-address (:user-email data)
             :library (get action "library")
             :library-version (get action "last-processed-version")
             :id (get action "id")})))

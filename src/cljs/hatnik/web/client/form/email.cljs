@@ -11,9 +11,11 @@
     (render [this]
       (dom/div nil
                (dom/div #js {:className "form-group"}
-                        (dom/label nil "Address")
-                        (dom/p #js {:id "email-input"}
-                               (:email data)))
+                        (dom/label #js {:className "col-sm-2 control-label"}
+                                   "Address")
+                        (dom/div #js {:className "col-sm-10"}
+                                 (dom/p #js {:className "form-control-static"}
+                                           (:email-address data))))
                (u/form-field {:data data
                               :field :title
                               :id "email-subject"

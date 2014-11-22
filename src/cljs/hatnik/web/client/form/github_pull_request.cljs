@@ -21,21 +21,26 @@
                                 :title "File"
                                 :validator (schm/string-of-length 1 1024)
                                 :placeholder "e.g. project.clj"
-                                :type :text})
+                                :type :text
+                                :popover "path to the file to be edited relative to repo root"})
                  (u/form-field {:data oper
                                 :field :regex
                                 :id (str "gh-pull-req-op-regex-" id)
                                 :title "Regex"
                                 :validator (schm/string-of-length 1 128)
                                 :placeholder "e.g. {{library}} \"[^\"]+\""
-                                :type :text})
+                                :type :text
+                                :popover (str "supports template variables like {{library}} and others, "
+                                              "uses java regex syntax")})
                  (u/form-field {:data oper
                                 :field :replacement
                                 :id (str "gh-pull-req-op-repl-" id)
                                 :title "Replacement"
                                 :validator (schm/string-of-length 1 128)
                                 :placeholder "e.g. {{library}} \"{{version}}\""
-                                :type :text})
+                                :type :text
+                                :popover (str "supports template variables like {{library}} and others, "
+                                              "supports backreferences, uses java regex syntax")})
                  (dom/div #js {:className "dropdown pull-right"}
                           (dom/div #js {:className "btn btn-danger"
                                         :onClick #((:delete data) id)}
@@ -85,11 +90,14 @@
                               :id "gh-title"
                               :title "Title & commit"
                               :validator schm/TemplateTitle
-                              :type :text})
+                              :type :text
+                              :popover "supported variables: {{library}} {{version}} {{previous-version}}"})
                (u/form-field {:data data
                               :field :body
                               :id "gh-body"
                               :title "Body"
                               :validator schm/TemplateBody
-                              :type :textarea})
+                              :type :textarea
+                              :popover (str "supported variables: {{library}} {{version}} {{previous-version}} "
+                                            "{{results-table}}")})
                (om/build pull-request-operations-list (:file-operations data))))))

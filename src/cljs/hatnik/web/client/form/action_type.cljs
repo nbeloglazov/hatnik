@@ -15,9 +15,10 @@
     om/IRender
     (render [this]
       (let [type (:type data)]
-       (dom/div #js {:className "form-group action-type-component"}
+       (dom/div #js {:className "form-group action-type-component has-success"}
                 (dom/label #js {:htmlFor "action-type"
-                                :className "control-label col-sm-2"} "Type")
+                                :className "control-label col-sm-2 no-padding-right"}
+                           "Type")
                 (dom/div #js {:className "col-sm-10"}
                          (dom/select #js {:className "form-control"
                                           :id "action-type"

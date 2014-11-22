@@ -11,6 +11,11 @@
         [hatnik.web.client.form.github-issue :only [github-issue-component]]
         [hatnik.web.client.form.github-pull-request :only [github-pull-request-component]]))
 
+(def action-components
+  {"email" email-component
+   "github-issue" github-issue-component
+   "github-pull-request" github-pull-request-component})
+
 (defn action-input-form [data owner]
   (reify
     om/IRender
@@ -18,15 +23,16 @@
       (dom/form #js {:className "form-horizontal"}
                 (om/build library-input-component data)
                 (om/build action-type-component data)
+                (when-let [component (action-components (:type data))]
+                  (om/build component data))))
 
-                (when (= "email" (:type data))
-                  (om/build email-component data))
+    om/IDidUpdate
+    (did-update [this prev-props prev-state]
+      (.popover ($ "[data-toggle='popover']")))
 
-                (when (= "github-issue" (:type data))
-                  (om/build github-issue-component data))
-
-                (when (= "github-pull-request" (:type data))
-                  (om/build github-pull-request-component data))))))
+    om/IDidMount
+    (did-mount [this]
+      (.popover ($ "[data-toggle='popover']")))))
 
 (defn action-footer [data owner]
   (reify

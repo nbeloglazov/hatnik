@@ -57,10 +57,12 @@
                               :id "gh-issue-title"
                               :title "Title"
                               :validator schm/TemplateTitle
-                              :type :text})
+                              :type :text
+                              :popover "supported variables: {{library}} {{version}} {{previous-version}}"})
                (u/form-field {:data data
                               :field :body
                               :id "gh-issue-body"
                               :title "Body"
                               :validator schm/TemplateBody
-                              :type :textarea})))))
+                              :type :textarea
+                              :popover "supported variables: {{library}} {{version}} {{previous-version}}"})))))

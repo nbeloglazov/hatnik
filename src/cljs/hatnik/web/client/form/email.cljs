@@ -10,8 +10,8 @@
     om/IRender
     (render [this]
       (dom/div nil
-               (dom/div #js {:className "form-group"}
-                        (dom/label #js {:className "col-sm-2 control-label"}
+               (dom/div #js {:className "form-group has-success"}
+                        (dom/label #js {:className "col-sm-2 control-label no-padding-right"}
                                    "Address")
                         (dom/div #js {:className "col-sm-10"}
                                  (dom/p #js {:className "form-control-static"}
@@ -21,10 +21,12 @@
                               :id "email-subject"
                               :title "Subject"
                               :validator schm/TemplateTitle
-                              :type :text})
+                              :type :text
+                              :popover "supported variables: {{library}} {{version}} {{previous-version}}"})
                (u/form-field {:data data
                               :field :body
                               :id "email-body"
                               :title "Body"
                               :validator schm/TemplateBody
-                              :type :textarea})))))
+                              :type :textarea
+                              :popover "supported variables: {{library}} {{version}} {{previous-version}}"})))))

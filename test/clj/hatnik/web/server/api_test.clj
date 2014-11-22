@@ -96,7 +96,7 @@
         ; Create third action in Default. GithubIssue action.
         act-dflt-three {:project-id proj-dflt-id
                         :type "github-issue"
-                        :repo "quil/quil"
+                        :repo "quil/quil-with.dot"
                         :body "Template body"
                         :title "Template title"
                         :library "ring"}

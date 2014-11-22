@@ -31,7 +31,7 @@
   (string-of-length 1 256))
 
 (def GithubRepository
-  (s/both (s/pred #(re-matches #"(?i)^[A-Z0-9-_]+/[A-Z0-9-_]+$" %)
+  (s/both (s/pred #(re-matches #"(?i)^[A-Z0-9-_.]+/[A-Z0-9-_.]+$" %)
                   'valid-github-repo?)
           (string-of-length 1 128)))
 

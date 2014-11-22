@@ -103,7 +103,7 @@
   (merge default-state
          {:project-id (:project-id data)
           :email-address (:user-email data)
-          :type :email}))
+          :type "email"}))
 
 (defmethod get-init-state :update [data _]
   (let [action (:action data)]

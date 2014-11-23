@@ -16,6 +16,11 @@
    "github-issue" github-issue-component
    "github-pull-request" github-pull-request-component})
 
+(def test-button-tooltip
+  {"email" "Send test email"
+   "github-issue" "Create test issue"
+   "github-pull-request" "Open test pull request"})
+
 (defn action-input-form [data owner]
   (reify
     om/IRender
@@ -28,11 +33,15 @@
 
     om/IDidUpdate
     (did-update [this prev-props prev-state]
-      (.popover ($ "[data-toggle='popover']")))
+      (when-not (u/mobile?)
+        (.popover ($ "[data-toggle='popover']"))
+        (.tooltip ($ "[data-toggle='tooltip']") "fixTitle")))
 
     om/IDidMount
     (did-mount [this]
-      (.popover ($ "[data-toggle='popover']")))))
+      (when-not (u/mobile?)
+        (.popover ($ "[data-toggle='popover']"))
+        (.tooltip ($ "[data-toggle='tooltip']"))))))
 
 (defn action-footer [data owner]
   (reify
@@ -52,7 +61,7 @@
                                    (action/update-action @data))}
                   (if add? "Create" "Update"))
 
-                 (when-not (= :noop (:type data))
+                 (when-not (= "noop" (:type data))
                    (if (:test-in-progress? state)
                      (dom/span #js {:className "test-spinner"}
                                (dom/img #js {:src "/img/ajax-loader.gif"
@@ -60,6 +69,10 @@
                                              :title "Testing"}))
                      (dom/button
                       #js {:className "btn btn-default"
+                           :data-toggle "tooltip"
+                           :data-placement "top"
+                           :data-container "body"
+                           :title (test-button-tooltip (:type data))
                            :onClick (fn []
                                       (om/set-state! owner :test-in-progress? true)
                                       (action/test-action @data

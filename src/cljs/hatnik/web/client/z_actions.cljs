@@ -25,7 +25,7 @@
             :contentType "application/json"
             :dataType "json"
             :async true
-            :error #(msg/danger "Invalid request. Please, check out request data.")
+            :error #(msg/danger "Invalid request. Please, check request data.")
             :success #(callback (js->clj %))}))
 
 (defn get-github-repos [github-name callback error-handler]
@@ -94,11 +94,11 @@
    "github-issue" {:build build-gh-issue-action
                    :schema schm/GithubIssueAction
                    :text-progress "Creating test issue on Github..."
-                   :text-done "The issue is created. Check out the repository."}
+                   :text-done "The issue is created. Check the repository."}
    "github-pull-request" {:build build-gh-pull-request
                           :schema schm/GithubPullRequestAction
                           :text-progress "Creating test pull request on GitHub..."
-                          :text-done "The pull request is created. Check out the repository."}})
+                          :text-done "The pull request is created. Check the repository."}})
 
 (defn send-new-action [data-pack]
   (let [{:keys [build schema]} (actions-config (:type data-pack))

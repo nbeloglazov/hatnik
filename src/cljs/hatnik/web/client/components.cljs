@@ -137,10 +137,9 @@
                               (sort-by first)
                               (map second))
             user-data (:user data)]
-        (dom/div #js {:className "panel-group" :id "iProjectList"}   
-                 (apply dom/div nil
-                        (map #(om/build project-view (assoc % :user user-data))
-                             project-data)))))))
+        (apply dom/div #js {:className "panel-group" :id "iProjectList"}
+               (map #(om/build project-view (assoc % :user user-data))
+                    project-data))))))
 
 
 (defn app-view [data owner]

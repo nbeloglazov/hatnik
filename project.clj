@@ -24,7 +24,7 @@
                  ; ClojureScript
                  [org.clojure/clojurescript "0.0-2411"]
                  [jayq "2.5.2"]
-                 [om "0.7.3"]]
+                 [om "0.8.0-beta3"]]
 
   :plugins [[lein-cljsbuild "1.0.3"]]
 

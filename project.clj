@@ -32,10 +32,17 @@
   :source-paths ["src/clj" "target/gen/clj"]
   :test-paths ["test/clj"]
 
+  :test-selectors {:selenium :selenium}
+
   :profiles
   {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
                         [ring-mock "0.1.5"]
-                        [com.cemerick/piggieback "0.1.3"]]
+                        [com.cemerick/piggieback "0.1.3"]
+                        [org.seleniumhq.selenium/selenium-java "2.44.0"]
+                        [org.seleniumhq.selenium/selenium-remote-driver "2.44.0"]
+                        [org.seleniumhq.selenium/selenium-server "2.44.0"]
+
+]
 
          :plugins [[jonase/eastwood "0.1.4"]
                    [com.keminglabs/cljx "0.4.0"]]

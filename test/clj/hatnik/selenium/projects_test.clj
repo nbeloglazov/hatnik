@@ -3,6 +3,7 @@
   (:require [hatnik.selenium.core :refer :all]
             [clojure.test :refer :all]))
 
+; Start web server once for all tests
 (use-fixtures :once system-fixture)
 
 (defn change-project-name [driver project name]

@@ -1,8 +1,11 @@
 language: clojure
 lein: lein2
-script: lein2 do cljx once, test
+script: lein2 with-profile release do cljx once, cljsbuild once, test
 jdk:
   - openjdk7
 services:
   - mongodb
 env: TEST_DB=mongo
+before_install:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"

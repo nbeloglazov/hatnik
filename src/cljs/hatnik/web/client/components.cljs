@@ -102,7 +102,7 @@
              (dom/button
               #js {:className "btn btn-default"
                    :type "button"
-                   :onClick nil #(pmenu/show {:project-id id
+                   :onClick #(pmenu/show {:project-id id
                                           :name name})}
               (dom/span #js {:className "glyphicon glyphicon-pencil pull-right"})))))
 

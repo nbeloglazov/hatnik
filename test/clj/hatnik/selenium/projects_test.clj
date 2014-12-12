@@ -17,13 +17,15 @@
 
 (deftest change-name-test
   (let [driver (create-and-login)]
-    (change-project-name driver
-                         (first (find-projects-on-page driver))
-                         "New name")
-    (wait-until-projects-match driver
-                               [{:name "New name"
-                                 :actions []}])
-    (.quit driver)))
+    (try
+      (change-project-name driver
+                           (first (find-projects-on-page driver))
+                           "New name")
+      (wait-until-projects-match driver
+                                 [{:name "New name"
+                                   :actions []}])
+      (finally
+        (.quit driver)))))
 
 
 (comment

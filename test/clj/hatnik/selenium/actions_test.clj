@@ -26,6 +26,31 @@
   (.click (find-element driver "#iModalAddAction .modal-header .btn-danger"))
   (wait-until-dialog-invisible driver :action))
 
+(defn action-params [driver]
+  (let [element-value #(if-let [el (->> %
+                                        name
+                                        (str "#")
+                                        (find-elements driver)
+                                        first)]
+                         (.getAttribute el "value")
+                         nil)
+        params (into {}
+                     (for [id [:library-input :action-type :email-subject :email-body
+                               :gh-repo :gh-issue-title :gh-issue-body
+                               :gh-title :gh-body]
+                           :let [value (element-value id)]
+                           :when value]
+                       [id value]))
+        gh-pr-operations (map-indexed (fn [ind operation]
+                                        {:file (element-value (str "gh-pull-req-op-file-" ind))
+                                         :regex (element-value (str "gh-pull-req-op-regex-" ind))
+                                         :replacement (element-value (str "gh-pull-req-op-repl-" ind))})
+                                      (find-elements driver ".operations .operation"))]
+    (if (empty? gh-pr-operations)
+      params
+      (assoc params
+        :gh-pr-operations gh-pr-operations))))
+
 (deftest create-delete-test
   (let [driver (create-and-login)]
     (try

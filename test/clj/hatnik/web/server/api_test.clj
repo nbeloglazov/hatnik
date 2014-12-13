@@ -1,30 +1,9 @@
 (ns hatnik.web.server.api-test
-  (:require [hatnik.web.server.handler :refer [map->WebServer]]
-            [com.stuartsierra.component :as component]
-            [clojure.test :refer :all]
+  (:require [clojure.test :refer :all]
             [clj-http.client :as c]
-            [taoensso.timbre :as timbre]
             [hatnik.versions :as ver]
             [hatnik.test-utils :refer :all]
             [clojure.data :refer [diff]]))
-
-(def config
-  {:web {:port test-web-port}
-   :enable-force-login true
-   :db :memory})
-
-(defn system-fixture [f]
-  (let [system (-> (component/system-map
-                    :config config
-                    :db (get-db)
-                    :web-server (component/using
-                                 (map->WebServer {})
-                                 [:db :config]))
-                   (component/start))]
-    (timbre/set-level! :info)
-    (try (f)
-         (finally
-           (component/stop system)))))
 
 (defn cookie-store-fixture [f]
   (binding [clj-http.core/*cookie-store* (clj-http.cookies/cookie-store)]

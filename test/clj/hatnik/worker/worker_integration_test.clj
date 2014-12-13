@@ -6,7 +6,7 @@
             [hatnik.worker.handler :refer [map->WorkerWebServer]]
             [hatnik.versions :as ver]
             [com.stuartsierra.component :as component]
-            [hatnik.test-utils :refer :all]
+            [hatnik.test-utils :refer :all :exclude [config]]
             [taoensso.timbre :as timbre]))
 
 ;;;

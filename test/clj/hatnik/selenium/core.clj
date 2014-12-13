@@ -9,24 +9,6 @@
             [hatnik.test-utils :refer :all]
             [taoensso.timbre :as timbre]))
 
-(def config
-  {:web {:port test-web-port}
-   :enable-force-login true
-   :db :memory})
-
-(defn system-fixture [f]
-  (let [system (-> (component/system-map
-                    :config config
-                    :db (get-db)
-                    :web-server (component/using
-                                 (map->WebServer {})
-                                 [:db :config]))
-                   (component/start))]
-    (timbre/set-level! :info)
-    (try (f)
-         (finally
-           (component/stop system)))))
-
 (let [id (atom 0)]
   (defn generate-user-email []
     (str "email-" (swap! id inc)

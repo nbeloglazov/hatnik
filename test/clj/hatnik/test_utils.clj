@@ -2,9 +2,17 @@
   (:require [clj-http.client :as c]
             [clojure.test :refer :all]
             [hatnik.db.memory-storage :refer [map->MemoryStorage]]
-            [hatnik.db.mongo-storage :refer [map->MongoStorage]]))
+            [hatnik.db.mongo-storage :refer [map->MongoStorage]]
+            [com.stuartsierra.component :as component]
+            [hatnik.web.server.handler :refer [map->WebServer]]
+            [taoensso.timbre :as timbre]))
 
 (def test-web-port 6780)
+
+(def config
+  {:web {:port test-web-port}
+   :enable-force-login true
+   :db :memory})
 
 (def api-url (str "http://localhost:" test-web-port "/api"))
 
@@ -44,3 +52,21 @@
                          :db "test-db"
                          :drop? true}})
     (map->MemoryStorage {})))
+
+(defn start-test-system []
+  (-> (component/system-map
+       :config config
+       :db (get-db)
+       :web-server (component/using
+                    (map->WebServer {})
+                    [:db :config]))
+      (component/start)))
+
+(defn system-fixture [f]
+  (let [system (start-test-system)]
+    (timbre/set-level! :info)
+    (try (f)
+         (finally
+           (component/stop system)))))
+
+

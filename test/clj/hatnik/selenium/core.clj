@@ -70,9 +70,21 @@
         "Initial state not valid.")
     driver))
 
-(defn wait-until-visible [driver element]
+(def dialog-visible-selector {:project "#iModalProjectMenu .modal-dialog"})
+
+(defn wait-until-dialog-visible [driver type]
   (.until (WebDriverWait. driver 10)
-          (ExpectedConditions/visibilityOf element)))
+          (-> type dialog-visible-selector
+              By/cssSelector
+              ExpectedConditions/visibilityOfElementLocated)))
+
+(def dialog-invisible-selector {:project "#iModalProjectMenu"})
+
+(defn wait-until-dialog-invisible [driver type]
+  (.until (WebDriverWait. driver 10)
+          (-> type dialog-invisible-selector
+              By/cssSelector
+              ExpectedConditions/invisibilityOfElementLocated)))
 
 (defn wait-until [driver condition]
   (.until (WebDriverWait. driver 10)

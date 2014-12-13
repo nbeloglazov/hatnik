@@ -93,7 +93,9 @@
     (.withMessage message)
     (.until (reify ExpectedCondition
               (apply [this driver]
-                (condition driver))))))
+                (condition driver)))))
+  ; Hack. Tests don't pass on travis for some reason. It should help.
+  (Thread/sleep 100))
 
 (defn wait-until-projects-match [driver projects]
   (wait-until driver

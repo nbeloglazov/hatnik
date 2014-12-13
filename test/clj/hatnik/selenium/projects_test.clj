@@ -8,9 +8,7 @@
 (use-fixtures :once system-fixture)
 
 (defn set-project-name-field [driver name]
-  (let [input (find-element driver "#iModalProjectMenu input")]
-    (.clear input)
-    (.sendKeys input (into-array [name]))))
+  (set-input-text driver "#iModalProjectMenu input" name))
 
 (defn open-project-dialog [driver project]
   (.click (find-element (:element project) ".glyphicon-pencil"))

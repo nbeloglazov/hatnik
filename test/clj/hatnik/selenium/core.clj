@@ -70,7 +70,8 @@
         "Initial state not valid.")
     driver))
 
-(def dialog-visible-selector {:project "#iModalProjectMenu .modal-dialog"})
+(def dialog-visible-selector {:project "#iModalProjectMenu .modal-dialog"
+                              :action "#iModalAddAction .modal-dialog"})
 
 (defn wait-until-dialog-visible [driver type]
   (.until (WebDriverWait. driver 10)
@@ -78,7 +79,8 @@
               By/cssSelector
               ExpectedConditions/visibilityOfElementLocated)))
 
-(def dialog-invisible-selector {:project "#iModalProjectMenu"})
+(def dialog-invisible-selector {:project "#iModalProjectMenu"
+                                :action "#iModalAddAction"})
 
 (defn wait-until-dialog-invisible [driver type]
   (.until (WebDriverWait. driver 10)
@@ -86,16 +88,23 @@
               By/cssSelector
               ExpectedConditions/invisibilityOfElementLocated)))
 
-(defn wait-until [driver condition]
-  (.until (WebDriverWait. driver 10)
-          (reify ExpectedCondition
-            (apply [this driver]
-              (condition driver)))))
+(defn wait-until [driver condition message]
+  (doto (WebDriverWait. driver 10)
+    (.withMessage message)
+    (.until (reify ExpectedCondition
+              (apply [this driver]
+                (condition driver))))))
 
 (defn wait-until-projects-match [driver projects]
   (wait-until driver
      #(= projects
-         (clean-projects (find-projects-on-page %)))))
+         (clean-projects (find-projects-on-page %)))
+     (str "Wait for projects to be " (pr-str projects))))
+
+(defn set-input-text [driver selector text]
+  (let [input (find-element driver selector)]
+    (.clear input)
+    (.sendKeys input (into-array [text]))))
 
 (comment
 

@@ -2,8 +2,7 @@
   hatnik.selenium.projects-test
   (:require [hatnik.selenium.core :refer :all]
             [clojure.test :refer :all]
-            [hatnik.test-utils :refer :all]
-            [taoensso.timbre :as timbre]))
+            [hatnik.test-utils :refer :all]))
 
 ; Start web server once for all tests
 (use-fixtures :once system-fixture)
@@ -79,9 +78,7 @@
       (wait-until-projects-match driver
                                  [])
       (catch Exception e
-        (timbre/error "Screenshot:" (take-screenshot driver))
-        (timbre/error "JS errors:" (.executeScript driver "return window.javascriptErrors;"
-                                                   (into-array [])))
+        (fail-report driver)
         (throw e))
       (finally
         (.quit driver)))))

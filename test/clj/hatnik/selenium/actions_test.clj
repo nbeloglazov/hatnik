@@ -2,11 +2,10 @@
   hatnik.selenium.actions-test
   (:require [hatnik.selenium.core :refer :all]
             [clojure.test :refer :all]
-            [hatnik.test-utils :refer :all]
-            [taoensso.timbre :as timbre]))
+            [hatnik.test-utils :refer :all]))
 
 ; Start web server once for all tests
-;(use-fixtures :once system-fixture)
+(use-fixtures :once system-fixture)
 
 (defn open-add-action-dialog [driver project]
   (.click (find-element (:element project) ".add-action"))
@@ -52,7 +51,7 @@
       (assoc params
         :gh-pr-operations gh-pr-operations))))
 
-(defn create-delete-test []
+(deftest create-delete-test []
   (let [driver (create-and-login)]
     (try
       (let [[project] (find-projects-on-page driver)]
@@ -86,10 +85,9 @@
                        (-> driver find-projects-on-page first :actions first))
         (wait-until-projects-match driver
                                    [{:name "Default"
-                                     :actions []}])
-        )
+                                     :actions []}]))
       (catch Exception e
-        (timbre/error "Screenshot:" (take-screenshot driver))
+        (fail-report driver)
         (throw e))
       (finally
         (.quit driver)))))

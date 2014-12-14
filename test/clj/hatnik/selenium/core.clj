@@ -128,6 +128,11 @@
     (->> result :body :files first :fileKey
          (format "http://expirebox.com/download/%s.html"))))
 
+(defn fail-report [driver]
+  (timbre/error "Screenshot:" (take-screenshot driver))
+  (timbre/error "JS errors:" (.executeScript driver "return window.javascriptErrors;"
+                                             (into-array []))))
+
 (comment
 
   (def driver (FirefoxDriver.))

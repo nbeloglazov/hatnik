@@ -6,7 +6,7 @@
             [taoensso.timbre :as timbre]))
 
 ; Start web server once for all tests
-(use-fixtures :once system-fixture)
+;(use-fixtures :once system-fixture)
 
 (defn open-add-action-dialog [driver project]
   (.click (find-element (:element project) ".add-action"))

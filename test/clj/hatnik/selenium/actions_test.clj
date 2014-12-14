@@ -52,7 +52,7 @@
       (assoc params
         :gh-pr-operations gh-pr-operations))))
 
-(deftest create-delete-test
+(defn create-delete-test []
   (let [driver (create-and-login)]
     (try
       (let [[project] (find-projects-on-page driver)]

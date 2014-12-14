@@ -78,7 +78,8 @@
   (.until (WebDriverWait. driver 10)
           (-> type dialog-visible-selector
               By/cssSelector
-              ExpectedConditions/visibilityOfElementLocated)))
+              ExpectedConditions/visibilityOfElementLocated))
+  (Thread/sleep 100))
 
 (def dialog-invisible-selector {:project "#iModalProjectMenu"
                                 :action "#iModalAddAction"})
@@ -87,7 +88,8 @@
   (.until (WebDriverWait. driver 10)
           (-> type dialog-invisible-selector
               By/cssSelector
-              ExpectedConditions/invisibilityOfElementLocated)))
+              ExpectedConditions/invisibilityOfElementLocated))
+  (Thread/sleep 100))
 
 (defn wait-until [driver condition message]
   (doto (WebDriverWait. driver 10)

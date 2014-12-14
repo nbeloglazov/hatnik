@@ -78,8 +78,7 @@
   (.until (WebDriverWait. driver 10)
           (-> type dialog-visible-selector
               By/cssSelector
-              ExpectedConditions/visibilityOfElementLocated))
-  (Thread/sleep 100))
+              ExpectedConditions/visibilityOfElementLocated)))
 
 (def dialog-invisible-selector {:project "#iModalProjectMenu"
                                 :action "#iModalAddAction"})
@@ -88,17 +87,14 @@
   (.until (WebDriverWait. driver 10)
           (-> type dialog-invisible-selector
               By/cssSelector
-              ExpectedConditions/invisibilityOfElementLocated))
-  (Thread/sleep 100))
+              ExpectedConditions/invisibilityOfElementLocated)))
 
 (defn wait-until [driver condition message]
   (doto (WebDriverWait. driver 10)
     (.withMessage message)
     (.until (reify ExpectedCondition
               (apply [this driver]
-                (condition driver)))))
-  ; Hack. Tests don't pass on travis for some reason. It should help.
-  (Thread/sleep 100))
+                (condition driver))))))
 
 (defn wait-until-projects-match [driver projects]
   (wait-until driver

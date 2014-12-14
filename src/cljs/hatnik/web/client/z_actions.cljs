@@ -36,14 +36,14 @@
 
 (defn common-update-callback [msg data response]
   (when (= "ok" (get response "result"))
+    (state/update-all-view)
     (.modal ($ :#iModalAddAction) "hide")
-    (.modal ($ :#iModalProjectMenu) "hide")
-    (state/update-all-view)))
+    (.modal ($ :#iModalProjectMenu) "hide")))
 
 (defn create-new-project-callback [name response]
   (when (= "ok" (get response "result"))
-    (.modal ($ :#iModalProjectMenu) "hide")
-    (state/update-all-view)))
+    (state/update-all-view)
+    (.modal ($ :#iModalProjectMenu) "hide")))
 
 (defn send-new-project-request [name]
   (if (s/check schm/Project {:name name})
@@ -52,8 +52,8 @@
 
 (defn create-new-action-callback [data response]
   (when (= "ok" (get response "result"))
-    (.modal ($ :#iModalAddAction) "hide")
-    (state/update-all-view)))
+    (state/update-all-view)
+    (.modal ($ :#iModalAddAction) "hide")))
 
 (defn build-email-action [data-pack]
   {:project-id (:project-id data-pack)
@@ -136,14 +136,12 @@
              #(common-update-callback action-update-error-message data %))))))
 
 (defn delete-action [action-id]
-  (.modal ($ :#iModalAddAction) "hide")
   (ajax
    (str "/api/actions/" action-id) "DELETE"
    {} (wrap-error-alert
        #(common-update-callback "Couldn't delete the action. Please file a bug if the issue persists." {} %))))
 
 (defn ^:export delete-project [project-id]
-  (.modal ($ :#iModalProjectMenu) "hide")
   (ajax
    (str "/api/projects/" project-id) "DELETE"
    {} (wrap-error-alert

@@ -1,5 +1,5 @@
 (ns hatnik.selenium.core
-  (:import [org.openqa.selenium By WebDriver]
+  (:import [org.openqa.selenium By WebDriver TakesScreenshot OutputType]
            org.openqa.selenium.firefox.FirefoxDriver
            [org.openqa.selenium.support.ui ExpectedConditions WebDriverWait
             ExpectedCondition])
@@ -7,7 +7,8 @@
             [hatnik.web.server.handler :refer [map->WebServer]]
             [com.stuartsierra.component :as component]
             [hatnik.test-utils :refer :all]
-            [taoensso.timbre :as timbre]))
+            [taoensso.timbre :as timbre]
+            [clj-http.client :as client]))
 
 (let [id (atom 0)]
   (defn generate-user-email []
@@ -108,9 +109,21 @@
     (.clear input)
     (.sendKeys input (into-array [text]))))
 
+(defn take-screenshot [driver]
+  (let [file (.getScreenshotAs driver OutputType/FILE)
+        result (client/post "http://expirebox.com/jqu/"
+                            {:multipart [{:name "files[]"
+                                          :content file}]
+                             :accept :json
+                             :as :json})]
+    (->> result :body :files first :fileKey
+         (format "http://expirebox.com/download/%s.html"))))
+
 (comment
 
   (def driver (FirefoxDriver.))
+
+  (take-screenshot driver)
 
   (create-and-login)
 )

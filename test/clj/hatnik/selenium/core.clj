@@ -69,6 +69,11 @@
              :actions []}]
            (clean-projects (find-projects-on-page driver)))
         "Initial state not valid.")
+    (.executeScript driver "window.javascriptErrors = [];" (into-array []))
+    (.executeScript driver (str "window.onerror = function(error) {"
+                                "  window.javasscriptErrors.push(error);"
+                                "};")
+                    (into-array []))
     driver))
 
 (def dialog-visible-selector {:project "#iModalProjectMenu .modal-dialog"
@@ -120,6 +125,7 @@
 (comment
 
   (def driver (FirefoxDriver.))
+
 
   (take-screenshot driver)
 

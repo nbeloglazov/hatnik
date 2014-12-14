@@ -80,6 +80,8 @@
                                  [])
       (catch Exception e
         (timbre/error "Screenshot:" (take-screenshot driver))
+        (timbre/error "JS errors:" (.executeScript driver "return window.javascriptErrors;"
+                                                   (into-array [])))
         (throw e))
       (finally
         (.quit driver)))))

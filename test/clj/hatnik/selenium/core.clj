@@ -103,8 +103,14 @@
 
 (defn wait-until-projects-match [driver projects]
   (wait-until driver
-     #(= projects
-         (clean-projects (find-projects-on-page %)))
+     ; Sometimes DOM update happens while we're collecting
+     ; data about projects from page and "DOM element not found"
+     ; is thrown. As workaround we simply consider it false and
+     ; hope that on next try it will work.
+     #(try
+        (= projects
+           (clean-projects (find-projects-on-page %)))
+        (catch Exception e false))
      (str "Wait for projects to be " (pr-str projects))))
 
 (defn set-input-text [driver selector text]

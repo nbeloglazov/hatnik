@@ -96,7 +96,7 @@
   ; Usually we're waiting until dialog becomes invisible as a sign
   ; of completed action. But it's not reliable as some om/react stuff
   ; might be async. So let's just wait for a little more longer explicitly.
-  (Thread/sleep 2000))
+  (Thread/sleep 1000))
 
 (defn wait-until [driver condition message]
   (doto (WebDriverWait. driver 10)

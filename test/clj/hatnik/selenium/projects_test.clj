@@ -37,51 +37,47 @@
   (wait-until-dialog-invisible driver :project))
 
 (deftest create-change-delete-test
-  (let [driver (create-and-login)]
-    (try
-      ; Change project name to "New name"
-      (change-project-name driver
-                           (first (find-projects-on-page driver))
-                           "New name")
-      (wait-until-projects-match driver
-                                 [{:name "New name"
-                                   :actions []}])
+  (run-with-driver
+   (fn [driver]
 
-      ; Add new project "Project Foo"
-      (create-project driver "Project Foo")
-      (wait-until-projects-match driver
-                                 [{:name "New name"
-                                   :actions []}
-                                  {:name "Project Foo"
-                                   :actions []}])
+     ; Change default project name to "New name"
+     (change-project-name driver
+                          (first (find-projects-on-page driver))
+                          "New name")
+     (wait-until-projects-match driver
+                                [{:name "New name"
+                                  :actions []}])
 
-      ; Rename "Project Foo" to "Project Bar"
-      (change-project-name driver
-                           (second (find-projects-on-page driver))
-                           "Project Bar")
-      (wait-until-projects-match driver
-                                 [{:name "New name"
-                                   :actions []}
-                                  {:name "Project Bar"
-                                   :actions []}])
+     ; Add new project "Project Foo"
+     (create-project driver "Project Foo")
+     (wait-until-projects-match driver
+                                [{:name "New name"
+                                  :actions []}
+                                 {:name "Project Foo"
+                                  :actions []}])
 
-      ; Delete first project.
-      (delete-project driver
-                      (first (find-projects-on-page driver)))
-      (wait-until-projects-match driver
-                                 [{:name "Project Bar"
-                                   :actions []}])
+     ; Rename "Project Foo" to "Project Bar"
+     (change-project-name driver
+                          (second (find-projects-on-page driver))
+                          "Project Bar")
+     (wait-until-projects-match driver
+                                [{:name "New name"
+                                  :actions []}
+                                 {:name "Project Bar"
+                                  :actions []}])
 
-      ; Delete remaining project.
-      (delete-project driver
-                      (first (find-projects-on-page driver)))
-      (wait-until-projects-match driver
-                                 [])
-      (catch Exception e
-        (fail-report driver)
-        (throw e))
-      (finally
-        (.quit driver)))))
+     ; Delete first project.
+     (delete-project driver
+                     (first (find-projects-on-page driver)))
+     (wait-until-projects-match driver
+                                [{:name "Project Bar"
+                                  :actions []}])
+
+                                        ; Delete remaining project.
+     (delete-project driver
+                     (first (find-projects-on-page driver)))
+     (wait-until-projects-match driver
+                                []))))
 
 
 (comment

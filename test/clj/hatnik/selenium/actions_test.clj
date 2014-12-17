@@ -58,45 +58,40 @@
         :gh-pr-operations gh-pr-operations))))
 
 (deftest create-delete-test []
-  (let [driver (create-and-login)]
-    (try
-      (let [[project] (find-projects-on-page driver)]
+  (run-with-driver
+   (fn [driver]
+     (let [[project] (find-projects-on-page driver)]
 
-        ; Create action for quil
-        (create-action-simple driver project "quil")
-        (wait-until-projects-match driver
-                                   [{:name "Default"
-                                     :actions [{:library "quil"
-                                                :type "email"}]}])
+                                        ; Create action for quil
+       (create-action-simple driver project "quil")
+       (wait-until-projects-match driver
+                                  [{:name "Default"
+                                    :actions [{:library "quil"
+                                               :type "email"}]}])
 
-        ; Create action for org.clojure/clojure
-        (create-action-simple driver project "org.clojure/clojure")
-        (wait-until-projects-match driver
-                                   [{:name "Default"
-                                     :actions [{:library "quil"
-                                                :type "email"}
-                                               {:library "org.clojure/clojure"
-                                                :type "email"}]}])
+                                        ; Create action for org.clojure/clojure
+       (create-action-simple driver project "org.clojure/clojure")
+       (wait-until-projects-match driver
+                                  [{:name "Default"
+                                    :actions [{:library "quil"
+                                               :type "email"}
+                                              {:library "org.clojure/clojure"
+                                               :type "email"}]}])
 
-        ; Delete quil action.
-        (delete-action driver
-                       (-> driver find-projects-on-page first :actions first))
-        (wait-until-projects-match driver
-                                   [{:name "Default"
-                                     :actions [{:library "org.clojure/clojure"
-                                                :type "email"}]}])
+                                        ; Delete quil action.
+       (delete-action driver
+                      (-> driver find-projects-on-page first :actions first))
+       (wait-until-projects-match driver
+                                  [{:name "Default"
+                                    :actions [{:library "org.clojure/clojure"
+                                               :type "email"}]}])
 
-        ; Delete remaining action.
-        (delete-action driver
-                       (-> driver find-projects-on-page first :actions first))
-        (wait-until-projects-match driver
-                                   [{:name "Default"
-                                     :actions []}]))
-      (catch Exception e
-        (fail-report driver)
-        (throw e))
-      (finally
-        (.quit driver)))))
+                                        ; Delete remaining action.
+       (delete-action driver
+                      (-> driver find-projects-on-page first :actions first))
+       (wait-until-projects-match driver
+                                  [{:name "Default"
+                                    :actions []}])))))
 
 (defn change-action-type [driver type]
   (.selectByValue (Select. (find-element driver "#action-type"))
@@ -107,50 +102,45 @@
     (set-input-text driver (str "#" (name id)) text)))
 
 (deftest email-action-test
-  (let [driver (create-and-login)]
-    (try
+  (run-with-driver
+   (fn [driver]
 
-      ; Create action
-      (let [[project] (find-projects-on-page driver)]
-        (open-add-action-dialog driver project)
-        (change-action-type driver "email")
-        (set-input-text-from-map driver
-                                 {:library-input "quil"
-                                  :email-subject "Email subject"
-                                  :email-body "Email body"})
-        (apply-changes driver))
+     ; Create action
+     (let [[project] (find-projects-on-page driver)]
+       (open-add-action-dialog driver project)
+       (change-action-type driver "email")
+       (set-input-text-from-map driver
+                                {:library-input "quil"
+                                 :email-subject "Email subject"
+                                 :email-body "Email body"})
+       (apply-changes driver))
 
-      ; Check that action has expected fields
-      (let [[project] (find-projects-on-page driver)
-            action (first (:actions project))]
-          (open-edit-action-dialog driver action)
-          (is (= (action-params driver)
-                 {:library-input "quil"
-                  :action-type "email"
-                  :email-subject "Email subject"
-                  :email-body "Email body"})))
+     ; Check that action has expected fields
+     (let [[project] (find-projects-on-page driver)
+           action (first (:actions project))]
+       (open-edit-action-dialog driver action)
+       (is (= (action-params driver)
+              {:library-input "quil"
+               :action-type "email"
+               :email-subject "Email subject"
+               :email-body "Email body"})))
 
-      ; Update action
-      (set-input-text-from-map driver
-                               {:library-input "ring"
-                                :email-subject "New subject"
-                                :email-body "New body"})
-      (apply-changes driver)
+     ; Update action
+     (set-input-text-from-map driver
+                              {:library-input "ring"
+                               :email-subject "New subject"
+                               :email-body "New body"})
+     (apply-changes driver)
 
-      ; Check updated action
-      (let [[project] (find-projects-on-page driver)
-            action (first (:actions project))]
-          (open-edit-action-dialog driver action)
-          (is (= (action-params driver)
-                 {:library-input "ring"
-                  :action-type "email"
-                  :email-subject "New subject"
-                  :email-body "New body"})))
-      (catch Exception e
-        (fail-report driver)
-        (throw e))
-      (finally
-        (.quit driver)))))
+     ; Check updated action
+     (let [[project] (find-projects-on-page driver)
+           action (first (:actions project))]
+       (open-edit-action-dialog driver action)
+       (is (= (action-params driver)
+              {:library-input "ring"
+               :action-type "email"
+               :email-subject "New subject"
+               :email-body "New body"}))))))
 
 (comment
 

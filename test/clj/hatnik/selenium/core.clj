@@ -137,6 +137,16 @@
   (timbre/error "JS errors:" (.executeScript driver "return window.javascriptErrors;"
                                              (into-array []))))
 
+(defn run-with-driver [test-fn]
+  (let [driver (create-and-login)]
+    (try
+      (test-fn driver)
+      (catch Exception e
+        (fail-report driver)
+        (throw e))
+      (finally
+        (.quit driver)))))
+
 (comment
 
   (def driver (FirefoxDriver.))

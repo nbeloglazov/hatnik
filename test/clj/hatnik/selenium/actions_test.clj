@@ -94,8 +94,11 @@
                                     :actions []}])))))
 
 (defn change-action-type [driver type]
-  (.selectByValue (Select. (find-element driver "#action-type"))
-                  type))
+  (let [select (find-element driver "#action-type")]
+    (.selectByValue (Select. select) type)
+    ; Yet another hack. For some reason action type not always selected
+    ; completely. We fix it by clicking on select element.
+    (.click select)))
 
 (defn set-input-text-from-map [driver map]
   (doseq [[id text] map]
@@ -142,9 +145,56 @@
                :email-subject "New subject"
                :email-body "New body"}))))))
 
+(deftest github-issue-action-test
+  (run-with-driver
+   (fn [driver]
+
+     ; Create action
+     (let [[project] (find-projects-on-page driver)]
+       (open-add-action-dialog driver project)
+       (change-action-type driver "github-issue")
+       (set-input-text-from-map driver
+                                {:library-input "quil"
+                                 :gh-repo "nbeloglazov/hatnik"
+                                 :gh-issue-title "Issue title"
+                                 :gh-issue-body "Issue body"})
+       (apply-changes driver))
+
+     ; Check that action has expected fields
+     (let [[project] (find-projects-on-page driver)
+           action (first (:actions project))]
+       (open-edit-action-dialog driver action)
+       (is (= (action-params driver)
+              {:library-input "quil"
+               :action-type "github-issue"
+               :gh-repo "nbeloglazov/hatnik"
+               :gh-issue-title "Issue title"
+               :gh-issue-body "Issue body"})))
+
+     ; Update action
+     (set-input-text-from-map driver
+                              {:library-input "ring"
+                               :gh-repo "quil/quil"
+                               :gh-issue-title "New title"
+                               :gh-issue-body "New body"})
+     (apply-changes driver)
+
+     ; Check updated action
+     (let [[project] (find-projects-on-page driver)
+           action (first (:actions project))]
+       (open-edit-action-dialog driver action)
+       (is (= (action-params driver)
+              {:library-input "ring"
+               :action-type "github-issue"
+               :gh-repo "quil/quil"
+               :gh-issue-title "New title"
+               :gh-issue-body "New body"}))))))
+
 (comment
 
-  (start-test-system)
+  (def system (start-test-system))
+
+  (com.stuartsierra.component/stop system)
 
   (create-delete-test)
 

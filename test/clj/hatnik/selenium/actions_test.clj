@@ -62,14 +62,14 @@
    (fn [driver]
      (let [[project] (find-projects-on-page driver)]
 
-                                        ; Create action for quil
+       ; Create action for quil
        (create-action-simple driver project "quil")
        (wait-until-projects-match driver
                                   [{:name "Default"
                                     :actions [{:library "quil"
                                                :type "email"}]}])
 
-                                        ; Create action for org.clojure/clojure
+       ; Create action for org.clojure/clojure
        (create-action-simple driver project "org.clojure/clojure")
        (wait-until-projects-match driver
                                   [{:name "Default"
@@ -78,7 +78,7 @@
                                               {:library "org.clojure/clojure"
                                                :type "email"}]}])
 
-                                        ; Delete quil action.
+       ; Delete quil action.
        (delete-action driver
                       (-> driver find-projects-on-page first :actions first))
        (wait-until-projects-match driver
@@ -94,11 +94,18 @@
                                     :actions []}])))))
 
 (defn change-action-type [driver type]
-  (let [select (find-element driver "#action-type")]
-    (.selectByValue (Select. select) type)
-    ; Yet another hack. For some reason action type not always selected
-    ; completely. We fix it by clicking on select element.
-    (.click select)))
+  ; Hacky way to change action type.
+  ; For some reason proper way by using selenium Select object
+  ; and calling .selectByValue() on it doesn't work on travis.
+  (.executeScript driver
+                  (str "$('#action-type').val('" type "');"
+                       "(function() { "
+                       "  var evt = document.createEvent('HTMLEvents');"
+                       "  evt.initEvent('change', true, true);"
+                       "  $('#action-type')[0].dispatchEvent(evt);"
+                       "})();")
+                  (into-array []))
+  (Thread/sleep 500))
 
 (defn set-input-text-from-map [driver map]
   (doseq [[id text] map]
@@ -203,7 +210,6 @@
   (open-add-action-dialog driver (first (find-projects-on-page driver)))
 
   (change-action-type driver "email")
-  
 
   (add-action-simple driver (first (find-projects-on-page driver))
                      "ring")

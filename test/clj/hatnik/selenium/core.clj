@@ -1,8 +1,11 @@
 (ns hatnik.selenium.core
   (:import [org.openqa.selenium By WebDriver TakesScreenshot OutputType]
            org.openqa.selenium.firefox.FirefoxDriver
+           [org.openqa.selenium.remote DesiredCapabilities CapabilityType]
+           [org.openqa.selenium.logging LogType LoggingPreferences]
            [org.openqa.selenium.support.ui ExpectedConditions WebDriverWait
-            ExpectedCondition])
+            ExpectedCondition]
+           java.util.logging.Level)
   (:require [clojure.test :refer [is]]
             [hatnik.web.server.handler :refer [map->WebServer]]
             [com.stuartsierra.component :as component]
@@ -15,8 +18,14 @@
     (str "email-" (swap! id inc)
          "@example.com")))
 
+(def selenium-log-types [LogType/BROWSER LogType/DRIVER])
+
 (defn create-driver []
-  (FirefoxDriver.))
+  (let [logging (LoggingPreferences.)]
+    (doseq [log-type selenium-log-types]
+      (.enable logging log-type Level/ALL))
+    (FirefoxDriver. (doto (DesiredCapabilities/firefox)
+                      (.setCapability CapabilityType/LOGGING_PREFS logging)))))
 
 (defn find-element [driver-or-element selector]
   (.findElement driver-or-element
@@ -132,7 +141,18 @@
     (->> result :body :files first :fileKey
          (format "http://expirebox.com/download/%s.html"))))
 
+(defn print-logs [driver type]
+  (println)
+  (println "######### Webdriver" type "log #########")
+  (let [entries (.. driver manage logs (get type))]
+    (doseq [entry entries]
+      (println (str entry))))
+  (println))
+
 (defn fail-report [driver]
+  ; Don't print logs. They turned out to be pretty useless.
+  #_(doseq [log-type selenium-log-types]
+      (print-logs driver log-type))
   (timbre/error "Screenshot:" (take-screenshot driver))
   (timbre/error "JS errors:" (.executeScript driver "return window.javascriptErrors;"
                                              (into-array []))))
@@ -147,10 +167,13 @@
       (finally
         (.quit driver)))))
 
+
 (comment
 
-  (def driver (FirefoxDriver.))
+  (def driver (create-driver))
 
+
+  (.get driver "http://nbeloglazov.com")
 
   (take-screenshot driver)
 

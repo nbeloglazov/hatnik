@@ -197,6 +197,70 @@
                :gh-issue-title "New title"
                :gh-issue-body "New body"}))))))
 
+(deftest github-pull-request-action-test
+  (run-with-driver
+   (fn [driver]
+
+     ; Create action
+     (let [[project] (find-projects-on-page driver)]
+       (open-add-action-dialog driver project)
+       (change-action-type driver "github-pull-request")
+       (.click (find-element driver ".add-operation"))
+       (set-input-text-from-map driver
+                                {:library-input "quil"
+                                 :gh-repo "nbeloglazov/hatnik"
+                                 :gh-title "Issue title"
+                                 :gh-body "Issue body"
+                                 :gh-pull-req-op-file-0 "file1"
+                                 :gh-pull-req-op-regex-0 "regex1"
+                                 :gh-pull-req-op-repl-0 "replacement1"
+                                 :gh-pull-req-op-file-1 "file2"
+                                 :gh-pull-req-op-regex-1 "regex2"
+                                 :gh-pull-req-op-repl-1 "replacement2"})
+       (apply-changes driver))
+
+     ; Check that action has expected fields
+     (let [[project] (find-projects-on-page driver)
+           action (first (:actions project))]
+       (open-edit-action-dialog driver action)
+       (is (= (action-params driver)
+              {:library-input "quil"
+               :action-type "github-pull-request"
+               :gh-repo "nbeloglazov/hatnik"
+               :gh-title "Issue title"
+               :gh-body "Issue body"
+               :gh-pr-operations
+               [{:file "file1" :regex "regex1" :replacement "replacement1"}
+                {:file "file2" :regex "regex2" :replacement "replacement2"}]})))
+
+     ; Update action: change most fields and remove one file operation
+     (set-input-text-from-map driver
+                              {:library-input "ring"
+                               :gh-repo "quil/quil"
+                               :gh-title "New title"
+                               :gh-body "New body"
+                               :gh-pull-req-op-file-1 "new file2"
+                               :gh-pull-req-op-regex-1 "new regex2"
+                               :gh-pull-req-op-repl-1 "new replacement2"})
+     (-> (find-elements driver ".operations .operation .btn")
+         first
+         (.click))
+     (apply-changes driver)
+
+     ; Check updated action
+     (let [[project] (find-projects-on-page driver)
+           action (first (:actions project))]
+       (open-edit-action-dialog driver action)
+       (is (= (action-params driver)
+              {:library-input "ring"
+               :action-type "github-pull-request"
+               :gh-repo "quil/quil"
+               :gh-title "New title"
+               :gh-body "New body"
+               :gh-pr-operations
+               [{:file "new file2" :regex "new regex2"
+                 :replacement "new replacement2"}]}))))))
+
 (comment
 
   (def system (start-test-system))
@@ -209,7 +273,9 @@
 
   (open-add-action-dialog driver (first (find-projects-on-page driver)))
 
-  (change-action-type driver "email")
+  (change-action-type driver "github-pull-request")
+
+
 
   (add-action-simple driver (first (find-projects-on-page driver))
                      "ring")

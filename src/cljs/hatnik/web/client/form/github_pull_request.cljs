@@ -69,7 +69,7 @@
                                                   :data operation
                                                   :delete delete-operation}))
                                      data))
-                 (dom/div #js {:className "btn btn-primary pull-right"
+                 (dom/div #js {:className "btn btn-primary pull-right add-operation"
                                :onClick #(add-new-operation data)}
                           "Add"))))))
 

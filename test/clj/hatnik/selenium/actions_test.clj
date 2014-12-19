@@ -261,6 +261,49 @@
                [{:file "new file2" :regex "new regex2"
                  :replacement "new replacement2"}]}))))))
 
+(deftest change-action-type-test
+  (run-with-driver
+   (fn [driver]
+
+     ; Create email action
+     (let [[project] (find-projects-on-page driver)]
+       (open-add-action-dialog driver project)
+       (change-action-type driver "email")
+       (set-input-text-from-map driver
+                                {:library-input "quil"
+                                 :email-subject "Email subject"
+                                 :email-body "Email body"})
+       (apply-changes driver))
+
+     ; Check that action has expected fields
+     (let [[project] (find-projects-on-page driver)
+           action (first (:actions project))]
+       (open-edit-action-dialog driver action)
+       (is (= (action-params driver)
+              {:library-input "quil"
+               :action-type "email"
+               :email-subject "Email subject"
+               :email-body "Email body"})))
+
+     ; Change action type to github-issue and set only repository
+     (change-action-type driver "github-issue")
+     (set-input-text-from-map driver
+                              {:gh-repo "nbeloglazov/hatnik"})
+     (apply-changes driver)
+
+     ; Check that action now is github-issue. Fields values should
+     ; stay the same, only names changed (email subject -> issue title,
+     ; email body -> issue body).
+     (let [[project] (find-projects-on-page driver)
+           action (first (:actions project))]
+       (open-edit-action-dialog driver action)
+       (is (= (action-params driver)
+              {:library-input "quil"
+               :action-type "github-issue"
+               :gh-repo "nbeloglazov/hatnik"
+               :gh-issue-title "Email subject"
+               :gh-issue-body "Email body"}))))))
+
 (comment
 
   (def system (start-test-system))

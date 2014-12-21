@@ -23,7 +23,7 @@
 (defn create-driver []
   (let [logging (LoggingPreferences.)]
     (doseq [log-type selenium-log-types]
-      (.enable logging log-type Level/ALL))
+      (.enable logging log-type Level/SEVERE))
     (FirefoxDriver. (doto (DesiredCapabilities/firefox)
                       (.setCapability CapabilityType/LOGGING_PREFS logging)))))
 
@@ -78,11 +78,6 @@
              :actions []}]
            (clean-projects (find-projects-on-page driver)))
         "Initial state not valid.")
-    (.executeScript driver "window.javascriptErrors = [];" (into-array []))
-    (.executeScript driver (str "window.onerror = function(error) {"
-                                "  window.javasscriptErrors.push(error);"
-                                "};")
-                    (into-array []))
     driver))
 
 (def dialog-visible-selector {:project "#iModalProjectMenu .modal-dialog"
@@ -151,11 +146,9 @@
 
 (defn fail-report [driver]
   ; Don't print logs. They turned out to be pretty useless.
-  #_(doseq [log-type selenium-log-types]
+  (doseq [log-type selenium-log-types]
       (print-logs driver log-type))
-  (timbre/error "Screenshot:" (take-screenshot driver))
-  (timbre/error "JS errors:" (.executeScript driver "return window.javascriptErrors;"
-                                             (into-array []))))
+  (timbre/error "Screenshot:" (take-screenshot driver)))
 
 (defn run-with-driver [test-fn]
   (let [driver (create-and-login)]

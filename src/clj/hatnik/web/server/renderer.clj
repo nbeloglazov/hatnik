@@ -130,7 +130,6 @@
 
     [:script {:src "/js/jquery-2.1.1.min.js"}]
     [:script {:src "/js/bootstrap.min.js"}]
-    [:script {:src "/js/react.min.js"}]
     [:script {:src "/js/jquery.bootstrap-growl.min.js"}]
 
     (when user

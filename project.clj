@@ -24,7 +24,7 @@
                  ; ClojureScript
                  [org.clojure/clojurescript "0.0-2505"]
                  [jayq "2.5.2"]
-                 [om "0.8.0-beta3"]]
+                 [om "0.8.0-beta5"]]
 
   :plugins [[lein-cljsbuild "1.0.3"]]
 
@@ -53,7 +53,8 @@
             :compiler
             {:output-to "resources/public/gen/js/hatnik.js"
              :optimizations :simple
-             :pretty-print true}}]
+             :pretty-print true
+             :preamble ["react/react.js"]}}]
           }
          :cljx {:builds [{:source-paths ["src/cljx"]
                  :output-path "target/gen/clj"
@@ -70,7 +71,7 @@
        {:output-to "resources/public/gen/js/hatnik.js"
         :optimizations :advanced
         :externs ["externs/jquery-1.9.js"
-                  "externs/hatnik.js"
-                  "react/externs/react.js"]
+                  "externs/hatnik.js"]
+        :preamble ["react/react.min.js"]
         :pretty-print false}}]
      }}})

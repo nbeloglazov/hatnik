@@ -137,27 +137,24 @@
          (format "http://expirebox.com/download/%s.html"))))
 
 (defn print-logs [driver type]
-  (println)
-  (println "######### Webdriver" type "log #########")
   (let [entries (.. driver manage logs (get type))]
-    (doseq [entry entries]
-      (println (str entry))))
-  (println))
-
-(defn fail-report [driver]
-  ; Don't print logs. They turned out to be pretty useless.
-  (doseq [log-type selenium-log-types]
-      (print-logs driver log-type))
-  (timbre/error "Screenshot:" (take-screenshot driver)))
+    (when-not (empty? entries)
+      (println)
+      (println "######### Webdriver" type "log #########")
+      (doseq [entry entries]
+        (println (str entry)))
+      (println))))
 
 (defn run-with-driver [test-fn]
   (let [driver (create-and-login)]
     (try
       (test-fn driver)
       (catch Exception e
-        (fail-report driver)
+        (timbre/error "Screenshot:" (take-screenshot driver))
         (throw e))
       (finally
+        (doseq [log-type selenium-log-types]
+          (print-logs driver log-type))
         (.quit driver)))))
 
 

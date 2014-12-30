@@ -41,10 +41,6 @@
    :regex (string-of-length 1 128)
    :replacement (string-of-length 1 128)})
 
-(def Project
-  "Schema for project. Project has only 1 field - name in API."
-  {:name (string-of-length 1 128)})
-
 (def EmailAction
   {:project-id Id
    :library Library
@@ -74,13 +70,25 @@
    :repo GithubRepository
    :operations [ReplaceOperation]})
 
+(def BuildFileAction
+  {:project-id Id
+   :library Library
+   :type (s/eq "build-file")})
+
 (def Action
   "Schema for action. Essentially it is the union of all actions."
   (s/conditional
    #(= (:type %) "email") EmailAction
    #(= (:type %) "noop") NoopAction
    #(= (:type %) "github-issue") GithubIssueAction
-   #(= (:type %) "github-pull-request") GithubPullRequestAction))
+   #(= (:type %) "github-pull-request") GithubPullRequestAction
+   #(= (:type %) "build-file") BuildFileAction))
+
+(def Project
+  "Schema for project. Project has only 1 field - name in API."
+  {:name (string-of-length 1 128)
+   (s/optional-key :build-file) (string-of-length 1 1028)
+   (s/optional-key :action) Action})
 
 (comment
 

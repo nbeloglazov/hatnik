@@ -18,33 +18,48 @@
   "Creates action for the given user and returns id of the created action.
   Response contains the latest library version."
   [db user data]
-  (if-let [version (ver/latest-release (:library data))]
-    (let [action (assoc data :last-processed-version version)
-          id (stg/create-action! db (:id user) action)]
-      (resp/response
-       (if id
-         {:result :ok
-          :id id
-          :last-processed-version version}
-         {:result :error
-          :message "Couldn't create action."})))
-    (resp/response
-     {:result :error
-      :message (str "Unknown library: " (:library data))})))
+  (let [version (ver/latest-release (:library data))]
+    (cond (nil? version)
+          (resp/response
+           {:result :error
+            :message (str "Unknown library: " (:library data))})
+
+          (= (:type data) "build-file")
+          (resp/response
+           {:result :error
+            :message "Build-file actions cannot be created manually."})
+
+          :default
+          (let [action (assoc data :last-processed-version version)
+                id (stg/create-action! db (:id user) action)]
+            (resp/response
+             (if id
+               {:result :ok
+                :id id
+                :last-processed-version version}
+               {:result :error
+                :message "Couldn't create action."}))))))
 
 (defn update-action
   "Updates action for given user and returns response containing the
   latest version of the library."
   [db user id data]
-  (if-let [version (ver/latest-release (:library data))]
-    (let [action (assoc data :last-processed-version version)]
-      (stg/update-action! db (:id user) id action)
-      (resp/response
-       {:result :ok
-        :last-processed-version version}))
-    (resp/response
-     {:result :error
-      :message (str "Unknown library: " (:library data)) })))
+  (let [version (ver/latest-release (:library data))]
+    (cond (nil? version)
+          (resp/response
+           {:result :error
+            :message (str "Unknown library: " (:library data))})
+
+          (= (:type data) "build-file")
+          (resp/response
+           {:result :error
+            :message "Build-file actions cannot be created manually."})
+          :default
+          (let [action (assoc data :last-processed-version version)]
+            (stg/update-action! db (:id user) id action)
+            (resp/response
+             {:result :ok
+              :last-processed-version version})))))
 
 (defn delete-action
   "Deletes action for given user."

@@ -5,7 +5,8 @@
             [hatnik.db.mongo-storage :refer [map->MongoStorage]]
             [com.stuartsierra.component :as component]
             [hatnik.web.server.handler :refer [map->WebServer]]
-            [taoensso.timbre :as timbre]))
+            [taoensso.timbre :as timbre]
+            [clojure.data :refer [diff]]))
 
 (def test-web-port 6780)
 
@@ -69,4 +70,34 @@
          (finally
            (component/stop system)))))
 
+(defn cookie-store-fixture [f]
+  (binding [clj-http.core/*cookie-store* (clj-http.cookies/cookie-store)]
+    (f)))
 
+(defn map-by-id [coll]
+  (into {} (map #(vector (keyword (:id %)) %) coll)))
+
+(defn assert-default-project [projects]
+  (is (= 1 (count projects)))
+  (let [[id project] (first projects)]
+    (is (= (name id) (:id project)))
+    (is (= (:name project) "Default"))
+    (is (empty? (:actions project)))))
+
+(defn data-equal [expected actual]
+  (let [[left right both] (diff expected actual)]
+    (is (nil? left))
+    (is (nil? right))))
+
+
+(defn login-and-check-default-project-created [email]
+  (let [resp (ok? (http :get (str "/force-login?skip-dummy-data=true&email="
+                                  email)))
+
+        ; Check that default project is create for user
+        projects (-> (http :get "/projects") ok? :projects)
+        proj-dflt-id (-> projects first first name)
+        _ (data-equal projects
+                      (map-by-id [{:name "Default" :id proj-dflt-id
+                                   :actions {}}]))]
+    proj-dflt-id))

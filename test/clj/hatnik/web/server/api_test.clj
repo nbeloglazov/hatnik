@@ -2,29 +2,9 @@
   (:require [clojure.test :refer :all]
             [clj-http.client :as c]
             [hatnik.versions :as ver]
-            [hatnik.test-utils :refer :all]
-            [clojure.data :refer [diff]]))
-
-(defn cookie-store-fixture [f]
-  (binding [clj-http.core/*cookie-store* (clj-http.cookies/cookie-store)]
-    (f)))
+            [hatnik.test-utils :refer :all]))
 
 (use-fixtures :each system-fixture cookie-store-fixture)
-
-(defn map-by-id [coll]
-  (into {} (map #(vector (keyword (:id %)) %) coll)))
-
-(defn assert-default-project [projects]
-  (is (= 1 (count projects)))
-  (let [[id project] (first projects)]
-    (is (= (name id) (:id project)))
-    (is (= (:name project) "Default"))
-    (is (empty? (:actions project)))))
-
-(defn data-equal [expected actual]
-  (let [[left right both] (diff expected actual)]
-    (is (nil? left))
-    (is (nil? right))))
 
 (deftest test-api-valid-usage
   (let [quil-ver (-> (http :get "/library-version?library=quil")
@@ -32,16 +12,7 @@
         ring-ver (-> (http :get "/library-version?library=ring")
                      ok? :version)
         email "me@email.com"
-
-        resp (ok? (http :get (str "/force-login?skip-dummy-data=true&email="
-                                  email)))
-
-        ; Check that default project is create for user
-        projects (-> (http :get "/projects") ok? :projects)
-        proj-dflt-id (-> projects first first name)
-        _ (data-equal projects
-                      (map-by-id [{:name "Default" :id proj-dflt-id
-                                   :actions {}}]))
+        proj-dflt-id (login-and-check-default-project-created email)
 
         ; Create project foo
         proj-foo-id (-> (http :post "/projects" {:name "Foo"}) ok? :id)
@@ -236,16 +207,7 @@
         ring-ver (-> (http :get "/library-version?library=ring")
                      ok? :version)
         email "me@email.com"
-
-        resp (ok? (http :get (str "/force-login?skip-dummy-data=true&email="
-                                  email)))
-
-        ; Check that default project is create for user
-        projects (-> (http :get "/projects") ok? :projects)
-        proj-dflt-id (-> projects first first name)
-        _ (data-equal projects
-                      (map-by-id [{:name "Default" :id proj-dflt-id
-                                   :actions {}}]))
+        proj-dflt-id (login-and-check-default-project-created email)
 
         ; Create action in Default.
         act-dflt-one {:project-id proj-dflt-id
@@ -278,7 +240,17 @@
         expected [{:name "Default" :id proj-dflt-id
                    :actions (map-by-id [act-dflt-one])}]
         _ (data-equal (-> (http :get "/projects") ok? :projects)
-                      (map-by-id expected))]))
+                      (map-by-id expected))
+
+        ; Try to create build file action for regular project.
+        ; Build file actions cannot be created by users.
+        build-file-action {:project-id proj-dflt-id
+                           :type "build-file"
+                           :library "quil"}
+        _ (error? (http :post "/actions" build-file-action))
+        _ (error? (http :put (str "/actions/" (:id act-dflt-one))
+                        build-file-action))
+        ]))
 
 (deftest test-api-access-to-other-users
   (let [quil-ver (-> (http :get "/library-version?library=quil")
@@ -286,12 +258,7 @@
         ring-ver (-> (http :get "/library-version?library=ring")
                      ok? :version)
         email "me@email.com"
-
-        _ (ok? (http :get (str "/force-login?skip-dummy-data=true&email="
-                               email)))
-
-        ; Check that default project was created
-        proj-id (-> (http :get "/projects") ok? :projects first first name)
+        proj-id (login-and-check-default-project-created email)
 
         ; Create action in Default.
         act-base {:project-id proj-id
@@ -332,4 +299,3 @@
                       (map-by-id [{:name "Default" :id proj-id
                                    :actions (map-by-id [act-full])}]))
         ]))
-

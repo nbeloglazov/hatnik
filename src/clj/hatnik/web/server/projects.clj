@@ -3,6 +3,7 @@
             [compojure.core :refer :all]
 
             [hatnik.db.storage :as stg]
+            [hatnik.web.server.build-files :as bf]
             [hatnik.schema :as s]
             [hatnik.schema-utils :as su]))
 
@@ -35,26 +36,69 @@
      {:result :ok
       :projects (map-by :id projects)})))
 
+(defn valid-project?
+  "Checks whether provided project is valid. If project has only name
+  then it is valied. Otherwise it has to have :build-file and :action fields. Also :build-file should point to a valid project file."
+  [data]
+  (or (and (nil? (:build-file data))
+           (nil? (:action data)))
+      (and (not (empty? (bf/actions-from-build-file (:build-file data))))
+           (= (select-keys (:action data) [:project-id :library])
+              {:library "none" :project-id "none"}))))
+
+(defn delete-actions
+  "Deletes all actions for given project."
+  [db user-id project-id]
+  (doseq [action (stg/get-actions db user-id project-id)]
+    (stg/delete-action! db user-id (:id action))))
+
+(defn create-actions
+  "Creates actions for given project."
+  [db user-id project-id actions]
+  (->> actions
+       (map #(assoc % :project-id project-id))
+       (map #(assoc % :id (stg/create-action! db user-id %)))
+       doall))
+
 (defn create-project
   "Creates project from given data. Returns the id of the new project."
   [db user data]
-  (let [project (assoc data :user-id (:id user))
-        id (stg/create-project! db project)]
-    (resp/response {:result :ok :id id})))
+  (if (valid-project? data)
+    (let [project (assoc data :user-id (:id user))
+          id (stg/create-project! db project)]
+      (if (:build-file data)
+        (resp/response {:result :ok
+                        :id id
+                        :actions (->> (:build-file data)
+                                      bf/actions-from-build-file
+                                      (create-actions db (:id user) id)
+                                      (map-by :id))})
+        (resp/response {:result :ok :id id})))
+    (resp/response {:result :error
+                    :message "Invalid project data."})))
 
 (defn update-project [db user id data]
-  (let [project (assoc data :user-id (:id user))]
-    (stg/update-project! db (:id user) id project))
-  (resp/response {:result :ok}))
+  (if (valid-project? data)
+    (let [project (assoc data :user-id (:id user))]
+      (stg/update-project! db (:id user) id project)
+      (if (:build-file data)
+        (do (delete-actions db (:id user) id)
+            (resp/response {:result :ok
+                            :actions (->> (:build-file data)
+                                          bf/actions-from-build-file
+                                          (create-actions db (:id user) id)
+                                          (map-by :id))}))
+        (resp/response {:result :ok})))
+    (resp/response {:result :error
+                    :message "Invalid project data."})))
 
 (defn delete-project [db user id]
-  (doseq [action (stg/get-actions db (:id user) id)]
-    (stg/delete-action! db (:id user) (:id action)))
+  (delete-actions db (:id user) id)
   (stg/delete-project! db (:id user) id)
   (resp/response {:result :ok}))
 
 (defn projects-api-routes
-  "Builes routes for acessing projects API."
+  "Builds routes for acessing projects API."
   [db]
   (routes
    (GET "/" req (all-projects db (get-user req)))

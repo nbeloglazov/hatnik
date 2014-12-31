@@ -89,7 +89,6 @@
     (is (nil? left))
     (is (nil? right))))
 
-
 (defn login-and-check-default-project-created [email]
   (let [resp (ok? (http :get (str "/force-login?skip-dummy-data=true&email="
                                   email)))

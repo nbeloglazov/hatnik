@@ -69,15 +69,22 @@
                 (select-keys [:name :actions])))]
     (map clean-project projects)))
 
+(defn wait-until [driver condition message]
+  (doto (WebDriverWait. driver 10)
+    (.withMessage message)
+    (.until (reify ExpectedCondition
+              (apply [this driver]
+                (condition driver))))))
+
 (defn create-and-login []
   (let [driver (create-driver)]
     (login driver)
     ; Check that initially only "Default" project is present
     ; with no actions.
-    (is (= [{:name "Default"
-             :actions []}]
-           (clean-projects (find-projects-on-page driver)))
-        "Initial state not valid.")
+    (wait-until driver #(= [{:name "Default"
+                             :actions []}]
+                           (clean-projects (find-projects-on-page %)))
+        "Initial state not valid. 'Default' project should be created.")
     driver))
 
 (def dialog-visible-selector {:project "#iModalProjectMenu .modal-dialog"
@@ -101,13 +108,6 @@
   ; of completed action. But it's not reliable as some om/react stuff
   ; might be async. So let's just wait for a little more longer explicitly.
   (Thread/sleep 1000))
-
-(defn wait-until [driver condition message]
-  (doto (WebDriverWait. driver 10)
-    (.withMessage message)
-    (.until (reify ExpectedCondition
-              (apply [this driver]
-                (condition driver))))))
 
 (defn wait-until-projects-match [driver projects]
   (wait-until driver

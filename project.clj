@@ -14,7 +14,7 @@
                  [ancient-clj "0.2.1"]
                  [com.draines/postal "1.11.3"]
                  [version-clj "0.1.0"]
-                 [clojurewerkz/quartzite "1.3.0"]
+                 [clojurewerkz/quartzite "2.0.0"]
                  [prismatic/schema "0.3.3"]
                  [com.stuartsierra/component "0.2.2"]
                  [me.raynes/fs "1.4.5"]

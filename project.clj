@@ -44,7 +44,7 @@
                         [org.seleniumhq.selenium/selenium-server "2.44.0"]]
 
          :plugins [[jonase/eastwood "0.1.4"]
-                   [com.keminglabs/cljx "0.4.0"]]
+                   [com.keminglabs/cljx "0.4.0" :exclusions [org.clojure/clojure]]]
 
          :cljsbuild
          {:builds

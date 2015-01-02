@@ -16,6 +16,10 @@
           (s/pred #(re-matches #"^[a-zA-Z0-9]+$" %)
                   'alphanumeric?)))
 
+(def ProjectName
+  "Schema for validating project names."
+  (string-of-length 1 128))
+
 (def Library
   "Schema for validating libraries."
   (string-of-length 1 128))
@@ -77,18 +81,24 @@
 
 (def Action
   "Schema for action. Essentially it is the union of all actions."
-  (s/conditional
-   #(= (:type %) "email") EmailAction
-   #(= (:type %) "noop") NoopAction
-   #(= (:type %) "github-issue") GithubIssueAction
-   #(= (:type %) "github-pull-request") GithubPullRequestAction
-   #(= (:type %) "build-file") BuildFileAction))
+  (s/either EmailAction NoopAction GithubIssueAction GithubPullRequestAction))
+
+(def RegularProject
+  "Project that has only name. Actions for this project are created by user."
+  {:name ProjectName
+   :type (s/eq "regular")})
+
+(def BuildFileProject
+  "Project that based on a build file. Actions are created by server and cannot
+  be modified manually. All actions created based on one, specified in the project itself."
+  {:name ProjectName
+   :type (s/eq "build-file")
+   :build-file (string-of-length 1 1028)
+   :action Action})
 
 (def Project
-  "Schema for project. Project has only 1 field - name in API."
-  {:name (string-of-length 1 128)
-   (s/optional-key :build-file) (string-of-length 1 1028)
-   (s/optional-key :action) Action})
+  "Schema for project."
+  (s/either RegularProject BuildFileProject))
 
 (comment
 

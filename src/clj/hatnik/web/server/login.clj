@@ -18,7 +18,8 @@
   (let [id (stg/create-user! db user)]
     (timbre/info "Create default project for user")
     (stg/create-project! db {:name "Default"
-                             :user-id id})
+                             :user-id id
+                             :type "regular"})
     (assoc user :id id)))
 
 (defn get-or-create-user

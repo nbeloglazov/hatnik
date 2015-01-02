@@ -5,7 +5,8 @@
 
 (defn create-default-project [db user-id]
   (let [proj-id (stg/create-project! db {:name "Default"
-                                         :user-id user-id})]
+                                         :user-id user-id
+                                         :type "regular"})]
     (stg/create-action! db user-id {:project-id proj-id
                                     :type "email"
                                     :subject "{{library}} {{version}} released"
@@ -38,7 +39,8 @@
 
 (defn create-quil-project [db user-id]
   (let [proj-id (stg/create-project! db {:name "Quil"
-                                         :user-id user-id})]
+                                         :user-id user-id
+                                         :type "reqular"})]
     (stg/create-action! db user-id {:project-id proj-id
                                     :type "email"
                                     :subject "{{library}} {{version}} released"
@@ -52,7 +54,8 @@
 
 (defn create-hatnik-project [db user-id]
   (stg/create-project! db {:name "Hatnik"
-                           :user-id user-id}))
+                           :user-id user-id
+                           :type "regular"}))
 
 (defn create-dummy-data [db user-id]
   (create-default-project db user-id)

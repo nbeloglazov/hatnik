@@ -46,9 +46,11 @@
     (.modal ($ :#iModalProjectMenu) "hide")))
 
 (defn send-new-project-request [name]
-  (if (s/check schm/Project {:name name})
-    (msg/danger default-error-message)
-    (ajax "/api/projects" "POST" {:name name} #(create-new-project-callback name %))))
+  (let [project {:name name
+                 :type "regular"}]
+    (if (s/check schm/Project project)
+      (msg/danger default-error-message)
+      (ajax "/api/projects" "POST" project #(create-new-project-callback name %)))))
 
 (defn create-new-action-callback [data response]
   (when (= "ok" (get response "result"))
@@ -148,7 +150,8 @@
        #(common-update-callback "Couldn't delete the project. Please file a bug if the issue persists." {} %))))
 
 (defn ^:export update-project [project-id new-name]
-  (let [data {:name new-name}]
+  (let [data {:name new-name
+              :type "regular"}]
     (if (s/check schm/Project data)
       (msg/danger default-error-message)
       (ajax

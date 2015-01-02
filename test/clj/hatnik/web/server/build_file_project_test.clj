@@ -35,6 +35,7 @@
         ; Create project based on dev/build-files/project.clj file.
         ; Uses noop action for all libraries.
         project {:name "Build file project"
+                 :type "build-file"
                  :build-file (str "http://localhost:" file-server-port
                                   "/project.clj")
                  :action {:library "none"

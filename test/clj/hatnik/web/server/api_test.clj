@@ -15,11 +15,13 @@
         proj-dflt-id (login-and-check-default-project-created email)
 
         ; Create project foo
-        proj-foo-id (-> (http :post "/projects" {:name "Foo"}) ok? :id)
-        expected [{:name "Default" :id proj-dflt-id :actions {}}
-                  {:name "Foo" :id proj-foo-id :actions {}}]
-        _ (data-equal (-> (http :get "/projects") ok? :projects)
-                      (map-by-id expected))
+        proj-foo-id (-> (http :post "/projects" {:name "Foo"
+                                                 :type "regular"})
+                        ok? :id)
+        expected [{:name "Default" :id proj-dflt-id :actions {} :type "regular"}
+                  {:name "Foo" :id proj-foo-id :actions {} :type "regular"}]
+        _ (data-equal (map-by-id expected)
+                      (-> (http :get "/projects") ok? :projects))
 
         ;
         ; Create 4 actions in Default proj and 1 action in Foo.
@@ -80,17 +82,20 @@
 
         ; Check that actions created correctly
         expected [{:name "Default" :id proj-dflt-id
+                   :type "regular"
                    :actions (map-by-id [act-dflt-one
                                         act-dflt-two
                                         act-dflt-three
                                         act-dflt-four])}
                   {:name "Foo" :id proj-foo-id
+                   :type "regular"
                    :actions (map-by-id [act-foo-one])}]
-        _ (data-equal (-> (http :get "/projects") ok? :projects)
-                      (map-by-id expected))
+        _ (data-equal (map-by-id expected)
+                      (-> (http :get "/projects") ok? :projects))
 
         ; Rename project "Default" to "First"
-        _ (ok? (http :put (str "/projects/" proj-dflt-id) {:name "First"}))
+        _ (ok? (http :put (str "/projects/" proj-dflt-id) {:name "First"
+                                                           :type "regular"}))
 
         ; Update action dflt-one. Change library and body.
         act-dflt-one (assoc act-dflt-one
@@ -99,8 +104,8 @@
         resp (->> (dissoc act-dflt-one :id :last-processed-version)
                   (http :put (str "/actions/" (:id act-dflt-one)))
                   ok?)
-        _ (data-equal {:result "ok" :last-processed-version ring-ver}
-                      resp)
+        _ (data-equal resp
+                      {:result "ok" :last-processed-version ring-ver})
         act-dflt-one (merge act-dflt-one (dissoc resp :result))
 
         ; Delete action dflt-two
@@ -112,11 +117,12 @@
         ; Check that only project "First" is present and it contains
         ; actions one and three.
         expected [{:name "First" :id proj-dflt-id
+                   :type "regular"
                    :actions (map-by-id [act-dflt-one
                                         act-dflt-three
                                         act-dflt-four])}]
-        _ (data-equal (-> (http :get "/projects") ok? :projects)
-                      (map-by-id expected))
+        _ (data-equal (map-by-id expected)
+                      (-> (http :get "/projects") ok? :projects))
 
         ; Logout and check that we don't have access to projects.
         _ (c/get (str api-url "/logout"))
@@ -130,20 +136,21 @@
                                   "email=new@email.com")))
         projects (-> (http :get "/projects") ok? :projects)
         proj-new-dflt-id (-> projects first first name)
-        _ (data-equal projects
-                      (map-by-id [{:name "Default" :id proj-new-dflt-id
-                                   :actions {}}]))
+        _ (data-equal (map-by-id [{:name "Default" :id proj-new-dflt-id
+                                   :type "regular" :actions {}}])
+                      projects)
 
         ; Login as old user again and verify that the project is
         ; retrieved properly.
         _ (ok? (http :get (str "/force-login?skip-dummy-data=true&email="
                                email)))
         expected [{:name "First" :id proj-dflt-id
+                   :type "regular"
                    :actions (map-by-id [act-dflt-one
                                         act-dflt-three
                                         act-dflt-four])}]
-        _ (data-equal (-> (http :get "/projects") ok? :projects)
-                      (map-by-id expected))
+        _ (data-equal (map-by-id expected)
+                      (-> (http :get "/projects") ok? :projects))
         ]))
 
 (def long-string (apply str (repeat 1000 "1111")))
@@ -222,9 +229,10 @@
         ; Try to create project without name, empty name, long name,
         ; invalid keys. Also try to update existing project.
         _ (doseq [proj [{}
-                        {:name ""}
-                        {:name "Valid" :another-key "Hey"}
-                        {:name long-string}]]
+                        {:name "" :type "regular"}
+                        {:name "Valid" :type "regular" :another-key "Hey"}
+                        {:name long-string :type "regular"}
+                        {:name "No type"}]]
             (error? (http :post "/projects" proj))
             (error? (http :put (str "/projects/" proj-dflt-id) proj)))
 
@@ -238,6 +246,7 @@
 
         ; Check that the project and the action weren't modified.
         expected [{:name "Default" :id proj-dflt-id
+                   :type "regular"
                    :actions (map-by-id [act-dflt-one])}]
         _ (data-equal (-> (http :get "/projects") ok? :projects)
                       (map-by-id expected))
@@ -279,7 +288,7 @@
                                "email=another@email.com")))
 
         ; Modify project
-        _ (ok? (http :put (str "/projects/" proj-id) {:name "I changed your project!"}))
+        _ (ok? (http :put (str "/projects/" proj-id) {:name "I changed your project!" :type "regular"}))
         ; Modify action
         _ (ok? (http :put (str "/actions/" (:id act-full))
                      (assoc act-base :body "I changed your action!")))
@@ -297,5 +306,6 @@
         projects (-> (http :get "/projects") ok? :projects)
         _ (data-equal projects
                       (map-by-id [{:name "Default" :id proj-id
+                                   :type "regular"
                                    :actions (map-by-id [act-full])}]))
         ]))

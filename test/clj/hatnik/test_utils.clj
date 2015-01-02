@@ -96,7 +96,7 @@
         ; Check that default project is create for user
         projects (-> (http :get "/projects") ok? :projects)
         proj-dflt-id (-> projects first first name)
-        _ (data-equal projects
-                      (map-by-id [{:name "Default" :id proj-dflt-id
-                                   :actions {}}]))]
+        _ (data-equal (map-by-id [{:name "Default" :id proj-dflt-id
+                                   :type "regular" :actions {}}])
+                      projects)]
     proj-dflt-id))

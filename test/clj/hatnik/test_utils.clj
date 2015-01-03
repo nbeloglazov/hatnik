@@ -86,8 +86,8 @@
 
 (defn data-equal [expected actual]
   (let [[left right both] (diff expected actual)]
-    (assert (nil? left))
-    (assert (nil? right))))
+    (assert (nil? left) (str "Expected left nil but got " (pr-str left)))
+    (assert (nil? right) (str "Expected right nil but got " (pr-str right)))))
 
 (defn login-and-check-default-project-created [email]
   (let [resp (ok? (http :get (str "/force-login?skip-dummy-data=true&email="

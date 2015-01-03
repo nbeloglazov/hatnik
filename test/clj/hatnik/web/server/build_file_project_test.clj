@@ -4,6 +4,7 @@
             [clj-http.client :as c]
             [hatnik.versions :as ver]
             [hatnik.test-utils :refer :all]
+            [hatnik.web.server.build-files :as bf]
             [compojure.route :as route]))
 
 (def file-server-port 49052)
@@ -114,10 +115,29 @@
         _ (proj-eq proj-dflt-id {:name "Default" :type "regular"})
         _ (proj-eq proj-bf-id {:name "Build file project" :type "build-file"})]))
 
+(deftest complex-project-clj-parse-test
+  (let [expected-libs ["org.clojure/clojure" "quil"
+                       "net.sf.ehcache/ehcache" "log4j" "org.lwjgl.lwjgl/lwjgl"
+                       "org.lwjgl.lwjgl/lwjgl-platform" "lein-pprint" "lein-assoc"
+                       "s3-wagon-private" "clj-stacktrace" "cider/cider-nrepl"]]
+    (clojure.pprint/pprint (bf/actions-from-build-file (str "http://localhost:" file-server-port
+                                          "/complex.project.clj")))
+    (clojure.pprint/pprint (map (fn [lib]
+                 {:library lib
+                  :latest-processed-version (ver/latest-release lib)
+                  :type "build-file"})
+                     expected-libs))
+    (data-equal (map (fn [lib]
+                       {:library lib
+                        :last-processed-version (ver/latest-release lib)
+                        :type "build-file"})
+                     expected-libs)
+                (bf/actions-from-build-file (str "http://localhost:" file-server-port
+                                                 "/complex.project.clj")))))
 
 (comment
 
  ((join-fixtures [system-fixture cookie-store-fixture file-server-fixture])
-  build-file-project-test)
+  complex-project-clj-parse-test)
 
  )

@@ -46,7 +46,8 @@
                 {:library library
                  :last-processed-version (ver/latest-release library)
                  :type "build-file"}))
-         (filter :last-processed-version))))
+         (filter :last-processed-version)
+         doall)))
 
 (comment
 

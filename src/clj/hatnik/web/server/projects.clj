@@ -40,11 +40,12 @@
   "Checks whether provided project is valid. If project has only name
   then it is valied. Otherwise it has to have :build-file and :action fields. Also :build-file should point to a valid project file."
   [data]
-  (or (and (nil? (:build-file data))
-           (nil? (:action data)))
-      (and (not (empty? (bf/actions-from-build-file (:build-file data))))
-           (= (select-keys (:action data) [:project-id :library])
-              {:library "none" :project-id "none"}))))
+  (case (:type data)
+    "regular" true
+    "build-file" (and (not (empty? (bf/actions-from-build-file (:build-file data))))
+                      (= (-> data :action :project-id)
+                         (-> data :action :library)
+                         "none"))))
 
 (defn delete-actions
   "Deletes all actions for given project."
@@ -79,16 +80,24 @@
 
 (defn update-project [db user id data]
   (if (valid-project? data)
-    (let [project (assoc data :user-id (:id user))]
-      (stg/update-project! db (:id user) id project)
-      (if (:build-file data)
-        (do (delete-actions db (:id user) id)
-            (resp/response {:result :ok
-                            :actions (->> (:build-file data)
-                                          bf/actions-from-build-file
-                                          (create-actions db (:id user) id)
-                                          (map-by :id))}))
-        (resp/response {:result :ok})))
+    (let [old-project (->> (stg/get-projects db (:id user))
+                           (filter #(= (:id %) id))
+                           first)
+          project (assoc data :user-id (:id user))]
+      (if (and old-project
+               (not= (:type old-project) (:type project)))
+        (resp/response {:result :error
+                        :message "Projects cannot change types."})
+        (do
+          (stg/update-project! db (:id user) id project)
+          (if (:build-file data)
+            (do (delete-actions db (:id user) id)
+                (resp/response {:result :ok
+                                :actions (->> (:build-file data)
+                                              bf/actions-from-build-file
+                                              (create-actions db (:id user) id)
+                                              (map-by :id))}))
+            (resp/response {:result :ok})))))
     (resp/response {:result :error
                     :message "Invalid project data."})))
 

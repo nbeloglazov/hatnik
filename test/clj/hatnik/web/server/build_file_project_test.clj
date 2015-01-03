@@ -121,13 +121,6 @@
                        "net.sf.ehcache/ehcache" "log4j" "org.lwjgl.lwjgl/lwjgl"
                        "org.lwjgl.lwjgl/lwjgl-platform" "lein-pprint" "lein-assoc"
                        "s3-wagon-private" "clj-stacktrace" "cider/cider-nrepl"]]
-    (clojure.pprint/pprint (bf/actions-from-build-file (str "http://localhost:" file-server-port
-                                          "/complex.project.clj")))
-    (clojure.pprint/pprint (map (fn [lib]
-                 {:library lib
-                  :latest-processed-version (ver/latest-release lib)
-                  :type "build-file"})
-                     expected-libs))
     (data-equal (map (fn [lib]
                        {:library lib
                         :last-processed-version (ver/latest-release lib)

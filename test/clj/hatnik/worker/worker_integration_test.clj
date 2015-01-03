@@ -115,7 +115,7 @@
   "Validates that send-email was called with expected args."
   [args]
   ; send-email should be called 4 times.
-  (is (= (count args) 4))
+  (assert (= (count args) 4))
 
   (are [v] (some #(= % v) args)
        ; Check that email for lib-2 release was sent 2 times.
@@ -134,7 +134,7 @@
   "Validates that create-github-action was called with expected args."
   [args]
   ; create-github-issue should be called 2 times.
-  (is (= (count args) 2))
+  (assert (= (count args) 2))
 
   (are [v] (some #(= % [v]) args)
        ; Github issue should be created for lib-3 2 times.
@@ -172,8 +172,8 @@
                                         :utils utils})
                    component/start)]
     (try
-      (is (deref emails-done 5000 false) "send-email not done")
-      (is (deref gi-done 5000 false) "create-github-issue not done")
+      (assert (deref emails-done 5000 false) "send-email not done")
+      (assert (deref gi-done 5000 false) "create-github-issue not done")
       (assert-emails-args @email-args)
       (assert-github-issue-args @gi-args)
 
@@ -193,7 +193,7 @@
           _ (http :get "/force-login?email=bar@email.com&skip-dummy-data=true")
           bar-actions (-> (http :get "/projects") ok?
                           :projects vals first :actions vals)]
-      (is (= (count foo-actions) 3))
+      (assert (= (count foo-actions) 3))
       (are [library version] (some #(and (= (:library %) library)
                                          (= (:last-processed-version %) version))
                                    foo-actions)
@@ -201,8 +201,8 @@
            "lib-2" "0.4.2"
            "lib-3" "0.5.2")
 
-      (is (= (count bar-actions) 1))
-      (is (and (= (:library (first bar-actions)) "lib-4")
+      (assert (= (count bar-actions) 1))
+      (assert (and (= (:library (first bar-actions)) "lib-4")
                (= (:last-processed-version (first bar-actions))
                   "0.6.2"))))))
 

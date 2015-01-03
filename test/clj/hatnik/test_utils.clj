@@ -31,13 +31,13 @@
     resp))
 
 (defn ok? [resp]
-  (is (= (:result resp) "ok")
-      (str "Expected ok response. Got: " resp))
+  (assert (= (:result resp) "ok")
+          (str "Expected ok response. Got: " resp))
   resp)
 
 (defn error? [resp]
-  (is (= (:result resp) "error")
-      (str "Expected error response. Got: " resp))
+  (assert (= (:result resp) "error")
+          (str "Expected error response. Got: " resp))
   resp)
 
 (defn get-db
@@ -78,16 +78,16 @@
   (into {} (map #(vector (keyword (:id %)) %) coll)))
 
 (defn assert-default-project [projects]
-  (is (= 1 (count projects)))
+  (assert (= 1 (count projects)))
   (let [[id project] (first projects)]
-    (is (= (name id) (:id project)))
-    (is (= (:name project) "Default"))
-    (is (empty? (:actions project)))))
+    (assert (= (name id) (:id project)))
+    (assert (= (:name project) "Default"))
+    (assert (empty? (:actions project)))))
 
 (defn data-equal [expected actual]
   (let [[left right both] (diff expected actual)]
-    (is (nil? left))
-    (is (nil? right))))
+    (assert (nil? left))
+    (assert (nil? right))))
 
 (defn login-and-check-default-project-created [email]
   (let [resp (ok? (http :get (str "/force-login?skip-dummy-data=true&email="

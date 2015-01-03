@@ -129,7 +129,7 @@
      (let [[project] (find-projects-on-page driver)
            action (first (:actions project))]
        (open-edit-action-dialog driver action)
-       (is (= (action-params driver)
+       (assert (= (action-params driver)
               {:library-input "quil"
                :action-type "email"
                :email-subject "Email subject"
@@ -146,7 +146,7 @@
      (let [[project] (find-projects-on-page driver)
            action (first (:actions project))]
        (open-edit-action-dialog driver action)
-       (is (= (action-params driver)
+       (assert (= (action-params driver)
               {:library-input "ring"
                :action-type "email"
                :email-subject "New subject"
@@ -171,7 +171,7 @@
      (let [[project] (find-projects-on-page driver)
            action (first (:actions project))]
        (open-edit-action-dialog driver action)
-       (is (= (action-params driver)
+       (assert (= (action-params driver)
               {:library-input "quil"
                :action-type "github-issue"
                :gh-repo "nbeloglazov/hatnik"
@@ -190,7 +190,7 @@
      (let [[project] (find-projects-on-page driver)
            action (first (:actions project))]
        (open-edit-action-dialog driver action)
-       (is (= (action-params driver)
+       (assert (= (action-params driver)
               {:library-input "ring"
                :action-type "github-issue"
                :gh-repo "quil/quil"
@@ -223,7 +223,7 @@
      (let [[project] (find-projects-on-page driver)
            action (first (:actions project))]
        (open-edit-action-dialog driver action)
-       (is (= (action-params driver)
+       (assert (= (action-params driver)
               {:library-input "quil"
                :action-type "github-pull-request"
                :gh-repo "nbeloglazov/hatnik"
@@ -251,7 +251,7 @@
      (let [[project] (find-projects-on-page driver)
            action (first (:actions project))]
        (open-edit-action-dialog driver action)
-       (is (= (action-params driver)
+       (assert (= (action-params driver)
               {:library-input "ring"
                :action-type "github-pull-request"
                :gh-repo "quil/quil"
@@ -279,7 +279,7 @@
      (let [[project] (find-projects-on-page driver)
            action (first (:actions project))]
        (open-edit-action-dialog driver action)
-       (is (= (action-params driver)
+       (assert (= (action-params driver)
               {:library-input "quil"
                :action-type "email"
                :email-subject "Email subject"
@@ -297,7 +297,7 @@
      (let [[project] (find-projects-on-page driver)
            action (first (:actions project))]
        (open-edit-action-dialog driver action)
-       (is (= (action-params driver)
+       (assert (= (action-params driver)
               {:library-input "quil"
                :action-type "github-issue"
                :gh-repo "nbeloglazov/hatnik"

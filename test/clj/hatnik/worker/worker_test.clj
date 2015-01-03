@@ -29,7 +29,7 @@
      (check-library-and-perform-actions "foo-library" (stg/get-actions db)
                                         db perform-action-disabled {}))
    (doseq [action (stg/get-actions db)]
-     (is (= (:last-processed-version action) "2.0.0")))
+     (assert (= (:last-processed-version action) "2.0.0")))
 
    (component/stop db)))
 
@@ -42,7 +42,7 @@
       (check-library-and-perform-actions "foo-library" actions
                                          db perform-action-disabled {}))
     (doseq [action (stg/get-actions db)]
-      (is (= (:last-processed-version action)
+      (assert (= (:last-processed-version action)
              (:last-processed-version (actions-by-id (:id action))))))
 
     (component/stop db)))
@@ -56,7 +56,7 @@
       (check-library-and-perform-actions "foo-library" actions
                                          db perform-action-disabled {}))
     (doseq [action (stg/get-actions db)]
-      (is (= (:last-processed-version action)
+      (assert (= (:last-processed-version action)
              (:last-processed-version (actions-by-id (:id action))))))
 
     (component/stop db)))

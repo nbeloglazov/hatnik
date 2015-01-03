@@ -41,11 +41,11 @@
                         {:file "some/dir/hello.txt"
                          :regex "{{library}} something"
                          :replacement "helllo"}]]
-        (is (= [:updated :unmodified]
+        (assert (= [:updated :unmodified]
                (update-files {:operations operations}
                              variables
                              dir)))
-        (is (= {"file1.txt" (str "library-1 2.2.2\n"
+        (assert (= {"file1.txt" (str "library-1 2.2.2\n"
                                  "library-2 2.3.4")
                 "some/dir/hello.txt" "Using library-3 of version 5.5-alpha!"}
                (get-state dir))))
@@ -57,11 +57,11 @@
             operations [{:file "file1.txt"
                          :regex "({{library}}) [0-9.\\w]+"
                          :replacement "$1 {{version}}"}]]
-        (is (= [:updated]
+        (assert (= [:updated]
                (update-files {:operations operations}
                              variables
                              dir)))
-        (is (= {"file1.txt" (str "library-1 2.2.2\n"
+        (assert (= {"file1.txt" (str "library-1 2.2.2\n"
                                  "library-2 3.0.0")
                 "some/dir/hello.txt" "Using library-3 of version 5.5-alpha!"}
                (get-state dir))))
@@ -73,11 +73,11 @@
             operations [{:file "some/dir/hello.txt"
                          :regex "({{library}} of version) [^!]+"
                          :replacement "$1 {{version}}"}]]
-        (is (= [:updated]
+        (assert (= [:updated]
                (update-files {:operations operations}
                              variables
                              dir)))
-        (is (= {"file1.txt" (str "library-1 2.2.2\n"
+        (assert (= {"file1.txt" (str "library-1 2.2.2\n"
                                  "library-2 3.0.0")
                 "some/dir/hello.txt" "Using library-3 of version 6.0!"}
                (get-state dir))))
@@ -92,15 +92,15 @@
                         {:file "randomfile.txt"
                          :regex ".*"
                          :replacement "hmm"}]]
-        (is (= [:file-not-found :file-not-found]
+        (assert (= [:file-not-found :file-not-found]
                (update-files {:operations operations}
                              variables
                              dir)))
-        (is (= {"file1.txt" (str "library-1 2.2.2\n"
+        (assert (= {"file1.txt" (str "library-1 2.2.2\n"
                                  "library-2 3.0.0")
                 "some/dir/hello.txt" "Using library-3 of version 6.0!"}
                (get-state dir)))
-        (is (= "inaccessible" (slurp temp-file))))
+        (assert (= "inaccessible" (slurp temp-file))))
       (finally
         (fs/delete-dir dir)
         (fs/delete temp-file)))))

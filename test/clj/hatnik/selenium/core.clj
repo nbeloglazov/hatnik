@@ -42,7 +42,7 @@
 
 (defn element->project [element]
   (let [action-divs (find-elements element ".action")]
-    (is (-> action-divs last .getText (.contains "Add action")))
+    (assert (-> action-divs last .getText (.contains "Add action")))
     {:name (.getText (find-element element ".project-name"))
      :actions (doall (map element->action (butlast action-divs)))
      :element element}))

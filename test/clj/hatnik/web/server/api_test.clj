@@ -34,7 +34,7 @@
                       :body "Template dflt one"
                       :library "quil"}
         resp (ok? (http :post "/actions" act-dflt-one))
-        _ (is (= (:last-processed-version resp) quil-ver))
+        _ (assert (= (:last-processed-version resp) quil-ver))
         act-dflt-one (merge act-dflt-one (dissoc resp :result))
 
         ; Create second action in Default. Noop action.
@@ -42,7 +42,7 @@
                       :type "noop"
                       :library "ring"}
         resp (ok? (http :post "/actions" act-dflt-two))
-        _ (is (= (:last-processed-version resp) ring-ver))
+        _ (assert (= (:last-processed-version resp) ring-ver))
         act-dflt-two (merge act-dflt-two (dissoc resp :result))
 
         ; Create third action in Default. GithubIssue action.
@@ -53,7 +53,7 @@
                         :title "Template title"
                         :library "ring"}
         resp (ok? (http :post "/actions" act-dflt-three))
-        _ (is (= (:last-processed-version resp) ring-ver))
+        _ (assert (= (:last-processed-version resp) ring-ver))
         act-dflt-three (merge act-dflt-three (dissoc resp :result))
 
         ; Create fourth action in Default. GithubPullRequest action.
@@ -67,7 +67,7 @@
                                      :replacement "world"}]
                        :library "ring"}
         resp (ok? (http :post "/actions" act-dflt-four))
-        _ (is (= (:last-processed-version resp) ring-ver))
+        _ (assert (= (:last-processed-version resp) ring-ver))
         act-dflt-four (merge act-dflt-four (dissoc resp :result))
 
         ; Create single action in Foo.
@@ -77,7 +77,7 @@
                      :body "Template foo single"
                      :library "quil"}
         resp (ok? (http :post "/actions" act-foo-one))
-        _ (is (= (:last-processed-version resp) quil-ver))
+        _ (assert (= (:last-processed-version resp) quil-ver))
         act-foo-one (merge act-foo-one (dissoc resp :result))
 
         ; Check that actions created correctly
@@ -128,7 +128,7 @@
         _ (c/get (str api-url "/logout"))
         resp (error? (http :get "/projects"))
         ; Error response should have only :result and :message keys.
-        _ (is (= #{:result :message} (set (keys resp))))
+        _ (assert (= #{:result :message} (set (keys resp))))
 
         ; Login as new user and check that we can't see previous user's
         ; project
@@ -223,7 +223,7 @@
                       :body "Template dflt one"
                       :library "quil"}
         resp (ok? (http :post "/actions" act-dflt-one))
-        _ (is (= (:last-processed-version resp) quil-ver))
+        _ (assert (= (:last-processed-version resp) quil-ver))
         act-dflt-one (merge act-dflt-one (dissoc resp :result))
 
         ; Try to create project without name, empty name, long name,

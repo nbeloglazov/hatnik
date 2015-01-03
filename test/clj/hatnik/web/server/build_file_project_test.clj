@@ -1,5 +1,6 @@
 (ns hatnik.web.server.build-file-project-test
   (:require [clojure.test :refer :all]
+            [clojure.java.io :as io]
             [ring.adapter.jetty :refer [run-jetty]]
             [clj-http.client :as c]
             [hatnik.versions :as ver]
@@ -73,7 +74,7 @@
         ; and use email new action.
         project {:name "Updated project"
                  :type "build-file"
-                 :build-file "https://raw.githubusercontent.com/nbeloglazov/hatnik-test-lib/master/project.clj"
+                 :build-file "nbeloglazov/hatnik-test-lib"
                  :action {:library "none"
                           :project-id "none"
                           :type "email"
@@ -86,7 +87,7 @@
         _ (assert-actions-match actions ["org.clojure/clojure"  "org.clojure/clojurescript"] proj-id)
         ]))
 
-(deftest changing-project-test
+(deftest changing-project-type-test
   (let [proj-dflt-id (login-and-check-default-project-created "me@email.com")
         project {:name "Build file project"
                  :type "build-file"
@@ -134,6 +135,21 @@
                      expected-libs)
                 (bf/actions-from-build-file (str "http://localhost:" file-server-port
                                                  "/complex.project.clj")))))
+
+(deftest invalid-build-file-test
+  (login-and-check-default-project-created "me@email.com")
+  (let [project {:name "Build file project"
+                 :type "build-file"
+                 :action {:library "none"
+                          :project-id "none"
+                          :type "noop"}}
+        invalid-build-files [(str (.toURI (io/file "dev/build-files/project.clj")))
+                             "http://example.com/project.clj"
+                             "nbeloglazov/not-existing-repo"]]
+    (doseq [invalid-file invalid-build-files]
+      (->> (assoc project :build-file invalid-file)
+           (http :post "/projects")
+           error?))))
 
 (comment
 

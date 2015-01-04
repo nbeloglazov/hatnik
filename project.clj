@@ -13,7 +13,7 @@
                  [com.novemberain/monger "2.0.0"]
                  [ancient-clj "0.2.1"]
                  [com.draines/postal "1.11.3"]
-                 [version-clj "0.1.0"]
+                 [version-clj "0.1.1"]
                  [clojurewerkz/quartzite "2.0.0"]
                  [prismatic/schema "0.3.3"]
                  [com.stuartsierra/component "0.2.2"]

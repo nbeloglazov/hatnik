@@ -8,13 +8,13 @@
                  [hiccup "1.0.5"]
                  [ring/ring-json "0.3.1"]
                  [clj-http "1.0.1"]
-                 [tentacles "0.2.5"]
+                 [tentacles "0.3.0"]
                  [com.taoensso/timbre "3.3.1"]
                  [com.novemberain/monger "2.0.0"]
                  [ancient-clj "0.2.1"]
                  [com.draines/postal "1.11.3"]
-                 [version-clj "0.1.0"]
-                 [clojurewerkz/quartzite "1.3.0"]
+                 [version-clj "0.1.1"]
+                 [clojurewerkz/quartzite "2.0.0"]
                  [prismatic/schema "0.3.3"]
                  [com.stuartsierra/component "0.2.2"]
                  [me.raynes/fs "1.4.5"]
@@ -22,9 +22,9 @@
                  [commons-io "2.4"]
 
                  ; ClojureScript
-                 [org.clojure/clojurescript "0.0-2511"]
+                 [org.clojure/clojurescript "0.0-2665"]
                  [jayq "2.5.2"]
-                 [om "0.8.0-beta5"]]
+                 [om "0.8.0-rc1"]]
 
   :plugins [[lein-cljsbuild "1.0.3"]]
 

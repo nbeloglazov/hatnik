@@ -118,9 +118,8 @@
     (timbre/info "Starting Worker component.")
     (timbre/info "Initialising quartz and starting job. Quartz config:"
                  (:quartz config))
-    (qs/initialize)
-    (qs/start)
-    (let [data (org.quartz.JobDataMap. {"db" db
+    (let [scheduler (-> (qs/initialize) qs/start)
+          data (org.quartz.JobDataMap. {"db" db
                                         "perform-action" perform-action
                                         "utils" utils})
           job (j/build
@@ -140,14 +139,15 @@
                                        (-> config
                                            :quartz
                                            :interval-in-seconds)))))]
-      (qs/schedule job trigger))
-    component)
+      (qs/schedule scheduler job trigger)
+      (assoc component :scheduler scheduler)))
 
   (stop [component]
     (timbre/info "Stopping Worker component.")
-    (qs/delete-job (j/key "jobs.updateactions.1"))
-    (qs/shutdown true)
-    component))
+    (when-let [scheduler (:scheduler component)]
+      (qs/delete-job scheduler (j/key "jobs.updateactions.1"))
+      (qs/shutdown scheduler true))
+    (assoc component :scheduler nil)))
 
 (comment
 

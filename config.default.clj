@@ -57,6 +57,6 @@
  ; and performs actions if necessary.
  :quartz {:initial-delay-in-seconds 60
           :interval-in-seconds 600
-          :jobs #{:update-actions}}
+          :jobs #{:update-actions :sync-build-file-actions}}
 
  }

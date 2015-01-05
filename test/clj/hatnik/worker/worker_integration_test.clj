@@ -51,7 +51,7 @@
         (str "0." version ".2")))))
 
 (defn create-function-mock
-  "Creates mock funciton which saves all arguments it called with to
+  "Creates mock funciton which saves all arguments it called with into
   'arguments' atom vector. Also delivers 'true' to the 'finished' promise
   once it called times-to-call times."
   [arguments times-to-call finished]
@@ -220,4 +220,3 @@
       (finally
         (component/stop web-server)
         (component/stop db)))))
-

@@ -4,6 +4,7 @@
             [hatnik.worker.github-pull-request-action :as github-pull-request]
             [hatnik.versions :as ver]
             [hatnik.db.storage :as stg]
+            [hatnik.worker.build-file-worker :as bf]
 
             [com.stuartsierra.component :as component]
             [taoensso.timbre :as timbre]
@@ -121,7 +122,7 @@
                                              :initial-delay-in-seconds)
                                          DateBuilder$IntervalUnit/SECOND)
         trigger (t/build
-                 (t/with-identity (t/key "triggers.1"))
+                 (t/with-identity (t/key (str "trigger." name)))
                  (t/start-at start-at)
                  (t/with-schedule (ss/schedule
                                    (ss/repeat-forever)
@@ -138,8 +139,9 @@
     (timbre/info "Starting Worker component.")
     (timbre/info "Initialising quartz and starting job. Quartz config:"
                  (:quartz config))
-    (let [scheduler (-> (qs/initialize) qs/start)]
-      (when (contains? (-> config :quartz :jobs) :update-actions)
+    (let [scheduler (-> (qs/initialize) qs/start)
+          jobs (-> config :quartz :jobs)]
+      (when (contains? jobs :update-actions)
         (timbre/info "Scheduling UpdateActionsJob")
         (schedule-job config
                       scheduler
@@ -148,12 +150,23 @@
                       {"db" db
                        "perform-action" perform-action
                        "utils" utils}))
+      (when (contains? jobs :sync-build-file-actions)
+        (timbre/info "Scheduling SyncBuildFileActionsJob")
+        (schedule-job config
+                      scheduler
+                      hatnik.worker.build_file_worker.SyncBuildFileActionsJob
+                      "jobs.syncbuildfileactions.1"
+                      {"db" db}))
       (assoc component :scheduler scheduler)))
 
   (stop [component]
     (timbre/info "Stopping Worker component.")
     (when-let [scheduler (:scheduler component)]
-      (qs/delete-job scheduler (j/key "jobs.updateactions.1"))
+      (let [jobs (-> config :quartz :jobs)]
+        (when (contains? jobs :update-actions)
+          (qs/delete-job scheduler (j/key "jobs.updateactions.1")))
+        (when (contains? jobs :sync-build-file-actions)
+          (qs/delete-job scheduler (j/key "jobs.syncbuildfileactions.1"))))
       (qs/shutdown scheduler true))
     (assoc component :scheduler nil)))
 
@@ -166,3 +179,4 @@
   (component/stop worker)
 
   )
+

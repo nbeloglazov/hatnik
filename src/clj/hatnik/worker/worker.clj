@@ -131,7 +131,6 @@
                                          :interval-in-seconds)))))]
     (qs/schedule scheduler job trigger)))
 
-
 (defrecord Worker [config db perform-action utils]
 
   component/Lifecycle
@@ -140,13 +139,15 @@
     (timbre/info "Initialising quartz and starting job. Quartz config:"
                  (:quartz config))
     (let [scheduler (-> (qs/initialize) qs/start)]
-      (schedule-job config
-                    scheduler
-                    UpdateActionsJob
-                    "jobs.updateactions.1"
-                    {"db" db
-                     "perform-action" perform-action
-                     "utils" utils})
+      (when (contains? (-> config :quartz :jobs) :update-actions)
+        (timbre/info "Scheduling UpdateActionsJob")
+        (schedule-job config
+                      scheduler
+                      UpdateActionsJob
+                      "jobs.updateactions.1"
+                      {"db" db
+                       "perform-action" perform-action
+                       "utils" utils}))
       (assoc component :scheduler scheduler)))
 
   (stop [component]

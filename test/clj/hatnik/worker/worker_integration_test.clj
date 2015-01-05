@@ -32,7 +32,8 @@
                    :port 6790}
    :enable-force-login true
    :quartz {:initial-delay-in-seconds 0
-            :interval-in-seconds 2}})
+            :interval-in-seconds 2
+            :jobs #{:update-actions}}})
 
 (defn mock-latest-release-fn
   "Create latest-release version which returns

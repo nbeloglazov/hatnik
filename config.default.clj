@@ -51,10 +51,12 @@
          :pass "ACCOUNT_PASS"
          :from "GMAIL_ACCOUNT"}
 
- ; Settings that define how often worker job is run.
- ; The job pulls version of all existing libraries and
- ; performs actions if necessary.
+ ; Settings that define how often worker jobs are run and
+ ; which jobs to run.
+ ; :update-actions job pulls version of all existing libraries
+ ; and performs actions if necessary.
  :quartz {:initial-delay-in-seconds 60
-          :interval-in-seconds 600}
+          :interval-in-seconds 600
+          :jobs #{:update-actions}}
 
  }

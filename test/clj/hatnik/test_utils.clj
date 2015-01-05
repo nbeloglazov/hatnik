@@ -1,12 +1,14 @@
 (ns hatnik.test-utils
   (:require [clj-http.client :as c]
             [clojure.test :refer :all]
+            [clojure.data :refer [diff]]
             [hatnik.db.memory-storage :refer [map->MemoryStorage]]
             [hatnik.db.mongo-storage :refer [map->MongoStorage]]
             [com.stuartsierra.component :as component]
             [hatnik.web.server.handler :refer [map->WebServer]]
             [taoensso.timbre :as timbre]
-            [clojure.data :refer [diff]]))
+            [ring.adapter.jetty :refer [run-jetty]]
+            [compojure.route :as route]))
 
 (def test-web-port 6780)
 
@@ -100,3 +102,12 @@
                                    :type "regular" :actions {}}])
                       projects)]
     proj-dflt-id))
+
+(def file-server-port 49052)
+
+(defn file-server [folder]
+  (run-jetty
+   (route/files "/" {:root folder})
+   {:join? false
+    :port file-server-port
+    :host "localhost"}))

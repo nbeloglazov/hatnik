@@ -1,21 +1,10 @@
 (ns hatnik.web.server.build-file-project-test
   (:require [clojure.test :refer :all]
             [clojure.java.io :as io]
-            [ring.adapter.jetty :refer [run-jetty]]
             [clj-http.client :as c]
             [hatnik.versions :as ver]
             [hatnik.test-utils :refer :all]
-            [hatnik.web.server.build-files :as bf]
-            [compojure.route :as route]))
-
-(def file-server-port 49052)
-
-(defn file-server [folder]
-  (run-jetty
-   (route/files "/" {:root folder})
-   {:join? false
-    :port file-server-port
-    :host "localhost"}))
+            [hatnik.web.server.build-files :as bf]))
 
 (defn file-server-fixture [f]
   (let [server (file-server "dev/build-files")]

@@ -23,7 +23,7 @@
 ;;; create-github-issue functions and check that they're called with
 ;;; apropriate arguments.
 ;;;
-;;; We'll wait until job will be executed 2 times and then verify all arguments.
+;;; We'll wait until job is executed 2 times and then verify all arguments.
 ;;;
 
 (def config

@@ -110,6 +110,27 @@
     (catch Exception e
       (timbre/error e "Error while executing UpdateActionsJob"))))
 
+(defn schedule-job [config scheduler job name data]
+  (let [data (org.quartz.JobDataMap. data)
+        job (j/build
+             (j/of-type job)
+             (j/with-identity (j/key name))
+             (.usingJobData data))
+        start-at (DateBuilder/futureDate (-> config
+                                             :quartz
+                                             :initial-delay-in-seconds)
+                                         DateBuilder$IntervalUnit/SECOND)
+        trigger (t/build
+                 (t/with-identity (t/key "triggers.1"))
+                 (t/start-at start-at)
+                 (t/with-schedule (ss/schedule
+                                   (ss/repeat-forever)
+                                   (ss/with-interval-in-seconds
+                                     (-> config
+                                         :quartz
+                                         :interval-in-seconds)))))]
+    (qs/schedule scheduler job trigger)))
+
 
 (defrecord Worker [config db perform-action utils]
 
@@ -118,28 +139,14 @@
     (timbre/info "Starting Worker component.")
     (timbre/info "Initialising quartz and starting job. Quartz config:"
                  (:quartz config))
-    (let [scheduler (-> (qs/initialize) qs/start)
-          data (org.quartz.JobDataMap. {"db" db
-                                        "perform-action" perform-action
-                                        "utils" utils})
-          job (j/build
-               (j/of-type UpdateActionsJob)
-               (j/with-identity (j/key "jobs.updateactions.1"))
-               (.usingJobData data))
-          start-at (DateBuilder/futureDate (-> config
-                                               :quartz
-                                               :initial-delay-in-seconds)
-                                           DateBuilder$IntervalUnit/SECOND)
-          trigger (t/build
-                   (t/with-identity (t/key "triggers.1"))
-                   (t/start-at start-at)
-                   (t/with-schedule (ss/schedule
-                                     (ss/repeat-forever)
-                                     (ss/with-interval-in-seconds
-                                       (-> config
-                                           :quartz
-                                           :interval-in-seconds)))))]
-      (qs/schedule scheduler job trigger)
+    (let [scheduler (-> (qs/initialize) qs/start)]
+      (schedule-job config
+                    scheduler
+                    UpdateActionsJob
+                    "jobs.updateactions.1"
+                    {"db" db
+                     "perform-action" perform-action
+                     "utils" utils})
       (assoc component :scheduler scheduler)))
 
   (stop [component]

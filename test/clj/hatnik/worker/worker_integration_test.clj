@@ -48,7 +48,7 @@
       (let [version (-> versions
                         (swap! update-in [library] inc)
                         (get library))]
-        (str "0." version ".2")))))
+        (str version ".0")))))
 
 (defn create-function-mock
   "Creates mock funciton which saves all arguments it called with into
@@ -120,16 +120,16 @@
 
   (are [v] (some #(= % v) args)
        ; Check that email for lib-2 release was sent 2 times.
-       ["foo@email.com" "Subject lib-2 0.3.2 0.2.2 Default {{not-used}}"
-        "Email lib-2 0.3.2 0.2.2 Default {{not-used}}"]
-       ["foo@email.com" "Subject lib-2 0.4.2 0.3.2 Default {{not-used}}"
-        "Email lib-2 0.4.2 0.3.2 Default {{not-used}}"]
+       ["foo@email.com" "Subject lib-2 3.0 2.0 Default {{not-used}}"
+        "Email lib-2 3.0 2.0 Default {{not-used}}"]
+       ["foo@email.com" "Subject lib-2 4.0 3.0 Default {{not-used}}"
+        "Email lib-2 4.0 3.0 Default {{not-used}}"]
 
        ; Check that email for lib-4 release was sent 2 times.
-       ["bar@email.com" "Subject bar lib-4 0.5.2 0.4.2 Default {{not-used}}"
-        "Email lib-4 0.5.2 0.4.2 Default {{not-used}}"]
-       ["bar@email.com" "Subject bar lib-4 0.6.2 0.5.2 Default {{not-used}}"
-        "Email lib-4 0.6.2 0.5.2 Default {{not-used}}"]))
+       ["bar@email.com" "Subject bar lib-4 5.0 4.0 Default {{not-used}}"
+        "Email lib-4 5.0 4.0 Default {{not-used}}"]
+       ["bar@email.com" "Subject bar lib-4 6.0 5.0 Default {{not-used}}"
+        "Email lib-4 6.0 5.0 Default {{not-used}}"]))
 
 (defn assert-github-issue-args
   "Validates that create-github-action was called with expected args."
@@ -141,13 +141,13 @@
        ; Github issue should be created for lib-3 2 times.
        {:user "someone"
         :repo "cool-repo"
-        :title "Title lib-3 0.4.2 0.3.2 Default {{not-used}}"
-        :body (str "Body lib-3 0.4.2 0.3.2 Default {{not-used}}"
+        :title "Title lib-3 4.0 3.0 Default {{not-used}}"
+        :body (str "Body lib-3 4.0 3.0 Default {{not-used}}"
                    "\n\nThis issue is created on behalf of @dummy-login")}
        {:user "someone"
         :repo "cool-repo"
-        :title "Title lib-3 0.5.2 0.4.2 Default {{not-used}}"
-        :body (str "Body lib-3 0.5.2 0.4.2 Default {{not-used}}"
+        :title "Title lib-3 5.0 4.0 Default {{not-used}}"
+        :body (str "Body lib-3 5.0 4.0 Default {{not-used}}"
                    "\n\nThis issue is created on behalf of @dummy-login")}))
 
 (defn run-worker
@@ -198,14 +198,14 @@
       (are [library version] (some #(and (= (:library %) library)
                                          (= (:last-processed-version %) version))
                                    foo-actions)
-           "lib-1" "0.3.2"
-           "lib-2" "0.4.2"
-           "lib-3" "0.5.2")
+           "lib-1" "3.0"
+           "lib-2" "4.0"
+           "lib-3" "5.0")
 
       (assert (= (count bar-actions) 1))
       (assert (and (= (:library (first bar-actions)) "lib-4")
                (= (:last-processed-version (first bar-actions))
-                  "0.6.2"))))))
+                  "6.0"))))))
 
 (deftest worker-integration-test
   (let [db (component/start (get-db))

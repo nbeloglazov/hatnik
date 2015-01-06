@@ -68,7 +68,10 @@
       (try
         (let [proj (stg/get-project db (:project-id action))
               user (stg/get-user-by-id db (:user-id proj))
-              result (perform-action action user
+              action-to-perform (if (= (:type proj) "build-file")
+                                  (:action proj)
+                                  action)
+              result (perform-action action-to-perform user
                                      {:library library
                                       :version ver
                                       :previous-version (:last-processed-version action)

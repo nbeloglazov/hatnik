@@ -16,6 +16,9 @@
 ;;; then updates changed actions.
 ;;; We'll use REST API to create 2 users. Then we'll create an action of
 ;;; each type for the first user and single action for the second.
+;;; Along with regular actions we'll create build-file project for the
+;;; first user to check that build-file action also processed correctly.
+;;;
 ;;; We'll also rebind 'latest-release' function so it returns new version
 ;;; every time it called. Thus each action will be "released" each time
 ;;; worker job is executed.
@@ -36,6 +39,15 @@
             :interval-in-seconds 2
             :jobs #{:update-actions}}})
 
+(defn file-server-fixture [f]
+  (let [server (file-server "dev/build-files")]
+    (try
+      (f)
+      (finally
+        (.stop server)))))
+
+(use-fixtures :each file-server-fixture)
+
 (defn mock-latest-release-fn
   "Create latest-release version which returns
   new version every time it called."
@@ -50,6 +62,23 @@
   (fn [& args]
     (swap! arguments conj (vec args))
     (.release semaphore)))
+
+(defn create-build-file-project []
+  (->> {:name "Build file project"
+        :type "build-file"
+        :build-file (str "http://localhost:" file-server-port
+                         "/project.clj")
+        :action {:project-id "none"
+                 :library "none"
+                 :type "email"
+                 :subject (str "Build file subject {{library}} {{version}} "
+                               "{{previous-version}} {{project}} "
+                               "{{not-used}}")
+                 :body (str "Build file email {{library}} {{version}} "
+                            "{{previous-version}} {{project}} "
+                            "{{not-used}}")}}
+       (http :post "/projects")
+       ok?))
 
 (defn create-actions []
   (binding [clj-http.core/*cookie-store* (clj-http.cookies/cookie-store)]
@@ -82,6 +111,7 @@
                         :body (str "Body {{library}} {{version}} "
                                    "{{previous-version}} {{project}} "
                                    "{{not-used}}")}))
+          _ (create-build-file-project)
 
           ; Login as bar@email.com and create single email action.
           _ (http :get "/force-login?email=bar@email.com&skip-dummy-data=true")
@@ -102,7 +132,7 @@
   "Validates that send-email was called with expected args."
   [args]
   ; send-email should be called 4 times.
-  (assert (= (count args) 4))
+  (assert (= (count args) 7))
 
   (are [v] (some #(= % v) args)
        ; Check that email for lib-2 release was sent 2 times.
@@ -110,6 +140,16 @@
         "Email lib-2 3.0 2.0 Default {{not-used}}"]
        ["foo@email.com" "Subject lib-2 4.0 3.0 Default {{not-used}}"
         "Email lib-2 4.0 3.0 Default {{not-used}}"]
+
+       ; Check that email for org.clojure/clojure release was sent 2 times.
+       ["foo@email.com" "Build file subject org.clojure/clojure 2.0 1.0 Build file project {{not-used}}"
+        "Build file email org.clojure/clojure 2.0 1.0 Build file project {{not-used}}"]
+       ["foo@email.com" "Build file subject org.clojure/clojure 3.0 2.0 Build file project {{not-used}}"
+        "Build file email org.clojure/clojure 3.0 2.0 Build file project {{not-used}}"]
+
+       ; Check that email for quil release was sent once.
+       ["foo@email.com" "Build file subject quil 3.0 1.0 Build file project {{not-used}}"
+        "Build file email quil 3.0 1.0 Build file project {{not-used}}"]
 
        ; Check that email for lib-4 release was sent 2 times.
        ["bar@email.com" "Subject bar lib-4 5.0 4.0 Default {{not-used}}"
@@ -138,8 +178,8 @@
 
 (defn acquire
   "Acquires a permit from semaphore with 10s timeout."
-  [semaphore permits]
-  (.tryAcquire semaphore permits 10 TimeUnit/SECONDS))
+  [semaphore permits message]
+  (assert (.tryAcquire semaphore permits 10 TimeUnit/SECONDS) message))
 
 (defn run-worker
   "Run worker jobs. The job will be run 2 times."
@@ -147,7 +187,10 @@
   (reset! versions {"lib-1" 2
                     "lib-2" 3
                     "lib-3" 4
-                    "lib-4" 5})
+                    "lib-4" 5
+                    "org.clojure/clojure" 2
+                    "quil" 3
+                    "ring" 1})
   (let [; send-email is called 4 times: 2 times for 2 actions.
         ; Both first and second users have email actions.
         email-args (atom [])
@@ -169,17 +212,20 @@
                    component/start)]
     (try
       ; Wait for the first update by worker and update libraries.
-      (acquire email-semaphore 2)
-      (acquire gi-semaphore 1)
+      (acquire email-semaphore 4 "Email semaphore")
+      (acquire gi-semaphore 1 "Github semaphore")
       (reset! versions {"lib-1" 3
                         "lib-2" 4
                         "lib-3" 5
-                        "lib-4" 6})
+                        "lib-4" 6
+                        "org.clojure/clojure" 3
+                        "quil" 3
+                        "ring" 1})
 
       ; Wait for the second update by worker and verify send-email
       ; and create-github-issue mocks.
-      (acquire email-semaphore 2)
-      (acquire gi-semaphore 1)
+      (acquire email-semaphore 3 "Email semaphore")
+      (acquire gi-semaphore 1 "Github semaphore")
       (assert-emails-args @email-args)
       (assert-github-issue-args @gi-args)
 
@@ -219,7 +265,10 @@
         versions (atom {"lib-1" 1
                         "lib-2" 2
                         "lib-3" 3
-                        "lib-4" 4})]
+                        "lib-4" 4
+                        "org.clojure/clojure" 1
+                        "quil" 1
+                        "ring" 1})]
     (timbre/set-level! :info)
     (try
       (with-redefs [ver/latest-release (mock-latest-release-fn versions)]

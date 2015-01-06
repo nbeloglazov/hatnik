@@ -7,7 +7,8 @@
             [hatnik.versions :as ver]
             [com.stuartsierra.component :as component]
             [hatnik.test-utils :refer :all :exclude [config]]
-            [taoensso.timbre :as timbre]))
+            [taoensso.timbre :as timbre])
+  (:import [java.util.concurrent Semaphore TimeUnit]))
 
 ;;;
 ;;; Integration test that verifies that worker job is executed periodically.
@@ -38,32 +39,17 @@
 (defn mock-latest-release-fn
   "Create latest-release version which returns
   new version every time it called."
-  []
-  (let [versions (atom {"lib-1" 0
-                        "lib-2" 1
-                        "lib-3" 2
-                        "lib-4" 3})]
-    (fn [library]
-      (timbre/debug library)
-      (let [version (-> versions
-                        (swap! update-in [library] inc)
-                        (get library))]
-        (str version ".0")))))
+  [versions]
+  (fn [library]
+    (str (@versions library) ".0")))
 
 (defn create-function-mock
   "Creates mock funciton which saves all arguments it called with into
-  'arguments' atom vector. Also delivers 'true' to the 'finished' promise
-  once it called times-to-call times."
-  [arguments times-to-call finished]
-  (let [counter (atom times-to-call)]
-    (fn [& args]
-      (when (zero? @counter)
-        (throw (ex-info (str "Function expected to be called only "
-                             times-to-call " times.")
-                        {})))
-      (swap! arguments conj (vec args))
-      (when (zero? (swap! counter dec))
-        (deliver finished true)))))
+  'arguments' atom vector. Also releases a permit on provided semaphore."
+  [arguments semaphore]
+  (fn [& args]
+    (swap! arguments conj (vec args))
+    (.release semaphore)))
 
 (defn create-actions []
   (binding [clj-http.core/*cookie-store* (clj-http.cookies/cookie-store)]
@@ -150,20 +136,29 @@
         :body (str "Body lib-3 5.0 4.0 Default {{not-used}}"
                    "\n\nThis issue is created on behalf of @dummy-login")}))
 
+(defn acquire
+  "Acquires a permit from semaphore with 10s timeout."
+  [semaphore permits]
+  (.tryAcquire semaphore permits 10 TimeUnit/SECONDS))
+
 (defn run-worker
   "Run worker jobs. The job will be run 2 times."
-  [db]
+  [db versions]
+  (reset! versions {"lib-1" 2
+                    "lib-2" 3
+                    "lib-3" 4
+                    "lib-4" 5})
   (let [; send-email is called 4 times: 2 times for 2 actions.
         ; Both first and second users have email actions.
         email-args (atom [])
-        emails-done (promise)
-        send-email (create-function-mock email-args 4 emails-done)
+        email-semaphore (Semaphore. 0)
+        send-email (create-function-mock email-args email-semaphore)
 
         ; create-github-issue is run 2 times: first user has single
         ; github-issue action.
         gi-args (atom [])
-        gi-done (promise)
-        create-github-issue (create-function-mock gi-args 2 gi-done)
+        gi-semaphore (Semaphore. 0)
+        create-github-issue (create-function-mock gi-args gi-semaphore)
 
         utils {:send-email send-email
                :create-github-issue create-github-issue}
@@ -173,8 +168,18 @@
                                         :utils utils})
                    component/start)]
     (try
-      (assert (deref emails-done 5000 false) "send-email not done")
-      (assert (deref gi-done 5000 false) "create-github-issue not done")
+      ; Wait for the first update by worker and update libraries.
+      (acquire email-semaphore 2)
+      (acquire gi-semaphore 1)
+      (reset! versions {"lib-1" 3
+                        "lib-2" 4
+                        "lib-3" 5
+                        "lib-4" 6})
+
+      ; Wait for the second update by worker and verify send-email
+      ; and create-github-issue mocks.
+      (acquire email-semaphore 2)
+      (acquire gi-semaphore 1)
       (assert-emails-args @email-args)
       (assert-github-issue-args @gi-args)
 
@@ -204,18 +209,22 @@
 
       (assert (= (count bar-actions) 1))
       (assert (and (= (:library (first bar-actions)) "lib-4")
-               (= (:last-processed-version (first bar-actions))
-                  "6.0"))))))
+                   (= (:last-processed-version (first bar-actions))
+                      "6.0"))))))
 
 (deftest worker-integration-test
   (let [db (component/start (get-db))
         web-server (component/start (map->WebServer {:config config
-                                                     :db db}))]
+                                                     :db db}))
+        versions (atom {"lib-1" 1
+                        "lib-2" 2
+                        "lib-3" 3
+                        "lib-4" 4})]
     (timbre/set-level! :info)
     (try
-      (with-redefs [ver/latest-release (mock-latest-release-fn)]
+      (with-redefs [ver/latest-release (mock-latest-release-fn versions)]
         (create-actions)
-        (run-worker db)
+        (run-worker db versions)
         (assert-actions-updated))
       (finally
         (component/stop web-server)

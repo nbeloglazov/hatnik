@@ -57,7 +57,7 @@
       (assoc params
         :gh-pr-operations gh-pr-operations))))
 
-(deftest create-delete-test []
+(deftest create-delete-test
   (run-with-driver
    (fn [driver]
      (let [[project] (find-projects-on-page driver)]

@@ -8,7 +8,8 @@
   (:use [jayq.core :only [$]]))
 
 (defn ^:export add-new-project []
-  (pmenu/show {:name ""}))
+  (pmenu/show {:name ""
+               :type "regular"}))
 
 (defn add-new-action-card [data owner]
   (reify
@@ -103,7 +104,8 @@
               #js {:className "btn btn-default"
                    :type "button"
                    :onClick #(pmenu/show {:project-id id
-                                          :name name})}
+                                          :name name
+                                          :type (get project "type")})}
               (dom/span #js {:className "glyphicon glyphicon-pencil pull-right"})))))
 
 (defn project-view [prj owner]

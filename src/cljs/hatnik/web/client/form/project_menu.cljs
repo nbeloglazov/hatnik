@@ -22,12 +22,34 @@
 (defn body [data]
   (dom/div
    #js {:className "modal-body"}
-   (dom/form #js {:className "form-horizontal"}
-             (u/form-field {:data data
-                            :field :name
-                            :title "Name"
-                            :type :text
-                            :validator (schm/string-of-length 1 128)}))))
+   (dom/form
+    #js {:className "form-horizontal"}
+    (u/form-field {:data data
+                   :field :name
+                   :id "project-name"
+                   :title "Name"
+                   :type :text
+                   :validator (schm/string-of-length 1 128)})
+
+    ; Project type radio button
+    (dom/div
+     #js {:className (str "form-group")}
+     (dom/label #js {:htmlFor "project-type"
+                     :className "control-label col-sm-2 no-padding-right"}
+                "Type")
+     (apply dom/div
+            #js {:className "col-sm-10"}
+            (for [[name value] [["regular" "regular"]
+                                ["build file" "build-file"]]]
+              (dom/label
+               #js {:className "radio-inline"}
+               (dom/input #js {:type "radio"
+                               :checked (if (= (:type data) value)
+                                          "checked"
+                                          nil)
+                               :value value
+                               :onChange #(om/update! data :type value)})
+               name)))))))
 
 (defn footer [data]
   (let [id (:project-id data)

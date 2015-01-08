@@ -46,7 +46,7 @@
                      :placeholder "e.g. org.clojure/clojure"
                      :type :text
                      :validator #(:form-status state)
-                     :on-change #(let [library (.. % -target -value)]
+                     :on-change #(let [library (u/ev-value %)]
                                    (check-library-exists owner (:timer state) library)
                                    (om/update! data :library library))
                      :feedback (dom/span #js {:className "form-control-feedback"}

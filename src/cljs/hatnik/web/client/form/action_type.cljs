@@ -2,6 +2,7 @@
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [hatnik.web.client.z-actions :as action]
+            [hatnik.web.client.utils :as u]
             [hatnik.schema :as schm]
             [schema.core :as s]))
 
@@ -23,7 +24,7 @@
                          (dom/select #js {:className "form-control"
                                           :id "action-type"
                                           :defaultValue type
-                                          :onChange #(om/update! data :type (.. % -target -value))}
+                                          :onChange #(om/update! data :type (u/ev-value %))}
                                      (dom/option (option-element-map "email" type)  "Email")
                                      (dom/option (option-element-map "noop" type) "Noop")
                                      (dom/option (option-element-map "github-issue" type) "GitHub issue")

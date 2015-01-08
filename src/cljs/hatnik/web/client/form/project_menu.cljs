@@ -40,7 +40,7 @@
                               (dom/input #js {:className "form-control"
                                               :type "text"
                                               :value name
-                                              :onChange #(om/update! data :name (.. % -target -value))}))))
+                                              :onChange #(om/update! data :name (u/ev-value %))}))))
 
           (dom/div #js {:className "modal-footer"}
 

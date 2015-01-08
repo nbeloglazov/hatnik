@@ -49,7 +49,7 @@
                               :validator #(:repo-status state)
                               :placeholder "user/repo or organization/repo"
                               :type :text
-                              :on-change #(let [repo (.. % -target -value)]
+                              :on-change #(let [repo (u/ev-value %)]
                                             (github-issue-on-change repo (:timer state) owner)
                                             (om/update! data :gh-repo repo))})
                (u/form-field {:data data

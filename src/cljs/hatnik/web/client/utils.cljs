@@ -6,6 +6,11 @@
 
 (enable-console-print!)
 
+(defn ev-value
+  "Extracts value from the event object. Usually it is <input> element."
+  [event]
+  (.. event -target -value))
+
 (defn validate
   "Validates data using given schema. Returns one of two
   css classes: has-success or has-error"
@@ -47,7 +52,7 @@
                              :data-placement "auto"
                              :data-trigger "focus"
                              :onChange (or on-change
-                                           #(om/update! data field (.. % -target -value)))}]
+                                           #(om/update! data field (ev-value %)))}]
               (case type
                 :text (dom/input attrs)
                 :textarea (dom/textarea attrs)))

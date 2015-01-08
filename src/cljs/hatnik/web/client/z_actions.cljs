@@ -1,7 +1,7 @@
 (ns hatnik.web.client.z-actions
-  (:require [jayq.core :as jq]
-            [hatnik.web.client.app-state :as state]
+  (:require [hatnik.web.client.app-state :as state]
             [hatnik.web.client.message :as msg]
+            [hatnik.web.client.utils :as u]
             [hatnik.schema :as schm]
             [schema.core :as s])
   (:use [jayq.core :only [$]]))
@@ -13,48 +13,30 @@
 
 (defn wrap-error-alert [callback]
   (fn [response]
-    (when (= "error" (get response "result"))
-      (msg/danger (get response "message")))
+    (when (= "error" (:result response))
+      (msg/danger (:message response)))
     (callback response)))
 
-(defn ajax [url type data callback]
-  (jq/ajax url
-           {:type type
-            :data (.stringify js/JSON
-                              (clj->js data))
-            :contentType "application/json"
-            :dataType "json"
-            :async true
-            :error #(msg/danger "Invalid request. Please, check request data.")
-            :success #(callback (js->clj %))}))
-
-(defn get-github-repos [github-name callback error-handler]
-  (jq/ajax (str "https://api.github.com/users/" github-name "/repos")
-           {:type "GET"
-            :success callback
-            :error error-handler}))
-
 (defn common-update-callback [msg data response]
-  (when (= "ok" (get response "result"))
-    (state/update-all-view)
+  (when (= "ok" (:result response))
+    (state/update-all-views)
     (.modal ($ :#iModalAddAction) "hide")
     (.modal ($ :#iModalProjectMenu) "hide")))
 
 (defn create-new-project-callback [name response]
-  (when (= "ok" (get response "result"))
-    (state/update-all-view)
+  (when (= "ok" (:result response))
+    (state/update-all-views)
     (.modal ($ :#iModalProjectMenu) "hide")))
 
 (defn send-new-project-request [name]
-  (let [project {:name name
-                 :type "regular"}]
-    (if (s/check schm/Project project)
-      (msg/danger default-error-message)
-      (ajax "/api/projects" "POST" project #(create-new-project-callback name %)))))
+  (if (s/check schm/Project {:name name
+                             :type "regular"})
+    (msg/danger default-error-message)
+    (u/ajax "/api/projects" "POST" {:name name} #(create-new-project-callback name %))))
 
 (defn create-new-action-callback [data response]
-  (when (= "ok" (get response "result"))
-    (state/update-all-view)
+  (when (= "ok" (:result response))
+    (state/update-all-views)
     (.modal ($ :#iModalAddAction) "hide")))
 
 (defn build-email-action [data-pack]
@@ -107,7 +89,7 @@
         data (build data-pack)]
     (if (s/check schema data)
       (msg/danger default-error-message)
-      (ajax "/api/actions" "POST" data
+      (u/ajax "/api/actions" "POST" data
             (wrap-error-alert #(create-new-action-callback data %))))))
 
 (defn test-action [data-pack done-callback]
@@ -118,12 +100,12 @@
           (done-callback))
       (do
         (msg/info (:text-progress config))
-       (ajax "/api/actions/test" "POST" data
+       (u/ajax "/api/actions/test" "POST" data
             (fn [response]
               (done-callback)
-              (case (get response "result")
+              (case (:result response)
                 "ok" (msg/success (:text-done config))
-                "error" (msg/danger (get response "message")))))))))
+                "error" (msg/danger (:message response)))))))))
 
 (def action-update-error-message "Couldn't update the action. Please file a bug if the issue persists.")
 
@@ -132,19 +114,19 @@
         data (build data-pack)]
     (if (s/check schema data)
       (msg/danger default-error-message)
-      (ajax
+      (u/ajax
        (str "/api/actions/" (:id data-pack)) "PUT"
        data (wrap-error-alert
              #(common-update-callback action-update-error-message data %))))))
 
 (defn delete-action [action-id]
-  (ajax
+  (u/ajax
    (str "/api/actions/" action-id) "DELETE"
    {} (wrap-error-alert
        #(common-update-callback "Couldn't delete the action. Please file a bug if the issue persists." {} %))))
 
 (defn ^:export delete-project [project-id]
-  (ajax
+  (u/ajax
    (str "/api/projects/" project-id) "DELETE"
    {} (wrap-error-alert
        #(common-update-callback "Couldn't delete the project. Please file a bug if the issue persists." {} %))))
@@ -154,12 +136,12 @@
               :type "regular"}]
     (if (s/check schm/Project data)
       (msg/danger default-error-message)
-      (ajax
+      (u/ajax
        (str "/api/projects/" project-id) "PUT"  data
        (wrap-error-alert #(common-update-callback "Couldn't rename the project. Please file a bug if the issue persists." {} %))))))
 
 
 (defn get-library [library callback]
-  (ajax
+  (u/ajax
    (str "/api/library-version?library=" library) "GET"
    {} callback))

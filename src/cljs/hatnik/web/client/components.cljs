@@ -4,7 +4,8 @@
             [hatnik.web.client.app-state :as state]
             [hatnik.web.client.form.add-action :as add-action]
             [hatnik.web.client.form.project-menu :as pmenu]
-            [hatnik.web.client.z-actions :as action])
+            [hatnik.web.client.z-actions :as action]
+            [hatnik.web.client.utils :as u])
   (:use [jayq.core :only [$]]))
 
 (defn ^:export add-new-project []
@@ -56,7 +57,7 @@
     (render [this]
       (let [id (:project-id data)
             email (:user-email data)
-            library (get data "library")
+            library (:library data)
             library-class (if (< (count library) 27)
                             "" ; regular class
                             "long-name")]
@@ -71,7 +72,7 @@
                                  :title library}
                             library)
                    (dom/div #js {:className "version"}
-                            (get data "last-processed-version"))))))))
+                            (:last-processed-version data))))))))
 
 (defn render-action [data]
   (if (= (:type data) :add)
@@ -86,7 +87,7 @@
         (map (fn [act]
                (dom/div #js {:className "col-sm-6 col-md-4 col-lg-3 prj-list-item"}
                         (render-action (assoc act :project-id id
-                                              :type (get act "type")
+                                              :type (:type act)
                                               :user-email email))))
              actions)]
     (apply dom/div #js {:className "row"}
@@ -97,22 +98,20 @@
                                              :user-email email}))]))))
 
 (defn project-header-menu-button [project]
-  (let [id (get project "id")
-        name (get project "name")]
-    (dom/div #js {:className "dropdown pull-right"}
-             (dom/button
-              #js {:className "btn btn-default"
-                   :type "button"
-                   :onClick #(pmenu/show {:project-id id
-                                          :name name
-                                          :type (get project "type")})}
-              (dom/span #js {:className "glyphicon glyphicon-pencil pull-right"})))))
+  (dom/div #js {:className "dropdown pull-right"}
+           (dom/button
+            #js {:className "btn btn-default"
+                 :type "button"
+                 :onClick #(pmenu/show {:project-id (:id project)
+                                        :name (:name project)
+                                        :type (:type project)})}
+            (dom/span #js {:className "glyphicon glyphicon-pencil pull-right"}))))
 
 (defn project-view [prj owner]
   (reify
     om/IRender
     (render [_]
-      (let [id (str "__PrjList" (get prj "id"))]
+      (let [id (str "__PrjList" (:id prj))]
        (dom/div
         #js {:className "panel panel-default panel-primary"}
         (dom/div
@@ -122,13 +121,13 @@
           (dom/a
            #js {:data-toggle "collapse"
                 :href (str "#" id)}
-           (dom/div #js {:className "bg-primary"} (get prj "name"))))
+           (dom/div #js {:className "bg-primary"} (:name prj))))
          (project-header-menu-button prj))
         (dom/div #js {:className "panel-collapse collapse in"
                       :id id}
                  (dom/div #js {:className "panel-body"}
-                          (actions-table (get prj "id") 
-                                         (get prj "actions") 
+                          (actions-table (:id prj)
+                                         (:actions prj)
                                          (-> prj :user :email)))))))))
 
 (defn project-list [data owner]
@@ -149,13 +148,13 @@
 
     om/IWillMount
     (will-mount [this]
-      (.send goog.net.XhrIo "/api/current-user" state/update-user-data)
-      (.send goog.net.XhrIo "/api/projects" state/update-projects-list))
+      (u/ajax "/api/current-user" "GET" nil state/update-user-data)
+      (state/update-all-views))
 
-    om/IRender 
+    om/IRender
     (render [this]
       (dom/div nil
-      (dom/div 
+      (dom/div
        #js {:className "row"}
        (dom/div #js {:className "col-md-2"}
                 (dom/a #js {:className "btn btn-success"

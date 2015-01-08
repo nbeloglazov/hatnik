@@ -1,17 +1,16 @@
-(ns hatnik.web.client.app-state)
+(ns hatnik.web.client.app-state
+  (:require [hatnik.web.client.utils :as u]))
 
-(def app-state 
+(def app-state
   (atom {; Here we store data from the server
          :projects []
          :user {}}))
 
-(defn update-projects-list [reply]
-  (let [json (.getResponseJson (.-target reply))
-        data (js->clj json)]
-    (when (= "ok" (get data "result"))
-      (swap! app-state
-             assoc-in [:projects]
-             (get data "projects")))))
+(defn update-projects-list [data]
+  (when (= "ok" (:result data))
+    (swap! app-state
+           assoc-in [:projects]
+           (:projects data))))
 
 (defn add-new-project [id name]
   (swap! app-state
@@ -21,21 +20,19 @@
                    :data
                    :projects))))
 
-(defn update-user-data [reply]
-  (let [json (.getResponseJson (.-target reply))
-        data (js->clj json)]
-    (when (= "ok" (get data "result"))
-      (swap! app-state
-             assoc-in [:user :email]
-             (get data "email")))))
+(defn update-user-data [data]
+  (when (= "ok" (:result data))
+    (swap! app-state
+           assoc-in [:user :email]
+           (:email data))))
 
 (defn set-current-project [id]
-  (swap! app-state 
+  (swap! app-state
          assoc :current-project id))
 
-(defn update-all-view []
-  (.send goog.net.XhrIo "/api/projects" update-projects-list) )
+(defn update-all-views []
+  (u/ajax "/api/projects" "GET" nil update-projects-list))
 
 (defn update-project-actions [action]
-  (.send goog.net.XhrIo "/api/projects" update-projects-list))
+  (update-all-view))
 

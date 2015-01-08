@@ -90,25 +90,25 @@
                       :regex ""
                       :replacement ""}]})
 
-(defmulti get-state-from-action #(get % "type"))
+(defmulti get-state-from-action :type)
 
 (defmethod get-state-from-action "noop" [action]
   {})
 
 (defmethod get-state-from-action "email" [action]
-  {:body (get action "body")
-   :title (get action "subject")})
+  {:body (:body action)
+   :title (:subject action)})
 
 (defmethod get-state-from-action "github-issue" [action]
-  {:title (get action "title")
-   :body (get action "body")
-   :gh-repo (get action "repo")})
+  {:title (:title action)
+   :body (:body action)
+   :gh-repo (:repo action)})
 
 (defmethod get-state-from-action "github-pull-request" [action]
-  {:body (get action "body")
-   :title (get action "title")
-   :file-operations (keywordize-keys (get action "operations"))
-   :gh-repo (get action "repo")})
+  {:body (:body action)
+   :title (:title action)
+   :file-operations (keywordize-keys (:operations action))
+   :gh-repo (:repo action)})
 
 (defmulti get-init-state #(:type %))
 
@@ -122,12 +122,12 @@
   (let [action (:action data)]
     (merge default-state
            (get-state-from-action action)
-           {:type (get action "type")
+           {:type (:type action)
             :project-id (:project-id data)
             :email-address (:user-email data)
-            :library (get action "library")
-            :library-version (get action "last-processed-version")
-            :id (get action "id")})))
+            :library (:library action)
+            :library-version (:last-processed-version action)
+            :id (:id action)})))
 
 (defn get-action-header [data]
   (let [add? (nil? (:id data))]

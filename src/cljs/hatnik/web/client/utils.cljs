@@ -1,5 +1,7 @@
 (ns hatnik.web.client.utils
   (:require [schema.core :as s]
+            [hatnik.web.client.message :as msg]
+            [jayq.core :as jq]
             [goog.dom :as gdom]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]))
@@ -57,3 +59,17 @@
                 :text (dom/input attrs)
                 :textarea (dom/textarea attrs)))
             feedback)))
+
+(defn ajax [url type data success & [error]]
+  (jq/ajax url
+           {:type type
+            :data (if data
+                    (.stringify js/JSON
+                                (clj->js data))
+                    nil)
+            :contentType "application/json"
+            :dataType "json"
+            :async true
+            :error (or error
+                       #(msg/danger "Invalid request. Please, check request data."))
+            :success #(success (js->clj % :keywordize-keys true))}))

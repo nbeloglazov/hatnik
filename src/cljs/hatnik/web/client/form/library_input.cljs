@@ -11,10 +11,10 @@
 
 (defn library-check-handler [reply owner]
   (let [resp (js->clj reply)
-        status (if (= "ok" (get resp "result"))
+        status (if (= "ok" (:result resp))
                  "has-success"
                  "has-error")]
-    (set-state owner status (get resp "version") false)))
+    (set-state owner status (:version resp) false)))
 
 (defn check-library-exists [owner timer library]
   (js/clearTimeout timer)

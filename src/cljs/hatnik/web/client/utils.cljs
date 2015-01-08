@@ -67,4 +67,4 @@
             :async true
             :error (or error
                        #(msg/danger "Invalid request. Please, check request data."))
-            :success #(success (js->clj %))}))
+            :success #(success (js->clj % :keywordize-keys true))}))

@@ -13,8 +13,8 @@
 
 (defn wrap-error-alert [callback]
   (fn [response]
-    (when (= "error" (get response "result"))
-      (msg/danger (get response "message")))
+    (when (= "error" (:result response))
+      (msg/danger (:message response)))
     (callback response)))
 
 (defn get-github-repos [github-name success-handler error-handler]
@@ -22,13 +22,13 @@
            "GET" nil success-handler error-handler))
 
 (defn common-update-callback [msg data response]
-  (when (= "ok" (get response "result"))
+  (when (= "ok" (:result response))
     (state/update-all-views)
     (.modal ($ :#iModalAddAction) "hide")
     (.modal ($ :#iModalProjectMenu) "hide")))
 
 (defn create-new-project-callback [name response]
-  (when (= "ok" (get response "result"))
+  (when (= "ok" (:result response))
     (state/update-all-views)
     (.modal ($ :#iModalProjectMenu) "hide")))
 
@@ -38,7 +38,7 @@
     (u/ajax "/api/projects" "POST" {:name name} #(create-new-project-callback name %))))
 
 (defn create-new-action-callback [data response]
-  (when (= "ok" (get response "result"))
+  (when (= "ok" (:result response))
     (state/update-all-views)
     (.modal ($ :#iModalAddAction) "hide")))
 
@@ -106,9 +106,9 @@
        (u/ajax "/api/actions/test" "POST" data
             (fn [response]
               (done-callback)
-              (case (get response "result")
+              (case (:result response)
                 "ok" (msg/success (:text-done config))
-                "error" (msg/danger (get response "message")))))))))
+                "error" (msg/danger (:message response)))))))))
 
 (def action-update-error-message "Couldn't update the action. Please file a bug if the issue persists.")
 

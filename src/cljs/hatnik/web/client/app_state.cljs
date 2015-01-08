@@ -7,10 +7,10 @@
          :user {}}))
 
 (defn update-projects-list [data]
-  (when (= "ok" (get data "result"))
+  (when (= "ok" (:result data))
     (swap! app-state
            assoc-in [:projects]
-           (get data "projects"))))
+           (:projects data))))
 
 (defn add-new-project [id name]
   (swap! app-state
@@ -21,10 +21,10 @@
                    :projects))))
 
 (defn update-user-data [data]
-  (when (= "ok" (get data "result"))
+  (when (= "ok" (:result data))
     (swap! app-state
            assoc-in [:user :email]
-           (get data "email"))))
+           (:email data))))
 
 (defn set-current-project [id]
   (swap! app-state

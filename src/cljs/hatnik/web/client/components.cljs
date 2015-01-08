@@ -56,7 +56,7 @@
     (render [this]
       (let [id (:project-id data)
             email (:user-email data)
-            library (get data "library")
+            library (:library data)
             library-class (if (< (count library) 27)
                             "" ; regular class
                             "long-name")]
@@ -71,7 +71,7 @@
                                  :title library}
                             library)
                    (dom/div #js {:className "version"}
-                            (get data "last-processed-version"))))))))
+                            (:last-processed-version data))))))))
 
 (defn render-action [data]
   (if (= (:type data) :add)
@@ -86,7 +86,7 @@
         (map (fn [act]
                (dom/div #js {:className "col-sm-6 col-md-4 col-lg-3 prj-list-item"}
                         (render-action (assoc act :project-id id
-                                              :type (get act "type")
+                                              :type (:type act)
                                               :user-email email))))
              actions)]
     (apply dom/div #js {:className "row"}
@@ -97,21 +97,19 @@
                                              :user-email email}))]))))
 
 (defn project-header-menu-button [project]
-  (let [id (get project "id")
-        name (get project "name")]
-    (dom/div #js {:className "dropdown pull-right"}
-             (dom/button
-              #js {:className "btn btn-default"
-                   :type "button"
-                   :onClick #(pmenu/show {:project-id id
-                                          :name name})}
-              (dom/span #js {:className "glyphicon glyphicon-pencil pull-right"})))))
+  (dom/div #js {:className "dropdown pull-right"}
+           (dom/button
+            #js {:className "btn btn-default"
+                 :type "button"
+                 :onClick #(pmenu/show {:project-id (:id project)
+                                        :name (:name project)})}
+            (dom/span #js {:className "glyphicon glyphicon-pencil pull-right"}))))
 
 (defn project-view [prj owner]
   (reify
     om/IRender
     (render [_]
-      (let [id (str "__PrjList" (get prj "id"))]
+      (let [id (str "__PrjList" (:id prj))]
        (dom/div
         #js {:className "panel panel-default panel-primary"}
         (dom/div
@@ -121,13 +119,13 @@
           (dom/a
            #js {:data-toggle "collapse"
                 :href (str "#" id)}
-           (dom/div #js {:className "bg-primary"} (get prj "name"))))
+           (dom/div #js {:className "bg-primary"} (:name prj))))
          (project-header-menu-button prj))
         (dom/div #js {:className "panel-collapse collapse in"
                       :id id}
                  (dom/div #js {:className "panel-body"}
-                          (actions-table (get prj "id") 
-                                         (get prj "actions") 
+                          (actions-table (:id prj)
+                                         (:actions prj)
                                          (-> prj :user :email)))))))))
 
 (defn project-list [data owner]

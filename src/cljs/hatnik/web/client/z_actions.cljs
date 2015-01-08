@@ -17,10 +17,6 @@
       (msg/danger (:message response)))
     (callback response)))
 
-(defn get-github-repos [github-name success-handler error-handler]
-  (u/ajax (str "https://api.github.com/users/" github-name "/repos")
-           "GET" nil success-handler error-handler))
-
 (defn common-update-callback [msg data response]
   (when (= "ok" (:result response))
     (state/update-all-views)

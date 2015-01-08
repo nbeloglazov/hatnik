@@ -1,7 +1,6 @@
 (ns hatnik.web.client.form.github-issue
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [hatnik.web.client.z-actions :as action]
             [hatnik.web.client.utils :as u]
             [hatnik.schema :as schm])
   (:use [clojure.string :only [split replace]]))
@@ -9,10 +8,14 @@
 (defn set-repo-status [owner status]
   (om/set-state! owner :repo-status status))
 
-(defn github-repos-handler [reply owner repo]
-  (let [exists? (some #(= repo (:name %)) reply)]
-    (set-repo-status owner
-                     (if exists? "has-success" "has-error"))))
+(defn get-github-repo [repo success-handler error-handler]
+  (u/ajax (str "https://api.github.com/repos/" repo)
+           "GET" nil success-handler error-handler))
+
+(defn github-repos-handler [repo owner]
+  (set-repo-status owner
+                   (if (contains? repo :id)
+                     "has-success" "has-error")))
 
 (defn github-issue-on-change [gh-repo timer owner]
   (js/clearTimeout timer)
@@ -22,9 +25,8 @@
                   (= "" user) (= "" repo))
       (let [timer (js/setTimeout
                    (fn []
-                     (action/get-github-repos
-                      user
-                      #(github-repos-handler % owner repo)
+                     (get-github-repo gh-repo
+                      #(github-repos-handler % owner)
                       #(set-repo-status owner "has-error")))
                    1000)]
         (om/set-state! owner :timer timer)))))

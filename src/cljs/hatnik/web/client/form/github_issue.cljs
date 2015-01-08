@@ -10,8 +10,7 @@
   (om/set-state! owner :repo-status status))
 
 (defn github-repos-handler [reply owner repo]
-  (let [rest (js->clj reply)
-        exists? (some #(= repo (get % "name")) rest)]
+  (let [exists? (some #(= repo (get % "name")) reply)]
     (set-repo-status owner
                      (if exists? "has-success" "has-error"))))
 

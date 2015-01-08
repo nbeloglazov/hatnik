@@ -4,7 +4,8 @@
             [hatnik.web.client.app-state :as state]
             [hatnik.web.client.form.add-action :as add-action]
             [hatnik.web.client.form.project-menu :as pmenu]
-            [hatnik.web.client.z-actions :as action])
+            [hatnik.web.client.z-actions :as action]
+            [hatnik.web.client.utils :as u])
   (:use [jayq.core :only [$]]))
 
 (defn ^:export add-new-project []
@@ -147,13 +148,13 @@
 
     om/IWillMount
     (will-mount [this]
-      (.send goog.net.XhrIo "/api/current-user" state/update-user-data)
-      (.send goog.net.XhrIo "/api/projects" state/update-projects-list))
+      (u/ajax "/api/current-user" "GET" nil state/update-user-data)
+      (state/update-all-views))
 
-    om/IRender 
+    om/IRender
     (render [this]
       (dom/div nil
-      (dom/div 
+      (dom/div
        #js {:className "row"}
        (dom/div #js {:className "col-md-2"}
                 (dom/a #js {:className "btn btn-success"

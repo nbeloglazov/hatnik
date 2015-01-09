@@ -29,10 +29,11 @@
     (.modal ($ :#iModalProjectMenu) "hide")))
 
 (defn send-new-project-request [name]
-  (if (s/check schm/Project {:name name
-                             :type "regular"})
-    (msg/danger default-error-message)
-    (u/ajax "/api/projects" "POST" {:name name} #(create-new-project-callback name %))))
+  (let [project {:name name
+                 :type "regular"}]
+    (if (s/check schm/Project project)
+      (msg/danger default-error-message)
+      (u/ajax "/api/projects" "POST" project #(create-new-project-callback name %)))))
 
 (defn create-new-action-callback [data response]
   (when (= "ok" (:result response))

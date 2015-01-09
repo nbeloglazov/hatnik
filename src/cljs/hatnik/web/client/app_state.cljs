@@ -34,5 +34,5 @@
   (u/ajax "/api/projects" "GET" nil update-projects-list))
 
 (defn update-project-actions [action]
-  (update-all-view))
+  (update-all-views))
 

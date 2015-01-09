@@ -3,14 +3,16 @@
             [om.dom :as dom :include-macros true]
             [hatnik.web.client.z-actions :as action]
             [hatnik.web.client.utils :as u]
+            [hatnik.web.client.app-state :as app-state]
+            [hatnik.web.client.form.add-action :as action-form]
             [hatnik.schema :as schm]
             [jayq.core :refer [$]]))
 
-(defn header [data]
+(defn header [project]
   (dom/div
    #js {:className "modal-header"}
    (dom/h4 #js {:className "modal-title"}
-           (if (:project-id data)
+           (if (:id project)
              "Update project"
              "Create project")
            (when (u/mobile?)
@@ -19,12 +21,26 @@
                    :onClick #(.modal ($ :#iModalProjectMenu) "hide")}
               "Close")))))
 
-(defn body [data]
+(defn build-file-body-addition [project]
+  [(u/form-field {:data project
+                  :field :build-file
+                  :id "project-name"
+                  :title "Build file"
+                  :type :text
+                  :validator (schm/string-of-length 1 1028)})
+   (dom/div
+    #js {:className "form-group"}
+    (dom/h4
+     #js {:className "control-label col-sm-2 no-padding-right"}
+     "Action"))
+   (om/build action-form/action-input-form (:action project))])
+
+(defn body [project]
   (dom/div
    #js {:className "modal-body"}
-   (dom/form
+   (apply dom/form
     #js {:className "form-horizontal"}
-    (u/form-field {:data data
+    (u/form-field {:data project
                    :field :name
                    :id "project-name"
                    :title "Name"
@@ -44,22 +60,29 @@
               (dom/label
                #js {:className "radio-inline"}
                (dom/input #js {:type "radio"
-                               :checked (if (= (:type data) value)
+                               :checked (if (= (:type project) value)
                                           "checked"
                                           nil)
                                :value value
-                               :onChange #(om/update! data :type value)})
-               name)))))))
+                               :onChange #(om/update! project :type value)})
+               name))))
 
-(defn footer [data]
-  (let [id (:project-id data)
-        name (:name data)]
+    (if (= (:type project) "build-file")
+      (build-file-body-addition project)
+      []))))
+
+(defn footer [project]
+  (let [id (:id project)
+        name (:name project)]
+    (println name)
     (dom/div
      #js {:className "modal-footer"}
      (dom/div
       #js {:className "btn btn-primary pull-left"
            :onClick (if id
-                      #(action/update-project id name)
+                      #(do
+                         (println id name)
+                         (action/update-project id name))
                       #(action/send-new-project-request name))}
       (if id
         "Update"
@@ -69,7 +92,7 @@
                      :onClick #(action/delete-project id)}
                 "Delete")))))
 
-(defn- project-menu [data owner]
+(defn- project-menu [project owner]
   (reify
     om/IDidMount
     (did-mount [this]
@@ -81,10 +104,24 @@
        #js {:className "modal-dialog"}
        (dom/div
         #js {:className "modal-content"}
-        (header data)
-        (body data)
-        (footer data))))))
+        (header project)
+        (body project)
+        (footer project))))))
+
+(defn adapt-action-in-project [project]
+  (let [email (-> @app-state/app-state :user :email)
+        action (:action project)
+        type (:type action "email")]
+    (assoc project :action
+           (merge action-form/default-state
+                  (if action
+                    (action-form/get-state-from-action action)
+                    {})
+                  {:type type
+                   :email-address email
+                   :library "none"
+                   :last-processed-version "none"}))))
 
 (defn show [project]
-  (om/root project-menu project
+  (om/root project-menu (adapt-action-in-project project)
            {:target (.getElementById js/document "iModalProjectMenu")}))

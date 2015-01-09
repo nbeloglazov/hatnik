@@ -21,12 +21,16 @@
    "github-issue" "Create test issue"
    "github-pull-request" "Open test pull request"})
 
+(defn action-from-project? [data]
+  (= (:library data) (:last-processed-version data) "none"))
+
 (defn action-input-form [data owner]
   (reify
     om/IRender
     (render [this]
       (dom/form #js {:className "form-horizontal"}
-                (om/build library-input-component data)
+                (when-not (action-from-project? data)
+                  (om/build library-input-component data))
                 (om/build action-type-component data)
                 (when-let [component (action-components (:type data))]
                   (om/build component data))))
@@ -110,7 +114,7 @@
    :file-operations (keywordize-keys (:operations action))
    :gh-repo (:repo action)})
 
-(defmulti get-init-state #(:type %))
+(defmulti get-init-state :type)
 
 (defmethod get-init-state :add [data _]
   (merge default-state

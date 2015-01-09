@@ -102,9 +102,7 @@
            (dom/button
             #js {:className "btn btn-default"
                  :type "button"
-                 :onClick #(pmenu/show {:project-id (:id project)
-                                        :name (:name project)
-                                        :type (:type project)})}
+                 :onClick #(pmenu/show @project)}
             (dom/span #js {:className "glyphicon glyphicon-pencil pull-right"}))))
 
 (defn project-view [prj owner]

@@ -105,8 +105,10 @@
 (j/defjob UpdateActionsJob [ctx]
   (try
     (timbre/info "Running UpdateActions job")
-    (let [data (into {} (.getMergedJobDataMap ctx))]
-      (update-all-actions (data "db") (data "perform-action") (data "utils")))
+    (let [data (.. ctx getScheduler getContext)]
+      (update-all-actions (get data "db")
+                          (get data "perform-action")
+                          (get data "utils")))
     (catch Exception e
       (timbre/error e "Error while executing UpdateActionsJob"))))
 
@@ -119,13 +121,9 @@
     (timbre/info "Initialising quartz and starting job. Quartz config:"
                  (:quartz config))
     (let [scheduler (-> (qs/initialize) qs/start)
-          data (org.quartz.JobDataMap. {"db" db
-                                        "perform-action" perform-action
-                                        "utils" utils})
           job (j/build
                (j/of-type UpdateActionsJob)
-               (j/with-identity (j/key "jobs.updateactions.1"))
-               (.usingJobData data))
+               (j/with-identity (j/key "jobs.updateactions.1")))
           start-at (DateBuilder/futureDate (-> config
                                                :quartz
                                                :initial-delay-in-seconds)
@@ -139,6 +137,10 @@
                                        (-> config
                                            :quartz
                                            :interval-in-seconds)))))]
+      (.putAll (.getContext scheduler)
+               {"db" db
+                "perform-action" perform-action
+                "utils" utils})
       (qs/schedule scheduler job trigger)
       (assoc component :scheduler scheduler)))
 
@@ -151,9 +153,8 @@
 
 (comment
 
-  (def worker (map->Worker {:config (hatnik.config/get-config)}))
-
-  (component/start worker)
+  (def worker (-> (map->Worker {:config (hatnik.config/get-config)})
+                  component/start))
 
   (component/stop worker)
 

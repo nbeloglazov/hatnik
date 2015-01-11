@@ -109,17 +109,17 @@
 (j/defjob UpdateActionsJob [ctx]
   (try
     (timbre/info "Running UpdateActions job")
-    (let [data (into {} (.getMergedJobDataMap ctx))]
-      (update-all-actions (data "db") (data "perform-action") (data "utils")))
+    (let [data (.. ctx getScheduler getContext)]
+      (update-all-actions (get data "db")
+                          (get data "perform-action")
+                          (get data "utils")))
     (catch Exception e
       (timbre/error e "Error while executing UpdateActionsJob"))))
 
-(defn schedule-job [config scheduler job name data]
-  (let [data (org.quartz.JobDataMap. data)
-        job (j/build
+(defn schedule-job [config scheduler job name]
+  (let [job (j/build
              (j/of-type job)
-             (j/with-identity (j/key name))
-             (.usingJobData data))
+             (j/with-identity (j/key name)))
         start-at (DateBuilder/futureDate (-> config
                                              :quartz
                                              :initial-delay-in-seconds)
@@ -144,22 +144,22 @@
                  (:quartz config))
     (let [scheduler (-> (qs/initialize) qs/start)
           jobs (-> config :quartz :jobs)]
+      (.putAll (.getContext scheduler)
+               {"db" db
+                "perform-action" perform-action
+                "utils" utils})
       (when (contains? jobs :update-actions)
         (timbre/info "Scheduling UpdateActionsJob")
         (schedule-job config
                       scheduler
                       UpdateActionsJob
-                      "jobs.updateactions.1"
-                      {"db" db
-                       "perform-action" perform-action
-                       "utils" utils}))
+                      "jobs.updateactions.1"))
       (when (contains? jobs :sync-build-file-actions)
         (timbre/info "Scheduling SyncBuildFileActionsJob")
         (schedule-job config
                       scheduler
                       hatnik.worker.build_file_worker.SyncBuildFileActionsJob
-                      "jobs.syncbuildfileactions.1"
-                      {"db" db}))
+                      "jobs.syncbuildfileactions.1"))
       (assoc component :scheduler scheduler)))
 
   (stop [component]
@@ -175,9 +175,8 @@
 
 (comment
 
-  (def worker (map->Worker {:config (hatnik.config/get-config)}))
-
-  (component/start worker)
+  (def worker (-> (map->Worker {:config (hatnik.config/get-config)})
+                  component/start))
 
   (component/stop worker)
 

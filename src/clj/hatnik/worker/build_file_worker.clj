@@ -37,7 +37,7 @@
 (j/defjob SyncBuildFileActionsJob [ctx]
   (try
     (timbre/info "Running SyncBuildFileActions job")
-    (let [data (into {} (.getMergedJobDataMap ctx))]
-      (sync-build-file-actions (data "db")))
+    (let [data (.. ctx getScheduler getContext)]
+      (sync-build-file-actions (get data "db")))
     (catch Exception e
       (timbre/error e "Error while executing SyncBuildFileActions job"))))

@@ -23,18 +23,6 @@
     (.modal ($ :#iModalAddAction) "hide")
     (.modal ($ :#iModalProjectMenu) "hide")))
 
-(defn create-new-project-callback [name response]
-  (when (= "ok" (:result response))
-    (state/update-all-views)
-    (.modal ($ :#iModalProjectMenu) "hide")))
-
-(defn send-new-project-request [name]
-  (let [project {:name name
-                 :type "regular"}]
-    (if (s/check schm/Project project)
-      (msg/danger default-error-message)
-      (u/ajax "/api/projects" "POST" project #(create-new-project-callback name %)))))
-
 (defn create-new-action-callback [data response]
   (when (= "ok" (:result response))
     (state/update-all-views)
@@ -126,19 +114,37 @@
    {} (wrap-error-alert
        #(common-update-callback "Couldn't delete the action. Please file a bug if the issue persists." {} %))))
 
-(defn ^:export delete-project [project-id]
+(defn create-new-project-callback [name response]
+  (when (= "ok" (:result response))
+    (state/update-all-views)
+    (.modal ($ :#iModalProjectMenu) "hide")))
+
+(defn prepare-project-for-api
+  "Converts project map that has client-specific structure to a map, that conforms Project schema
+  and can be sent to server."
+  [project]
+  {:name (:name project)
+   :type "regular"})
+
+(defn create-project [project]
+  (let [project (prepare-project-for-api project)]
+    (if (s/check schm/Project project)
+      (msg/danger default-error-message)
+      (u/ajax "/api/projects" "POST" project #(create-new-project-callback name %)))))
+
+(defn delete-project [project-id]
   (u/ajax
    (str "/api/projects/" project-id) "DELETE"
    {} (wrap-error-alert
        #(common-update-callback "Couldn't delete the project. Please file a bug if the issue persists." {} %))))
 
-(defn ^:export update-project [project-id new-name]
-  (let [data {:name new-name
-              :type "regular"}]
-    (if (s/check schm/Project data)
+(defn update-project [project]
+  (let [id (:id project)
+        project (prepare-project-for-api project)]
+    (if (s/check schm/Project project)
       (msg/danger default-error-message)
       (u/ajax
-       (str "/api/projects/" project-id) "PUT"  data
+       (str "/api/projects/" id) "PUT"  project
        (wrap-error-alert #(common-update-callback "Couldn't rename the project. Please file a bug if the issue persists." {} %))))))
 
 

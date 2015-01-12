@@ -72,18 +72,14 @@
       []))))
 
 (defn footer [project]
-  (let [id (:id project)
-        name (:name project)]
-    (println name)
+  (let [id (:id project)]
     (dom/div
      #js {:className "modal-footer"}
      (dom/div
       #js {:className "btn btn-primary pull-left"
            :onClick (if id
-                      #(do
-                         (println id name)
-                         (action/update-project id name))
-                      #(action/send-new-project-request name))}
+                      #(action/update-project project)
+                      #(action/create-project project))}
       (if id
         "Update"
         "Create"))

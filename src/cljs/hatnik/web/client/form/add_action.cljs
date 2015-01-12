@@ -24,16 +24,17 @@
 (defn action-from-project? [data]
   (= (:library data) (:last-processed-version data) "none"))
 
-(defn action-input-form [data owner]
+(defn action-input-elements [data owner]
   (reify
     om/IRender
     (render [this]
-      (dom/form #js {:className "form-horizontal"}
-                (when-not (action-from-project? data)
-                  (om/build library-input-component data))
-                (om/build action-type-component data)
-                (when-let [component (action-components (:type data))]
-                  (om/build component data))))
+      (dom/div
+       nil
+       (when-not (action-from-project? data)
+         (om/build library-input-component data))
+       (om/build action-type-component data)
+       (when-let [component (action-components (:type data))]
+         (om/build component data))))
 
     om/IDidUpdate
     (did-update [this prev-props prev-state]
@@ -159,7 +160,8 @@
         (dom/div #js {:className "modal-header"}
                  (get-action-header data))
         (dom/div #js {:className "modal-body"}
-                 (om/build action-input-form data))
+                 (dom/form #js {:className "form-horizontal"}
+                           (om/build action-input-elements data)))
         (dom/div #js {:className "modal-footer"}
                  (om/build action-footer data)))))
 

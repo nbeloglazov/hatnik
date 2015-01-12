@@ -27,13 +27,14 @@
                   :id "project-name"
                   :title "Build file"
                   :type :text
-                  :validator (schm/string-of-length 1 1028)})
+                  :validator (schm/string-of-length 1 1028)
+                  :placeholder "github username/repo or URL to project.clj"})
    (dom/div
     #js {:className "form-group"}
     (dom/h4
      #js {:className "control-label col-sm-2 no-padding-right"}
      "Action"))
-   (om/build action-form/action-input-form (:action project))])
+   (om/build action-form/action-input-elements (:action project))])
 
 (defn body [project]
   (dom/div
@@ -64,6 +65,7 @@
                                           "checked"
                                           nil)
                                :value value
+                               :disabled (if (:id project) "disabled" "")
                                :onChange #(om/update! project :type value)})
                name))))
 
@@ -115,8 +117,8 @@
                     {})
                   {:type type
                    :email-address email
-                   :library "none"
-                   :last-processed-version "none"}))))
+                   :project-id "none"
+                   :library "none"}))))
 
 (defn show [project]
   (om/root project-menu (adapt-action-in-project project)

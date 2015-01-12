@@ -73,9 +73,16 @@
                           :text-progress "Creating test pull request on GitHub..."
                           :text-done "The pull request is created. Check the repository."}})
 
+(defn convert-action-to-schema
+  "Converts action represented by a map with client-specific structur to a map that conforms
+  Action schema and can be sent to server."
+  [action]
+  (let [build (-> (:type action) actions-config :build)]
+    (build action)))
+
 (defn send-new-action [data-pack]
-  (let [{:keys [build schema]} (actions-config (:type data-pack))
-        data (build data-pack)]
+  (let [schema (-> data-pack :type actions-config :schema)
+        data (convert-action-to-schema data-pack)]
     (if (s/check schema data)
       (msg/danger default-error-message)
       (u/ajax "/api/actions" "POST" data
@@ -83,7 +90,7 @@
 
 (defn test-action [data-pack done-callback]
   (let [config (actions-config (:type data-pack))
-        data ((:build config) data-pack)]
+        data (convert-action-to-schema data-pack)]
     (if (s/check (:schema config) data)
       (do (msg/danger default-error-message)
           (done-callback))
@@ -99,8 +106,8 @@
 (def action-update-error-message "Couldn't update the action. Please file a bug if the issue persists.")
 
 (defn update-action [data-pack]
-  (let [{:keys [build schema]} (actions-config (:type data-pack))
-        data (build data-pack)]
+  (let [schema (-> data-pack :type actions-config :schema)
+        data (convert-action-to-schema data-pack)]
     (if (s/check schema data)
       (msg/danger default-error-message)
       (u/ajax
@@ -119,15 +126,19 @@
     (state/update-all-views)
     (.modal ($ :#iModalProjectMenu) "hide")))
 
-(defn prepare-project-for-api
-  "Converts project map that has client-specific structure to a map, that conforms Project schema
+(defn convert-project-to-schema
+  "Converts project map that has client-specific structure to a map that conforms Project schema
   and can be sent to server."
   [project]
-  {:name (:name project)
-   :type "regular"})
+  (let [base (select-keys project [:name :type])]
+    (if (= (:type project) "build-file")
+      (assoc base
+             :build-file (:build-file project)
+             :action (convert-action-to-schema (:action project)))
+      base)))
 
 (defn create-project [project]
-  (let [project (prepare-project-for-api project)]
+  (let [project (convert-project-to-schema project)]
     (if (s/check schm/Project project)
       (msg/danger default-error-message)
       (u/ajax "/api/projects" "POST" project #(create-new-project-callback name %)))))
@@ -140,7 +151,7 @@
 
 (defn update-project [project]
   (let [id (:id project)
-        project (prepare-project-for-api project)]
+        project (convert-project-to-schema project)]
     (if (s/check schm/Project project)
       (msg/danger default-error-message)
       (u/ajax

@@ -73,18 +73,26 @@
       (build-file-body-addition project)
       []))))
 
-(defn footer [project]
-  (let [id (:id project)]
+(defn footer [project state owner]
+  (let [id (:id project)
+        action-text (if id "Update" "Create")]
     (dom/div
      #js {:className "modal-footer"}
-     (dom/div
-      #js {:className "btn btn-primary pull-left"
-           :onClick (if id
-                      #(action/update-project project)
-                      #(action/create-project project))}
-      (if id
-        "Update"
-        "Create"))
+     (if (:test-in-progress? state)
+       (dom/span #js {:className "test-spinner pull-left"}
+                 (dom/img #js {:src "/img/ajax-loader.gif"
+                               :alt action-text
+                               :title action-text}))
+       (dom/div
+        #js {:className "btn btn-primary pull-left"
+             :onClick (fn []
+                        (let [done-callback #(om/set-state!
+                                              owner :test-in-progress? false)]
+                          (if id
+                            (action/update-project project done-callback)
+                            (action/create-project project done-callback))
+                          (om/set-state! owner :test-in-progress? true)))}
+        action-text))
      (when id
        (dom/div #js {:className "btn btn-danger pull-right"
                      :onClick #(action/delete-project id)}
@@ -92,19 +100,23 @@
 
 (defn- project-menu [project owner]
   (reify
+    om/IInitState
+    (init-state [this]
+      {:test-in-progress? false})
+
     om/IDidMount
     (did-mount [this]
       (.modal ($ :#iModalProjectMenu)))
 
-    om/IRender
-    (render [this]
+    om/IRenderState
+    (render-state [this state]
       (dom/div
        #js {:className "modal-dialog"}
        (dom/div
         #js {:className "modal-content"}
         (header project)
         (body project)
-        (footer project))))))
+        (footer project state owner))))))
 
 (defn adapt-action-in-project [project]
   (let [email (-> @app-state/app-state :user :email)

@@ -137,11 +137,14 @@
              :action (convert-action-to-schema (:action project)))
       base)))
 
-(defn create-project [project]
+(defn create-project [project done-callback]
   (let [project (convert-project-to-schema project)]
     (if (s/check schm/Project project)
       (msg/danger default-error-message)
-      (u/ajax "/api/projects" "POST" project #(create-new-project-callback name %)))))
+      (u/ajax "/api/projects" "POST" project
+              (wrap-error-alert
+               #(do (done-callback) (create-new-project-callback name %))))
+)))
 
 (defn delete-project [project-id]
   (u/ajax
@@ -149,14 +152,17 @@
    {} (wrap-error-alert
        #(common-update-callback "Couldn't delete the project. Please file a bug if the issue persists." {} %))))
 
-(defn update-project [project]
+(defn update-project [project done-callback]
   (let [id (:id project)
         project (convert-project-to-schema project)]
     (if (s/check schm/Project project)
       (msg/danger default-error-message)
       (u/ajax
        (str "/api/projects/" id) "PUT"  project
-       (wrap-error-alert #(common-update-callback "Couldn't rename the project. Please file a bug if the issue persists." {} %))))))
+       (wrap-error-alert #(do
+                            (done-callback)
+                            (common-update-callback "Couldn't update the project. Please file a bug if the issue persists." {} %)))
+))))
 
 
 (defn get-library [library callback]

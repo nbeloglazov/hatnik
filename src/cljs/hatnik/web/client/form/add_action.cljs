@@ -22,7 +22,7 @@
    "github-pull-request" "Open test pull request"})
 
 (defn action-from-project? [data]
-  (= (:library data) (:last-processed-version data) "none"))
+  (= (:library data) (:project-id data) "none"))
 
 (defn action-input-elements [data owner]
   (reify

@@ -140,7 +140,8 @@
 (defn create-project [project done-callback]
   (let [project (convert-project-to-schema project)]
     (if (s/check schm/Project project)
-      (msg/danger default-error-message)
+      (do (msg/danger default-error-message)
+          (done-callback))
       (u/ajax "/api/projects" "POST" project
               (wrap-error-alert
                #(do (done-callback) (create-new-project-callback name %))))
@@ -156,7 +157,8 @@
   (let [id (:id project)
         project (convert-project-to-schema project)]
     (if (s/check schm/Project project)
-      (msg/danger default-error-message)
+      (do (msg/danger default-error-message)
+          (done-callback))
       (u/ajax
        (str "/api/projects/" id) "PUT"  project
        (wrap-error-alert #(do

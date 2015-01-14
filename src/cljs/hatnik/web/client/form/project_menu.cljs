@@ -68,10 +68,17 @@
                 "Type")
      (apply dom/div
             #js {:className "col-sm-10"}
-            (for [[name value] [["regular" "regular"]
-                                ["build file" "build-file"]]]
+            (for [[name value tooltip] [["build file" "build-file"
+                                         (str "Libraries extracted from build file. "
+                                              "They all share same settings.")]
+                                        ["manual" "regular"
+                                         (str "Action for each library created manually. "
+                                              "Each action has its own settings.")]]]
               (dom/label
-               #js {:className "radio-inline"}
+               #js {:className "radio-inline"
+                    :data-title tooltip
+                    :data-toggle "tooltip"
+                    :data-container "body"}
                (dom/input #js {:type "radio"
                                :checked (if (= (:type project) value)
                                           "checked"
@@ -100,10 +107,10 @@
              :onClick (fn []
                         (let [done-callback #(om/set-state!
                                               owner :test-in-progress? false)]
+                          (om/set-state! owner :test-in-progress? true)
                           (if id
                             (action/update-project project done-callback)
-                            (action/create-project project done-callback))
-                          (om/set-state! owner :test-in-progress? true)))}
+                            (action/create-project project done-callback))))}
         action-text))
      (when id
        (dom/div #js {:className "btn btn-danger pull-right"
@@ -116,9 +123,16 @@
     (init-state [this]
       {:test-in-progress? false})
 
+    om/IDidUpdate
+    (did-update [this prev-props prev-state]
+      (when-not (u/mobile?)
+        (.tooltip ($ "[data-toggle='tooltip']") "fixTitle")))
+
     om/IDidMount
     (did-mount [this]
-      (.modal ($ :#iModalProjectMenu)))
+      (.modal ($ :#iModalProjectMenu))
+      (when-not (u/mobile?)
+        (.tooltip ($ "[data-toggle='tooltip']"))))
 
     om/IRenderState
     (render-state [this state]

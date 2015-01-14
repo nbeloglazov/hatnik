@@ -10,7 +10,8 @@
 
 (defn ^:export add-new-project []
   (pmenu/show {:name ""
-               :type "regular"}))
+               :type "regular"
+               :build-file ""}))
 
 (defn add-new-action-card [data owner]
   (reify

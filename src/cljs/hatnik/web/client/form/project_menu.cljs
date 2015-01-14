@@ -21,6 +21,15 @@
                    :onClick #(.modal ($ :#iModalProjectMenu) "hide")}
               "Close")))))
 
+(defn update-build-file-field [project value]
+  (let [gh-repo (-> project :action :gh-repo)
+        new-gh-repo (if (= gh-repo (:build-file project))
+                      value
+                      gh-repo)]
+    (-> project
+        (assoc :build-file value)
+        (assoc-in [:action :gh-repo] new-gh-repo))))
+
 (defn build-file-body-addition [project]
   [(u/form-field {:data project
                   :field :build-file
@@ -28,7 +37,10 @@
                   :title "Build file"
                   :type :text
                   :validator (schm/string-of-length 1 1028)
-                  :placeholder "github username/repo or URL to project.clj"})
+                  :placeholder "github username/repo or URL to project.clj"
+                  :on-change (fn [event]
+                               (om/transact! project
+                                             #(update-build-file-field % (u/ev-value event))))})
    (dom/div
     #js {:className "form-group"}
     (dom/h4

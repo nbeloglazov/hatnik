@@ -333,3 +333,52 @@
                                    :actions (map-by-id [act-full])}]))
         ]))
 
+(defn create-github-pr-action [proj-id operations library version]
+  (let [action {:project-id proj-id
+                :type "github-pull-request"
+                :repo "quil/quil"
+                :body (str "Template body PR "
+                           (rand-int 100))
+                :title (str "Template title PR "
+                            (rand-int 100))
+                :operations operations
+                :library library}
+        resp (ok? (http :post "/actions" action))]
+    (assert (= (:last-processed-version resp) version))
+    (merge action (dissoc resp :result))))
+
+(deftest test-api-github-pull-request-actions
+  (let [quil-ver (-> (http :get "/library-version?library=quil")
+                     ok? :version)
+        ring-ver (-> (http :get "/library-version?library=ring")
+                     ok? :version)
+        email "me@email.com"
+
+        resp (ok? (http :get (str "/force-login?skip-dummy-data=true&email="
+                                  email)))
+
+        ; Check that default project is create for user
+        projects (-> (http :get "/projects") ok? :projects)
+        proj-id (-> projects first first name)
+        _ (data-equal projects
+                      (map-by-id [{:name "Default" :id proj-id
+                                   :actions {}}]))
+
+        ; Create pull request action with custom operations
+        act-custom (create-github-pr-action
+                    proj-id
+                    [{:file "project.clj"
+                      :regex "hello"
+                      :replacement "world"}]
+                    "ring"
+                    ring-ver)
+        act-project-clj (create-github-pr-action
+                         proj-id
+                         "project.clj"
+                         "quil"
+                         quil-ver)
+        expected [{:name "Default" :id proj-id
+                   :actions (map-by-id [act-custom
+                                        act-project-clj])}]
+        _ (data-equal (-> (http :get "/projects") ok? :projects)
+                      (map-by-id expected))]))

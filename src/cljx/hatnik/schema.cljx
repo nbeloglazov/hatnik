@@ -41,6 +41,11 @@
    :regex (string-of-length 1 128)
    :replacement (string-of-length 1 128)})
 
+(def PredefinedOperations
+  "List of harcoded operations that can be used instead of manually
+  setting them up."
+  (s/enum "project.clj"))
+
 (def Project
   "Schema for project. Project has only 1 field - name in API."
   {:name (string-of-length 1 128)})
@@ -72,7 +77,8 @@
    :title TemplateTitle
    :body TemplateBody
    :repo GithubRepository
-   :operations [ReplaceOperation]})
+   :operations (s/either [ReplaceOperation]
+                         PredefinedOperations)})
 
 (def Action
   "Schema for action. Essentially it is the union of all actions."

@@ -31,6 +31,8 @@
 (defn create-project [driver name]
   (.click (find-element driver "#add-project"))
   (wait-until-dialog-visible driver :project)
+  ; Switch project type to regular.
+  (.click (find-element driver "input[type=radio][value=regular]"))
   (set-project-name-field driver name)
   (.click (find-element driver
                         "#iModalProjectMenu .modal-footer .btn-primary"))

@@ -50,7 +50,9 @@
    :repo (:gh-repo data-pack)
    :title (:title data-pack)
    :body (:body data-pack)
-   :operations (:file-operations data-pack)})
+   :operations (if (= (:file-operation-type data-pack) "manual")
+                 (:file-operations data-pack)
+                 (:file-operation-type data-pack))})
 
 (defn build-noop-action [data-pack]
   {:type "noop"

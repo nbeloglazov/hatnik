@@ -43,7 +43,7 @@
         params (into {}
                      (for [id [:library-input :action-type :email-subject :email-body
                                :gh-repo :gh-issue-title :gh-issue-body
-                               :gh-title :gh-body]
+                               :gh-title :gh-body :file-operation-type]
                            :let [value (element-value id)]
                            :when value]
                        [id value]))
@@ -93,19 +93,22 @@
                                   [{:name "Default"
                                     :actions []}])))))
 
-(defn change-action-type [driver type]
-  ; Hacky way to change action type.
+(defn set-select-value [driver id value]
+  ; Hacky way to change value of <select> element.
   ; For some reason proper way by using selenium Select object
   ; and calling .selectByValue() on it doesn't work on travis.
   (.executeScript driver
-                  (str "$('#action-type').val('" type "');"
+                  (str "$('#" id "').val('" value "');"
                        "(function() { "
                        "  var evt = document.createEvent('HTMLEvents');"
                        "  evt.initEvent('change', true, true);"
-                       "  $('#action-type')[0].dispatchEvent(evt);"
+                       "  $('#" id "')[0].dispatchEvent(evt);"
                        "})();")
                   (into-array []))
   (Thread/sleep 500))
+
+(defn change-action-type [driver type]
+  (set-select-value driver "action-type" type))
 
 (defn set-input-text-from-map [driver map]
   (doseq [[id text] map]
@@ -197,6 +200,9 @@
                :gh-issue-title "New title"
                :gh-issue-body "New body"}))))))
 
+(defn change-file-operation-type [driver type]
+  (set-select-value driver "file-operation-type" type))
+
 (deftest github-pull-request-action-test
   (run-with-driver
    (fn [driver]
@@ -229,6 +235,7 @@
                :gh-repo "nbeloglazov/hatnik"
                :gh-title "Issue title"
                :gh-body "Issue body"
+               :file-operation-type "manual"
                :gh-pr-operations
                [{:file "file1" :regex "regex1" :replacement "replacement1"}
                 {:file "file2" :regex "regex2" :replacement "replacement2"}]})))
@@ -257,9 +264,49 @@
                :gh-repo "quil/quil"
                :gh-title "New title"
                :gh-body "New body"
+               :file-operation-type "manual"
                :gh-pr-operations
                [{:file "new file2" :regex "new regex2"
-                 :replacement "new replacement2"}]}))))))
+                 :replacement "new replacement2"}]})))
+
+     ; Change file operation type between project.clj
+     ; and manual. We want to verify that operations are hidden
+     ; but they're still in memory and not wiped.
+     (change-file-operation-type driver "project.clj")
+     (assert (= (action-params driver)
+                {:library-input "ring"
+                 :action-type "github-pull-request"
+                 :gh-repo "quil/quil"
+                 :gh-title "New title"
+                 :gh-body "New body"
+                 :file-operation-type "project.clj"}))
+     (change-file-operation-type driver "manual")
+     (assert (= (action-params driver)
+                {:library-input "ring"
+                 :action-type "github-pull-request"
+                 :gh-repo "quil/quil"
+                 :gh-title "New title"
+                 :gh-body "New body"
+                 :file-operation-type "manual"
+                 :gh-pr-operations
+                 [{:file "new file2" :regex "new regex2"
+                   :replacement "new replacement2"}]}))
+
+     ; Update action: set file operation to project.clj and save.
+     (change-file-operation-type driver "project.clj")
+     (apply-changes driver)
+
+     ; Check updated action
+     (let [[project] (find-projects-on-page driver)
+           action (first (:actions project))]
+       (open-edit-action-dialog driver action)
+       (assert (= (action-params driver)
+                  {:library-input "ring"
+                   :action-type "github-pull-request"
+                   :gh-repo "quil/quil"
+                   :gh-title "New title"
+                   :gh-body "New body"
+                   :file-operation-type "project.clj"}))))))
 
 (deftest change-action-type-test
   (run-with-driver

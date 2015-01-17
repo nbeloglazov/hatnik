@@ -93,7 +93,8 @@
    :gh-repo ""
    :file-operations [{:file ""
                       :regex ""
-                      :replacement ""}]})
+                      :replacement ""}]
+   :file-operation-type "manual"})
 
 (defmulti get-state-from-action :type)
 
@@ -110,10 +111,15 @@
    :gh-repo (:repo action)})
 
 (defmethod get-state-from-action "github-pull-request" [action]
-  {:body (:body action)
-   :title (:title action)
-   :file-operations (keywordize-keys (:operations action))
-   :gh-repo (:repo action)})
+  (let [base {:body (:body action)
+              :title (:title action)
+              :gh-repo (:repo action)}]
+    (if (string? (:operations action))
+      (assoc base
+             :file-operation-type (:operations action))
+      (assoc base
+             :file-operation-type "manual"
+             :file-operations (keywordize-keys (:operations action))))))
 
 (defmulti get-init-state :type)
 

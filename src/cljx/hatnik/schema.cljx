@@ -45,6 +45,11 @@
    :regex (string-of-length 1 128)
    :replacement (string-of-length 1 128)})
 
+(def PredefinedOperations
+  "List of harcoded operations that can be used instead of manually
+  setting them up."
+  (s/enum "project.clj"))
+
 (def EmailAction
   {:project-id Id
    :library Library
@@ -72,7 +77,8 @@
    :title TemplateTitle
    :body TemplateBody
    :repo GithubRepository
-   :operations [ReplaceOperation]})
+   :operations (s/either [ReplaceOperation]
+                         PredefinedOperations)})
 
 (def BuildFileAction
   {:project-id Id

@@ -30,7 +30,7 @@
   (with-sh-dir target-dir
     (sh "git" "init")
     (sh "git" "remote" "add" "upstream" (str "https://github.com/" repo ".git"))
-    (sh "git" "pull" "upstream" "master:master" "--depth=1")))
+    (sh "git" "pull" "upstream" "master:master" "--depth=20")))
 
 (defn parent?
   "Checks whether given dir is a parent of the file."
@@ -69,6 +69,19 @@
     (catch Exception e
       (timbre/error e)
       :error)))
+
+(def predefined-operations-mapping
+  {"project.clj" [{:file "project.clj"
+                   :regex "{{library}} \"[^\"]+\""
+                   :replacement "{{library}} \"{{version}}\""}]})
+
+(defn expand-predefined-operations
+  "If provided operation is on of predefined - return a map corresponding
+  to that operation."
+  [operations]
+  (if (string? operations)
+    (predefined-operations-mapping operations)
+    operations))
 
 (defn update-files
   "Updates files in cloned repo by performing operations from provided action.
@@ -161,6 +174,7 @@
   "Modifies github repo and opens pull request."
   [action user variables utils]
   (let [repo-dir (fs/temp-dir "hatnik-pull-request-")
+        action (update action :operations expand-predefined-operations)
         repo (:repo action)
         branch (str "branch-" (.getTime (java.util.Date.)))]
     (try
@@ -213,7 +227,7 @@
            {:github-login "nbeloglazov"
             :email "me@nbeloglazov.com"}
            {:library "org.clojure/clojure"
-            :version "1.7.0"
+            :version "1.8.0"
             :previous-version "1.6.0"}
            {:fork-github-repo (partial u/fork-github-repo token)
             :create-github-pull-request (partial u/create-github-pull-request token)

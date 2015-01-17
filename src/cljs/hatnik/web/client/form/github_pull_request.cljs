@@ -61,7 +61,6 @@
                 (om/transact! data
                   #(vec (remove-nth % id))))]
         (dom/div #js {:className "clearfix"}
-                 (dom/h4 nil "Operations")
                  (apply dom/div #js {:className "operations"}
                         (map-indexed (fn [id operation]
                                        (om/build pull-request-operation
@@ -72,6 +71,28 @@
                  (dom/div #js {:className "btn btn-primary pull-right add-operation"
                                :onClick #(add-new-operation data)}
                           "Add"))))))
+
+(defn file-operation-type-selector [data]
+  (let [operation-type (:file-operation-type data)]
+    (dom/div
+     #js {:className "form-group action-type-component has-success"}
+     (dom/label
+      #js {:htmlFor "file-operation-type"
+           :className "control-label col-sm-2 no-padding-right"}
+      "Operation")
+     (dom/div
+      #js {:className "col-sm-10"}
+      (apply dom/select #js {:className "form-control"
+                             :id "file-operation-type"
+                             :defaultValue operation-type
+                             :onChange #(om/update! data :file-operation-type (.. % -target -value))}
+             (for [[text value] [["Update project.clj" "project.clj"]
+                                 ["Manual" "manual"]]]
+               (dom/option #js {:className "form-control"
+                                :value value
+                                :selected (if (= value operation-type)
+                                            "selected" nil)}
+                           text)))))))
 
 (defn github-pull-request-component [data owner]
   (reify
@@ -100,4 +121,6 @@
                               :type :textarea
                               :popover (str "supported variables: {{library}} {{version}} {{previous-version}} "
                                             "{{results-table}}")})
-               (om/build pull-request-operations-list (:file-operations data))))))
+               (file-operation-type-selector data)
+               (when (= (:file-operation-type data) "manual")
+                 (om/build pull-request-operations-list (:file-operations data)))))))

@@ -114,13 +114,16 @@ form textarea.form-control {
 }
 
 #iProjectList .action {
-    cursor: pointer;
     height: 80px;
     color: #444;
     background-color: #FAFAFA;
 }
 
-#iProjectList .action:hover {
+#iProjectList .action.pressable {
+    cursor: pointer;
+}
+
+#iProjectList .action.pressable:hover {
     background-color: #EEE;
 }
 

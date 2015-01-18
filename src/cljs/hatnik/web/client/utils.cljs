@@ -73,3 +73,11 @@
             :error (or error
                        #(msg/danger "Invalid request. Please, check request data."))
             :success #(success (js->clj % :keywordize-keys true))}))
+
+(defn map-value
+  "Iterates through the map and applies given function to each value,
+  return updated map."
+  [f mp]
+  (into {}
+        (for [[key value] mp]
+          [key (f value)])))

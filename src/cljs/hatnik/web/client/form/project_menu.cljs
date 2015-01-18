@@ -156,7 +156,8 @@
                   {:type type
                    :email-address email
                    :project-id "none"
-                   :library "none"}))))
+                   :library "none"
+                   :file-operation-type "project.clj"}))))
 
 (defn show [project]
   (om/root project-menu (adapt-action-in-project project)

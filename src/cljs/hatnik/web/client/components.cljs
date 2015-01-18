@@ -19,7 +19,7 @@
     (render [this]
       (let [id (:project-id data)
             email (:user-email data)]
-      (dom/div #js {:className "panel panel-default action add-action"
+      (dom/div #js {:className "panel panel-default action add-action pressable"
                     :onClick #(add-action/show {:type :add
                                                 :project-id id
                                                 :user-email email})}
@@ -57,18 +57,24 @@
     om/IRender
     (render [this]
       (let [id (:project-id data)
+            build-file? (= (:type data) "build-file")
+            type (if build-file?
+                   (-> data :project :action :type)
+                   (:type data))
             email (:user-email data)
             library (:library data)
             library-class (if (< (count library) 27)
                             "" ; regular class
                             "long-name")]
-        (dom/div #js {:className "panel panel-default action"
-                      :onClick #(add-action/show {:type :update
-                                                  :project-id id
-                                                  :user-email email
-                                                  :action @data})}
+        (dom/div #js {:className (str "panel panel-default action "
+                                      (if-not build-file? "pressable" ""))
+                      :onClick (when-not build-file?
+                                 #(add-action/show {:type :update
+                                                    :project-id id
+                                                    :user-email email
+                                                    :action @data}))}
                  (dom/div #js {:className "panel-body"}
-                   (render-action-type (:type data))
+                   (render-action-type type)
                    (dom/div #js {:className (str "library-name " library-class)
                                  :title library}
                             library)
@@ -80,23 +86,27 @@
     (om/build add-new-action-card data)
     (om/build action-card data)))
 
-(defn actions-table [id actions email]
+(defn actions-table [id actions email project-type]
   (let [actions (->> actions
                      (sort-by first)
                      (map second))
-        rendered
-        (map (fn [act]
-               (dom/div #js {:className "col-sm-6 col-md-4 col-lg-3 prj-list-item"}
-                        (render-action (assoc act :project-id id
-                                              :type (:type act)
-                                              :user-email email))))
-             actions)]
+        rendered (map (fn [act]
+                        (dom/div
+                         #js {:className "col-sm-6 col-md-4 col-lg-3 prj-list-item"}
+                         (render-action (assoc act :project-id id
+                                               :type (:type act)
+                                               :user-email email))))
+                      actions)
+        add-action (dom/div
+                    #js {:className "col-sm-6 col-md-4 col-lg-3 prj-list-item"}
+                    (render-action {:type :add
+                                    :project-id id
+                                    :user-email email}))]
     (apply dom/div #js {:className "row"}
-           (concat rendered
-                   [(dom/div #js {:className "col-sm-6 col-md-4 col-lg-3 prj-list-item"}
-                             (render-action {:type :add
-                                             :project-id id
-                                             :user-email email}))]))))
+           (if (= project-type "regular")
+             (concat rendered
+                     [add-action])
+             rendered))))
 
 (defn project-header-menu-button [project]
   (dom/div #js {:className "dropdown pull-right"}
@@ -127,7 +137,8 @@
                  (dom/div #js {:className "panel-body"}
                           (actions-table (:id prj)
                                          (:actions prj)
-                                         (-> prj :user :email)))))))))
+                                         (-> prj :user :email)
+                                         (:type prj)))))))))
 
 (defn project-list [data owner]
   (reify

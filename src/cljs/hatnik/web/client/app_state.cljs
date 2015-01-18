@@ -6,11 +6,19 @@
          :projects []
          :user {}}))
 
+(defn set-project-for-each-action [projects]
+  (u/map-value
+   (fn [project]
+     (assoc project :actions
+            (u/map-value #(assoc % :project project)
+                         (:actions project))))
+   projects))
+
 (defn update-projects-list [data]
   (when (= "ok" (:result data))
     (swap! app-state
            assoc-in [:projects]
-           (:projects data))))
+           (set-project-for-each-action (:projects data)))))
 
 (defn add-new-project [id name]
   (swap! app-state

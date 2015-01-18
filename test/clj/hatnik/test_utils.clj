@@ -4,6 +4,7 @@
             [clojure.data :refer [diff]]
             [hatnik.db.memory-storage :refer [map->MemoryStorage]]
             [hatnik.db.mongo-storage :refer [map->MongoStorage]]
+            hatnik.config
             [com.stuartsierra.component :as component]
             [hatnik.web.server.handler :refer [map->WebServer]]
             [taoensso.timbre :as timbre]
@@ -15,7 +16,9 @@
 (def config
   {:web {:port test-web-port}
    :enable-force-login true
-   :db :memory})
+   :db :memory
+   :cljs-optimization-none?
+   (:cljs-optimization-none? (hatnik.config/get-config))})
 
 (def api-url (str "http://localhost:" test-web-port "/api"))
 

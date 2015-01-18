@@ -41,11 +41,23 @@
    :element element})
 
 (defn element->project [element]
-  (let [action-divs (find-elements element ".action")]
-    (assert (-> action-divs last .getText (.contains "Add action")))
-    {:name (.getText (find-element element ".project-name"))
-     :actions (doall (map element->action (butlast action-divs)))
-     :element element}))
+  (let [action-divs (find-elements element ".action")
+        build-file (if-let [el (first (find-elements element
+                                                     ".project-name small"))]
+                     (.getText el)
+                     nil)
+        last-action-text (-> action-divs last .getText)
+        base {:name (.getText (find-element element ".project-name span"))
+              :element element}]
+    (if build-file
+      (assert (not (.contains last-action-text "Add action")))
+      (assert (.contains last-action-text "Add action")))
+    (if build-file
+      (assoc base
+             :build-file build-file
+             :actions (doall (map element->action action-divs)))
+      (assoc  base
+              :actions (doall (map element->action (butlast action-divs)))))))
 
 (defn find-projects-on-page [driver]
   (doall (map element->project
@@ -66,7 +78,7 @@
           (clean-project [project]
             (-> project
                 (update-in [:actions] #(map clean-action %))
-                (select-keys [:name :actions])))]
+                (select-keys [:name :actions :build-file])))]
     (map clean-project projects)))
 
 (defn wait-until [driver condition message]
@@ -126,6 +138,13 @@
     (.clear input)
     (.sendKeys input (into-array [text]))))
 
+(defn set-input-text-from-map
+  "Given map id->value sets value to all <input> fields for corresponding
+  ids."
+  [driver map]
+  (doseq [[id text] map]
+    (set-input-text driver (str "#" (name id)) text)))
+
 (defn take-screenshot [driver]
   (let [file (.getScreenshotAs driver OutputType/FILE)
         result (client/post "http://expirebox.com/jqu/"
@@ -157,6 +176,53 @@
           (print-logs driver log-type))
         (.quit driver)))))
 
+(defn action-params
+  "Assumes that action form is opened. Extracts all fields from the form
+  and returns it as a map. Also works for build-file project which has
+  action form embedded."
+  [driver]
+  (let [element-value #(if-let [el (->> %
+                                        name
+                                        (str "#")
+                                        (find-elements driver)
+                                        first)]
+                         (.getAttribute el "value")
+                         nil)
+        params (into {}
+                     (for [id [:library-input :action-type :email-subject :email-body
+                               :gh-repo :gh-issue-title :gh-issue-body
+                               :gh-title :gh-body :file-operation-type
+                               :build-file]
+                           :let [value (element-value id)]
+                           :when value]
+                       [id value]))
+        gh-pr-operations (map-indexed (fn [ind operation]
+                                        {:file (element-value (str "gh-pull-req-op-file-" ind))
+                                         :regex (element-value (str "gh-pull-req-op-regex-" ind))
+                                         :replacement (element-value (str "gh-pull-req-op-repl-" ind))})
+                                      (find-elements driver ".operations .operation"))]
+    (if (empty? gh-pr-operations)
+      params
+      (assoc params
+        :gh-pr-operations gh-pr-operations))))
+
+(defn set-select-value
+  "Hacky way to change value of <select> element.
+  For some reason proper way by using selenium Select object
+  and calling .selectByValue() on it doesn't work on travis."
+  [driver id value]
+  (.executeScript driver
+                  (str "$('#" id "').val('" value "');"
+                       "(function() { "
+                       "  var evt = document.createEvent('HTMLEvents');"
+                       "  evt.initEvent('change', true, true);"
+                       "  $('#" id "')[0].dispatchEvent(evt);"
+                       "})();")
+                  (into-array []))
+  (Thread/sleep 500))
+
+(defn change-action-type [driver type]
+  (set-select-value driver "action-type" type))
 
 (comment
 

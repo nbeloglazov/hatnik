@@ -32,31 +32,6 @@
   (.click (find-element driver "#iModalAddAction .modal-header .btn-danger"))
   (wait-until-dialog-invisible driver :action))
 
-(defn action-params [driver]
-  (let [element-value #(if-let [el (->> %
-                                        name
-                                        (str "#")
-                                        (find-elements driver)
-                                        first)]
-                         (.getAttribute el "value")
-                         nil)
-        params (into {}
-                     (for [id [:library-input :action-type :email-subject :email-body
-                               :gh-repo :gh-issue-title :gh-issue-body
-                               :gh-title :gh-body :file-operation-type]
-                           :let [value (element-value id)]
-                           :when value]
-                       [id value]))
-        gh-pr-operations (map-indexed (fn [ind operation]
-                                        {:file (element-value (str "gh-pull-req-op-file-" ind))
-                                         :regex (element-value (str "gh-pull-req-op-regex-" ind))
-                                         :replacement (element-value (str "gh-pull-req-op-repl-" ind))})
-                                      (find-elements driver ".operations .operation"))]
-    (if (empty? gh-pr-operations)
-      params
-      (assoc params
-        :gh-pr-operations gh-pr-operations))))
-
 (deftest create-delete-test
   (run-with-driver
    (fn [driver]
@@ -92,27 +67,6 @@
        (wait-until-projects-match driver
                                   [{:name "Default"
                                     :actions []}])))))
-
-(defn set-select-value [driver id value]
-  ; Hacky way to change value of <select> element.
-  ; For some reason proper way by using selenium Select object
-  ; and calling .selectByValue() on it doesn't work on travis.
-  (.executeScript driver
-                  (str "$('#" id "').val('" value "');"
-                       "(function() { "
-                       "  var evt = document.createEvent('HTMLEvents');"
-                       "  evt.initEvent('change', true, true);"
-                       "  $('#" id "')[0].dispatchEvent(evt);"
-                       "})();")
-                  (into-array []))
-  (Thread/sleep 500))
-
-(defn change-action-type [driver type]
-  (set-select-value driver "action-type" type))
-
-(defn set-input-text-from-map [driver map]
-  (doseq [[id text] map]
-    (set-input-text driver (str "#" (name id)) text)))
 
 (deftest email-action-test
   (run-with-driver

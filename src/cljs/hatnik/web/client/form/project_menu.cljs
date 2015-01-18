@@ -33,7 +33,7 @@
 (defn build-file-body-addition [project]
   [(u/form-field {:data project
                   :field :build-file
-                  :id "project-name"
+                  :id "build-file"
                   :title "Build file"
                   :type :text
                   :validator (schm/string-of-length 1 1028)

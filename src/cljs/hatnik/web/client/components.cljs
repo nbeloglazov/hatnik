@@ -130,7 +130,11 @@
           (dom/a
            #js {:data-toggle "collapse"
                 :href (str "#" id)}
-           (dom/div #js {:className "bg-primary"} (:name prj))))
+           (dom/div #js {:className "bg-primary"}
+                    (:name prj)
+                    (when (= (:type prj) "build-file")
+                      (dom/small nil
+                                 (:build-file prj))))))
          (project-header-menu-button prj))
         (dom/div #js {:className "panel-collapse collapse in"
                       :id id}

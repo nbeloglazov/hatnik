@@ -113,6 +113,11 @@ form textarea.form-control {
     padding: 2px 0px;
 }
 
+.project-name small {
+    color: #FFF;
+    padding-left: 10px;
+}
+
 #iProjectList .action {
     height: 80px;
     color: #444;

@@ -51,7 +51,8 @@
           [{:source-paths ["src/cljs" "dev/cljs" "target/gen/cljs"]
             :compiler
             {:output-to "resources/public/gen/js/hatnik.js"
-             :optimizations :simple
+             :output-dir "resources/public/gen/out"
+             :optimizations :none
              :pretty-print true
              :preamble ["react/react.js"]}}]
           }

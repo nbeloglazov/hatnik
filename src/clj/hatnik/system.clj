@@ -43,7 +43,7 @@
                   [:db :config]))))
 
 
-(def system nil)
+(defonce system nil)
 
 (defn init []
     (alter-var-root #'system

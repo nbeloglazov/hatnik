@@ -133,5 +133,11 @@
     [:script {:src "/js/jquery.bootstrap-growl.min.js"}]
 
     (when user
-      [:script {:src "/gen/js/hatnik.js"}])]))
+      (if (:cljs-optimization-none? config)
+        (list
+         [:script {:src "http://fb.me/react-0.12.2.js"}]
+         [:script {:src "/gen/out/goog/base.js"}]
+         [:script {:src "/gen/js/hatnik.js"}]
+         [:script "goog.require('hatnik.web.client.app_init')"])
+        [:script {:src "/gen/js/hatnik.js"}]))]))
 

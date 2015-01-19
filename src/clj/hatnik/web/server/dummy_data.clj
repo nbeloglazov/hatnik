@@ -40,7 +40,7 @@
 (defn create-quil-project [db user-id]
   (let [proj-id (stg/create-project! db {:name "Quil"
                                          :user-id user-id
-                                         :type "reqular"})]
+                                         :type "regular"})]
     (stg/create-action! db user-id {:project-id proj-id
                                     :type "email"
                                     :subject "{{library}} {{version}} released"

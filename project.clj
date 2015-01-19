@@ -46,6 +46,8 @@
          :plugins [[jonase/eastwood "0.2.1"]
                    [com.keminglabs/cljx "0.5.0" :exclusions [org.clojure/clojure]]]
 
+         :clean-targets ^{:protect false} ["resources/public/gen"]
+
          :cljsbuild
          {:builds
           [{:source-paths ["src/cljs" "dev/cljs" "target/gen/cljs"]

@@ -96,8 +96,8 @@
       [:li.available [:strong "Noop"]
        " - does nothing. Simply shows latest version."]]]
     [:div.col-md-4
-     [:h3 "Supported languages"]
-     [:p "Only JVM-based languages are currently supported"]
+     [:h3 "Languages & build tools"]
+     [:p "Currently you can create actions for JVM-based libraries:"]
      [:div.langs
       [:div.lang
        [:img {:src "/img/langs/java.png"
@@ -110,8 +110,10 @@
       [:div.lang
        [:img {:src "/img/langs/scala.png"
               :alt "scala"}]
-       "scala"]]]
-]])
+       "scala"]]
+     [:p "Supported build file formats:"]
+     [:ul
+      [:li "leiningen (project.clj)"]]]]])
 
 (defn core-page [config user]
   (hc/html

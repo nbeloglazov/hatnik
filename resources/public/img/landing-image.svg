@@ -267,10 +267,10 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.70710678"
-     inkscape:cx="517.78568"
+     inkscape:cx="349.49427"
      inkscape:cy="231.43128"
      inkscape:document-units="px"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="g3108"
      showgrid="false"
      inkscape:window-width="1295"
      inkscape:window-height="744"
@@ -408,21 +408,21 @@
          transform="scale(1.0145729,0.98563641)"
          sodipodi:linespacing="125%"
          id="text2995"
-         y="475.96799"
-         x="780.4873"
+         y="469.83182"
+         x="775.01971"
          style="font-size:31.75740242px;font-style:normal;font-weight:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
          xml:space="preserve"><tspan
-           y="475.96799"
-           x="780.4873"
-           id="tspan2997"
-           sodipodi:role="line">new version</tspan><tspan
-           id="tspan2999"
-           y="515.66473"
-           x="780.4873"
-           sodipodi:role="line">of X released</tspan></text>
+           y="469.83182"
+           x="775.01971"
+           sodipodi:role="line"
+           id="tspan3078">a dependency</tspan><tspan
+           y="509.52856"
+           x="775.01971"
+           sodipodi:role="line"
+           id="tspan3086">got released</tspan></text>
       <path
-         transform="matrix(1.0098498,-0.02759759,0.02199487,0.98863851,571.54251,377.72417)"
-         d="m 352.13918,110.52681 c 0,35.14719 -61.73359,63.63961 -137.88582,63.63961 -76.15224,0 -137.885822,-28.49242 -137.885822,-63.63961 0,-35.147187 61.733582,-63.639611 137.885822,-63.639611 76.15223,0 137.88582,28.492424 137.88582,63.639611 z"
+         transform="matrix(1.0657364,-0.03004286,0.0232121,1.0762362,555.89855,361.49512)"
+         d="m 352.13918,110.52681 a 137.88582,63.63961 0 1 1 -275.771642,0 137.88582,63.63961 0 1 1 275.771642,0 z"
          sodipodi:ry="63.63961"
          sodipodi:rx="137.88582"
          sodipodi:cy="110.52681"
@@ -435,7 +435,7 @@
        id="g3088"
        transform="translate(60.811183,28.284271)">
       <g
-         transform="translate(113.15434,-89.63961)"
+         transform="translate(115.34728,-88.585181)"
          id="g4275">
         <text
            xml:space="preserve"
@@ -462,25 +462,25 @@
     </g>
     <g
        id="g3098"
-       transform="translate(77.781746,-19.79899)">
+       transform="matrix(1.0054765,0,0,1.0243027,73.718878,-41.292354)">
       <text
          sodipodi:linespacing="125%"
          id="text3009"
-         y="823.31879"
-         x="613.30212"
+         y="818.13904"
+         x="612.74512"
          style="font-size:32px;font-style:normal;font-weight:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
          xml:space="preserve"><tspan
-           y="823.31879"
-           x="613.30212"
+           y="818.13904"
+           x="612.74512"
            id="tspan3011"
            sodipodi:role="line">open github</tspan><tspan
            id="tspan3015"
-           y="863.31879"
-           x="613.30212"
+           y="858.13904"
+           x="612.74512"
            sodipodi:role="line">issue</tspan></text>
       <path
-         transform="matrix(0.92882409,-0.0983209,0.09255626,0.87436626,403.5193,750.63399)"
-         d="m 352.13918,110.52681 c 0,35.14719 -61.73359,63.63961 -137.88582,63.63961 -76.15224,0 -137.885822,-28.49242 -137.885822,-63.63961 0,-35.147187 61.733582,-63.639611 137.885822,-63.639611 76.15223,0 137.88582,28.492424 137.88582,63.639611 z"
+         transform="matrix(0.93072664,-0.07910734,0.07378633,0.87608497,405.18625,746.32746)"
+         d="m 352.13918,110.52681 a 137.88582,63.63961 0 1 1 -275.771642,0 137.88582,63.63961 0 1 1 275.771642,0 z"
          sodipodi:ry="63.63961"
          sodipodi:rx="137.88582"
          sodipodi:cy="110.52681"
@@ -495,17 +495,17 @@
       <text
          sodipodi:linespacing="125%"
          id="text3019"
-         y="751.37567"
-         x="973.94983"
+         y="751.27649"
+         x="975.73352"
          style="font-size:32px;font-style:normal;font-weight:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
          xml:space="preserve"><tspan
            id="tspan4069"
-           y="751.37567"
-           x="973.94983"
+           y="751.27649"
+           x="975.73352"
            sodipodi:role="line">open github</tspan><tspan
            id="tspan3023"
-           y="791.37567"
-           x="973.94983"
+           y="791.27649"
+           x="975.73352"
            sodipodi:role="line">pull request</tspan></text>
       <path
          transform="matrix(0.99837762,-0.05693961,0.05693961,0.99837762,755.54224,664.3004)"
@@ -545,18 +545,18 @@
       <text
          sodipodi:linespacing="125%"
          id="text4251"
-         y="403.23816"
-         x="108.89444"
-         style="font-size:32px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+         y="404.0871"
+         x="204.39293"
+         style="font-size:32px;font-style:normal;font-weight:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
          xml:space="preserve"><tspan
-           y="403.23816"
-           x="108.89444"
-           id="tspan4253"
-           sodipodi:role="line">setup action</tspan><tspan
            id="tspan4255"
-           y="443.23816"
-           x="108.89444"
-           sodipodi:role="line">for library X</tspan></text>
+           y="404.0871"
+           x="209.48668"
+           sodipodi:role="line">import </tspan><tspan
+           y="444.0871"
+           x="204.39293"
+           sodipodi:role="line"
+           id="tspan3076">project.clj</tspan></text>
     </g>
   </g>
 </svg>

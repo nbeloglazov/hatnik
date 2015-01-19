@@ -10,23 +10,23 @@
                  [clj-http "1.0.1"]
                  [tentacles "0.3.0"]
                  [com.taoensso/timbre "3.3.1"]
-                 [com.novemberain/monger "2.0.0"]
+                 [com.novemberain/monger "2.0.1"]
                  [ancient-clj "0.3.2"]
                  [com.draines/postal "1.11.3"]
                  [version-clj "0.1.1"]
                  [clojurewerkz/quartzite "2.0.0"]
                  [prismatic/schema "0.3.3"]
                  [com.stuartsierra/component "0.2.2"]
-                 [me.raynes/fs "1.4.5"]
-                 [com.googlecode.streamflyer/streamflyer-core "1.1.2"]
+                 [me.raynes/fs "1.4.6"]
+                 [com.googlecode.streamflyer/streamflyer-core "1.1.3"]
                  [commons-io "2.4"]
 
                  ; ClojureScript
-                 [org.clojure/clojurescript "0.0-2657"]
+                 [org.clojure/clojurescript "0.0-2665"]
                  [jayq "2.5.2"]
-                 [om "0.8.0-rc1"]]
+                 [org.om/om "0.8.0"]]
 
-  :plugins [[lein-cljsbuild "1.0.3"]]
+  :plugins [[lein-cljsbuild "1.0.4"]]
 
   :main hatnik.system
   :source-paths ["src/clj" "target/gen/clj"]
@@ -38,13 +38,13 @@
   :profiles
   {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
                         [ring-mock "0.1.5"]
-                        [com.cemerick/piggieback "0.1.3"]
+                        [com.cemerick/piggieback "0.1.5"]
                         [org.seleniumhq.selenium/selenium-java "2.44.0"]
                         [org.seleniumhq.selenium/selenium-remote-driver "2.44.0"]
                         [org.seleniumhq.selenium/selenium-server "2.44.0"]]
 
-         :plugins [[jonase/eastwood "0.1.4"]
-                   [com.keminglabs/cljx "0.4.0" :exclusions [org.clojure/clojure]]]
+         :plugins [[jonase/eastwood "0.2.1"]
+                   [com.keminglabs/cljx "0.5.0" :exclusions [org.clojure/clojure]]]
 
          :cljsbuild
          {:builds

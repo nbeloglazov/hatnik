@@ -14,7 +14,7 @@
 
 #### How to run locally
 
-To start the server locally just run:
+To start copy `config.default.clj` to `config.clj` and set `:cljs-optimization-none?` to `true`. And then run:
 
 ```shell
 lein cljx once
@@ -22,6 +22,6 @@ lein cljsbuild once
 lein run
 ```
 
-By default app uses in-memory DB. You can change settings by creating `config.clj` file in root folder. Check [config.default.clj](https://github.com/nbeloglazov/hatnik/blob/master/config.default.clj) for available options.
+By default app uses in-memory DB. You can change settings in `config.clj`. Check [config.default.clj](https://github.com/nbeloglazov/hatnik/blob/master/config.default.clj) for available options.
 
 When registering a Github application for your own application, the URI of the "Application callback URL" is /api/github.

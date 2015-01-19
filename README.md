@@ -25,3 +25,8 @@ lein run
 By default app uses in-memory DB. You can change settings in `config.clj`. Check [config.default.clj](https://github.com/nbeloglazov/hatnik/blob/master/config.default.clj) for available options.
 
 When registering a Github application for your own application, the URI of the "Application callback URL" is /api/github.
+
+#### License
+Copyright © 2014-2015 Nikita Beloglazov
+
+Distributed under the Eclipse Public License either version 1.0.

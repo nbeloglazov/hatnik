@@ -1,6 +1,6 @@
 (defproject complex "1.0.0"
   :dependencies [[org.clojure/clojure "1.3.0"]
-                 [quil    		  "1.0"    :classifier "jdk15"]
+                 [quil    		  "4.5.6"    :classifier "jdk15"]
                  [net.sf.ehcache/ehcache "2.3.1" :extension "pom"]
                  [log4j "1.2.15" :exclusions [[javax.mail/mail :extension "jar"]
                                               [javax.jms/jms :classifier "*"]

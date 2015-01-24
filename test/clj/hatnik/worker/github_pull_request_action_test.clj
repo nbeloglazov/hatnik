@@ -105,6 +105,34 @@
         (fs/delete-dir dir)
         (fs/delete temp-file)))))
 
+(defn run-predefined-operation-test [file operation-type variables]
+  (let [dir (fs/temp-dir "hatnik-github-pull-request-test")
+        original-file (fs/file "dev/build-files/" file)
+        modified-file (fs/file dir operation-type)
+        golden-file (fs/file "dev/build-files/predefined-operations-goldens"
+                             file)]
+    (try
+      (fs/copy original-file modified-file)
+      (let [operations (predefined-operations-mapping operation-type)
+            results (update-files {:operations operations}
+                                  variables
+                                  dir)]
+        (is (= results [:updated]))
+        (is (org.apache.commons.io.FileUtils/contentEquals
+             modified-file golden-file)))
+      (finally
+        (fs/delete-dir dir)))))
 
-;(update-files-test)
+
+(deftest predefined-operation-project-clj-test
+  (run-predefined-operation-test "complex.project.clj" "project.clj"
+                                 {:library "quil"
+                                  :version "4.5.6"}))
+
+
+(comment
+  (predefined-operation-project-clj-test)
+
+  )
+
 

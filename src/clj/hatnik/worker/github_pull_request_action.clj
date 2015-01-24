@@ -72,8 +72,8 @@
 
 (def predefined-operations-mapping
   {"project.clj" [{:file "project.clj"
-                   :regex "{{library}} \"[^\"]+\""
-                   :replacement "{{library}} \"{{version}}\""}]})
+                   :regex "({{library}}[ \tab]+)\"[^\"]+\""
+                   :replacement "$1\"{{version}}\""}]})
 
 (defn expand-predefined-operations
   "If provided operation is on of predefined - return a map corresponding

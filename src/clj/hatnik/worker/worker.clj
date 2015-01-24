@@ -8,6 +8,7 @@
 
             [com.stuartsierra.component :as component]
             [taoensso.timbre :as timbre]
+            [clojure.string :as cstr]
 
             [clojurewerkz.quartzite.scheduler :as qs]
             [clojurewerkz.quartzite.triggers :as t]
@@ -48,6 +49,19 @@
     "github-pull-request" (github-pull-request/perform action user
                                                        variables utils)))
 
+(defn build-variables-map
+  "Builds map of variables that can be used in templates via {{variable}} syntax."
+  [project action library-version]
+  (let [library (:library action)
+        [group-id artifact-id] (cstr/split library #"/")]
+    {:library library
+     :group-id group-id
+     ; some libraries have both artifact and group ids same. E.g. quil
+     :artifact-id (or artifact-id group-id)
+     :version library-version
+     :previous-version (:last-processed-version action)
+     :project (:name project)}))
+
 (defn check-library-and-perform-actions
   "Retrieves latest version for given library and updates actions if they
   are outdated.
@@ -72,10 +86,7 @@
                                   (:action proj)
                                   action)
               result (perform-action action-to-perform user
-                                     {:library library
-                                      :version ver
-                                      :previous-version (:last-processed-version action)
-                                      :project (:name proj)}
+                                     (build-variables-map proj action ver)
                                      utils)]
           (if (= (:result result) :ok)
             (do (timbre/debug "Action completed sucessfully. Updating library version in action.")
@@ -100,7 +111,7 @@
   (let [actions (stg/get-actions db)
         libraries (group-by :library actions)]
     (timbre/info "Total actions:" (count actions)
-                 ", libraries to update:" (keys libraries))
+                 ", total libraries:" (count libraries))
     (doseq [[library actions] libraries]
       (check-library-and-perform-actions library actions db
                                          perform-action utils))

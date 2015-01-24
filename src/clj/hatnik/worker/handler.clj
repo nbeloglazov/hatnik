@@ -5,6 +5,7 @@
 
             [hatnik.db.storage :as stg]
             [hatnik.utils :as utils]
+            [hatnik.worker.worker :as w]
 
             [ring.util.response :as resp]
             [ring.middleware.json :as json]
@@ -15,12 +16,8 @@
   (timbre/info "Running test action for user" (:user action))
   (let [project (stg/get-project db (:project-id action))
         user (stg/get-user-by-id db (:user-id project))
-        result (perform-action action user
-                               {:library (:library action)
-                                :version (:version action)
-                                :previous-version (:previous-version action)
-                                :project (:name project)}
-                               utils)]
+        variables (w/build-variables-map project action (:version action))
+        result (perform-action action user variables utils)]
     (resp/response result)))
 
 (defn app

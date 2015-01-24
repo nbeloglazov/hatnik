@@ -22,7 +22,7 @@
                  [commons-io "2.4"]
 
                  ; ClojureScript
-                 [org.clojure/clojurescript "0.0-2665"]
+                 [org.clojure/clojurescript "0.0-2719"]
                  [jayq "2.5.2"]
                  [org.om/om "0.8.1"]]
 

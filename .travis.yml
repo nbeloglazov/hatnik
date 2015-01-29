@@ -15,6 +15,7 @@ before_install:
 before_script:
   - "lein2 cljx once"
   - "lein2 with-profile release cljsbuild once"
+  - "echo {} >> config.clj"
 
 script: "lein2 test"
 

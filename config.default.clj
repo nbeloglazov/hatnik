@@ -58,10 +58,4 @@
  :quartz {:initial-delay-in-seconds 60
           :interval-in-seconds 600
           :jobs #{:update-actions :sync-build-file-actions}}
-
- ; Defines whether cljs sources were compiled with :optimization
- ; set to :none. If so, js files included to the page in different
- ; way. This param should be set to true only for development mode.
- :cljs-optimization-none? false
-
  }

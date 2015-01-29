@@ -11,7 +11,11 @@
     (try
       (f)
       (finally
-        (.stop server)))))
+        (.stop server)
+        ; Hack to make sure server stopped and port is free.
+        ; Ideally we should select free port randomly for each
+        ; test but it requires some refactoring.
+        (Thread/sleep 2000)))))
 
 (use-fixtures :each system-fixture cookie-store-fixture file-server-fixture)
 

@@ -62,6 +62,8 @@
             (login-api-routes db config)
             (GET "/library-version" [library] (library-version library)))
    (route/resources "/")
+   ; for debugging serve files from "out" folder
+   (route/files "/out" {:root "out"})
    (route/not-found "Not Found")))
 
 (defn dump-request [handler]

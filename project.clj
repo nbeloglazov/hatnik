@@ -24,7 +24,7 @@
                  ; ClojureScript
                  [org.clojure/clojurescript "0.0-2740"]
                  [jayq "2.5.2"]
-                 [org.om/om "0.8.1"]]
+                 [org.omcljs/om "0.8.7"]]
 
   :plugins [[lein-cljsbuild "1.0.4"]]
 
@@ -34,6 +34,9 @@
 
   :test-selectors {:selenium :selenium
                    :unit (complement :selenium)}
+
+  :clean-targets ^{:protect false} ["resources/public/gen"
+                                    "out"]
 
   :profiles
   {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
@@ -46,17 +49,15 @@
          :plugins [[jonase/eastwood "0.2.1"]
                    [com.keminglabs/cljx "0.5.0" :exclusions [org.clojure/clojure]]]
 
-         :clean-targets ^{:protect false} ["resources/public/gen"]
-
          :cljsbuild
          {:builds
           [{:source-paths ["src/cljs" "dev/cljs" "target/gen/cljs"]
             :compiler
             {:output-to "resources/public/gen/js/hatnik.js"
-             :output-dir "resources/public/gen/out"
+             :output-dir "out"
+             :main hatnik.web.client.app-init
              :optimizations :none
-             :pretty-print true
-             :preamble ["react/react.js"]}}]
+             :pretty-print true}}]
           }
          :cljx {:builds [{:source-paths ["src/cljx"]
                  :output-path "target/gen/clj"
@@ -71,9 +72,9 @@
      [{:source-paths ["src/cljs" "target/gen/cljs"]
        :compiler
        {:output-to "resources/public/gen/js/hatnik.js"
-        :optimizations :advanced
+        :main hatnik.web.client.app-init
         :externs ["externs/jquery-1.9.js"
                   "externs/hatnik.js"]
-        :preamble ["react/react.min.js"]
+        :optimizations :advanced
         :pretty-print false}}]
      }}})

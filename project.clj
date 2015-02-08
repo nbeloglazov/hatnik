@@ -15,16 +15,16 @@
                  [com.draines/postal "1.11.3"]
                  [version-clj "0.1.2"]
                  [clojurewerkz/quartzite "2.0.0"]
-                 [prismatic/schema "0.3.4"]
+                 [prismatic/schema "0.3.7"]
                  [com.stuartsierra/component "0.2.2"]
                  [me.raynes/fs "1.4.6"]
                  [com.googlecode.streamflyer/streamflyer-core "1.1.3"]
                  [commons-io "2.4"]
 
                  ; ClojureScript
-                 [org.clojure/clojurescript "0.0-2740"]
+                 [org.clojure/clojurescript "0.0-2760"]
                  [jayq "2.5.2"]
-                 [org.omcljs/om "0.8.7"]]
+                 [org.omcljs/om "0.8.8"]]
 
   :plugins [[lein-cljsbuild "1.0.4"]]
 

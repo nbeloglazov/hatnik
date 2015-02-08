@@ -11,10 +11,16 @@
   ga('create', 'UA-51485241-3', 'auto');
   ga('send', 'pageview');"])
 
+(def description
+  (str "Automatically update dependencies of your project once new versions available. "
+       "You can send email, open github issue or even github pull request to update dependencies."))
+
 (defn page-html-head []
   (hc/html
    [:head
     [:title "Hatnik"]
+    [:meta {:name "description"
+            :content description}]
     [:meta {:name "viewport"
             :content "width=device-width, initial-scale=1.0"}]
     ga-script

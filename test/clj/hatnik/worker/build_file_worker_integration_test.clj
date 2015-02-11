@@ -54,7 +54,7 @@
 
 (use-fixtures :each file-server-fixture)
 
-(defn mock-latest-release-fn
+(defn mock-latest-release-jvm-fn
   "Create latest-release version which returns
   new version every time it called."
   [versions]
@@ -68,7 +68,7 @@
     (http :get "/force-login?email=foo@email.com&skip-dummy-data=true")
     (let [timeout-time (+ (System/currentTimeMillis) 5000)
           actions (->> actions
-                       (sort-by :library)
+                       (sort-by (comp :name :library))
                        (map #(assoc % :type "build-file")))
           cur-actions (fn []
                         (let [project (-> (http :get "/projects") ok?
@@ -76,7 +76,7 @@
                           (->> (:actions project)
                                vals
                                (map #(dissoc % :project-id :id))
-                               (sort-by :library))) )]
+                               (sort-by (comp :name :library)))) )]
       (while (not= actions (cur-actions))
         (when (> (System/currentTimeMillis) timeout-time)
           (throw (ex-info "Actions don't match"
@@ -102,14 +102,17 @@
                 :build-file (str "http://localhost:"
                                  file-server-port
                                  "/project.clj")
-                :action {:library "none"
+                :action {:library {:name "none"
+                                   :type "jvm"}
                          :project-id "none"
                          :type "noop"}}))
 
     ; Verify that actions are created.
-    (assert-actions [{:library "org.clojure/clojure"
+    (assert-actions [{:library {:name "org.clojure/clojure"
+                                :type "jvm"}
                       :last-processed-version "0.1.2"}
-                     {:library "ring"
+                     {:library {:name "ring"
+                                :type "jvm"}
                       :last-processed-version "0.2.2"}])))
 
 (defn run-worker [db versions]
@@ -117,18 +120,22 @@
                                         :db db})
                    component/start)]
     (try
-      (assert-actions [{:library "org.clojure/clojure"
+      (assert-actions [{:library {:name "org.clojure/clojure"
+                                  :type "jvm"}
                         :last-processed-version "0.1.2"}
-                       {:library "quil"
+                       {:library {:name "quil"
+                                  :type "jvm"}
                         :last-processed-version "0.3.2"}])
 
       ; Change ring version and update project.clj
       (swap! versions assoc-in ["ring"] 3)
       (create-project-clj ["quil" "ring"])
 
-      (assert-actions [{:library "quil"
+      (assert-actions [{:library {:name "quil"
+                                  :type "jvm"}
                         :last-processed-version "0.3.2"}
-                       {:library "ring"
+                       {:library {:name "ring"
+                                  :type "jvm"}
                         :last-processed-version "0.3.2"}])
       (finally
         (component/stop worker)))))
@@ -142,7 +149,7 @@
                         "quil" 3})]
     (timbre/set-level! :info)
     (try
-      (with-redefs [ver/latest-release (mock-latest-release-fn versions)]
+      (with-redefs [ver/latest-release-jvm (mock-latest-release-jvm-fn versions)]
         (create-project)
         (create-project-clj ["org.clojure/clojure" "quil"])
         (swap! versions assoc-in ["org.clojure/clojure"] 2)

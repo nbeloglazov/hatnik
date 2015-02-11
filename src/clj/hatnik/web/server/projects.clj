@@ -44,7 +44,7 @@
     "regular" true
     "build-file" (and (not (empty? (bf/actions-from-build-file (:build-file data))))
                       (= (-> data :action :project-id)
-                         (-> data :action :library)
+                         (-> data :action :library :name)
                          "none"))))
 
 (defn delete-actions

@@ -33,7 +33,8 @@
                  :type "build-file"
                  :build-file (str "http://localhost:" file-server-port
                                   "/project.clj")
-                 :action {:library "none"
+                 :action {:library {:name "none"
+                                    :type "jvm"}
                           :project-id "none"
                           :type "noop"}}
 
@@ -55,7 +56,14 @@
 
         ; Check that actions are present in response
         ; and also try to get all projects and check that it is correct.
-        _ (assert-actions-match actions ["org.clojure/clojure" "quil" "ring"] proj-id)
+        _ (assert-actions-match actions
+                                [{:name "org.clojure/clojure"
+                                  :type "jvm"}
+                                 {:name "quil"
+                                  :type "jvm"}
+                                 {:name "ring"
+                                  :type "jvm"}]
+                                proj-id)
 
         ; Checking all projects
         _ (data-equal (map-by-id [(assoc project
@@ -68,7 +76,8 @@
         project {:name "Updated project"
                  :type "build-file"
                  :build-file "nbeloglazov/hatnik-test-lib"
-                 :action {:library "none"
+                 :action {:library {:name "none"
+                                    :type "jvm"}
                           :project-id "none"
                           :type "email"
                           :subject "Hello"
@@ -77,8 +86,12 @@
 
         ; Check that new updated project has only 2 actions now: clojure and clojurescript.
         ; To verify it is correct check project.clj from nbeloglazov/hatnik-test-lib
-        _ (assert-actions-match actions ["org.clojure/clojure"  "org.clojure/clojurescript"] proj-id)
-        ]))
+        _ (assert-actions-match actions
+                                [{:name "org.clojure/clojure"
+                                  :type "jvm"}
+                                 {:name "org.clojure/clojurescript"
+                                  :type "jvm"}]
+                                proj-id)]))
 
 (deftest changing-project-type-test
   (let [proj-dflt-id (login-and-check-default-project-created "me@email.com")
@@ -86,7 +99,8 @@
                  :type "build-file"
                  :build-file (str "http://localhost:" file-server-port
                                   "/project.clj")
-                 :action {:library "none"
+                 :action {:library {:name "none"
+                                    :type "jvm"}
                           :project-id "none"
                           :type "noop"}}
         proj-bf-id (-> (http :post "/projects" project) ok? :id)
@@ -110,10 +124,13 @@
         _ (proj-eq proj-bf-id {:name "Build file project" :type "build-file"})]))
 
 (deftest complex-project-clj-parse-test
-  (let [expected-libs ["org.clojure/clojure" "quil"
-                       "net.sf.ehcache/ehcache" "log4j" "org.lwjgl.lwjgl/lwjgl"
-                       "org.lwjgl.lwjgl/lwjgl-platform" "lein-pprint" "lein-assoc"
-                       "s3-wagon-private" "clj-stacktrace" "cider/cider-nrepl"]]
+  (let [expected-libs (map (fn [name]
+                             {:name name
+                              :type "jvm"})
+                           ["org.clojure/clojure" "quil"
+                            "net.sf.ehcache/ehcache" "log4j" "org.lwjgl.lwjgl/lwjgl"
+                            "org.lwjgl.lwjgl/lwjgl-platform" "lein-pprint" "lein-assoc"
+                            "s3-wagon-private" "clj-stacktrace" "cider/cider-nrepl"])]
     (data-equal (map (fn [lib]
                        {:library lib
                         :last-processed-version (ver/latest-release lib)
@@ -126,7 +143,8 @@
   (login-and-check-default-project-created "me@email.com")
   (let [project {:name "Build file project"
                  :type "build-file"
-                 :action {:library "none"
+                 :action {:library {:name "none"
+                                    :type "jvm"}
                           :project-id "none"
                           :type "noop"}}
         invalid-build-files [(str (.toURI (io/file "dev/build-files/project.clj")))

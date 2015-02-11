@@ -60,7 +60,9 @@
                      (wrap-authenticated-only
                       (actions-api-routes db config)))
             (login-api-routes db config)
-            (GET "/library-version" [library] (library-version library)))
+            (GET "/library-version" [name type]
+                 (library-version {:name name
+                                   :type type})))
    (route/resources "/")
    ; for debugging serve files from "out" folder
    (route/files "/out" {:root "out"})

@@ -14,7 +14,7 @@
                   "old-actions" old-actions
                   "cur-actions" cur-actions)
 
-    ; Delete actions that no longer present in build file.
+    ; Delete actions that no longer exist in build file.
     (doseq [action old-actions
             :when (not (contains? cur-libraries (:library action)))]
       (timbre/debug "Deleting action" (:library action))

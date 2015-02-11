@@ -5,3 +5,4 @@ pom.xml
 resources/public/gen
 .lein-failures
 .lein-repl-history
+out

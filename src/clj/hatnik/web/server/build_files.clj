@@ -59,6 +59,9 @@
     (try
       (let [deps (all-dependencies (read-project-clj url))]
         (->> deps
+             (map (fn [library-name]
+                    {:name library-name
+                     :type "jvm"}))
              (map (fn [library]
                     {:library library
                      :last-processed-version (ver/latest-release library)
@@ -71,6 +74,6 @@
 
 (comment
 
-  (actions-from-build-file "dev/build-files/project.clj")
+  (actions-from-build-file "nbeloglazov/hatnik-test-lib")
   
   )

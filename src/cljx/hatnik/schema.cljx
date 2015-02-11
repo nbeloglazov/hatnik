@@ -20,9 +20,17 @@
   "Schema for validating project names."
   (string-of-length 1 128))
 
-(def Library
+(def LibraryName
   "Schema for validating libraries."
   (string-of-length 1 128))
+
+(def LibraryType
+  (s/enum "jvm"))
+
+(def Library
+  "Schema for validating libraries."
+  {:name LibraryName
+   :type LibraryType})
 
 (def TemplateBody
   "Schema for validating templates that will be used as message bodies.

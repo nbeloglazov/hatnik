@@ -156,7 +156,8 @@
                   {:type type
                    :email-address email
                    :project-id "none"
-                   :library "none"
+                   :library {:name "none"
+                             :type "jvm"}
                    :file-operation-type "project.clj"}))))
 
 (defn show [project]

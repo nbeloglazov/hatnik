@@ -7,9 +7,9 @@
 (use-fixtures :each system-fixture cookie-store-fixture)
 
 (deftest test-api-valid-usage
-  (let [quil-ver (-> (http :get "/library-version?library=quil")
+  (let [quil-ver (-> (http :get "/library-version?name=quil&type=jvm")
                      ok? :version)
-        ring-ver (-> (http :get "/library-version?library=ring")
+        ring-ver (-> (http :get "/library-version?name=ring&type=jvm")
                      ok? :version)
         email "me@email.com"
         proj-dflt-id (login-and-check-default-project-created email)
@@ -32,7 +32,8 @@
                       :type "email"
                       :subject "Subject dflt one"
                       :body "Template dflt one"
-                      :library "quil"}
+                      :library {:name "quil"
+                                :type "jvm"}}
         resp (ok? (http :post "/actions" act-dflt-one))
         _ (assert (= (:last-processed-version resp) quil-ver))
         act-dflt-one (merge act-dflt-one (dissoc resp :result))
@@ -40,7 +41,8 @@
         ; Create second action in Default. Noop action.
         act-dflt-two {:project-id proj-dflt-id
                       :type "noop"
-                      :library "ring"}
+                      :library {:name "ring"
+                                :type "jvm"}}
         resp (ok? (http :post "/actions" act-dflt-two))
         _ (assert (= (:last-processed-version resp) ring-ver))
         act-dflt-two (merge act-dflt-two (dissoc resp :result))
@@ -51,7 +53,8 @@
                         :repo "quil/quil-with.dot"
                         :body "Template body"
                         :title "Template title"
-                        :library "ring"}
+                        :library {:name "ring"
+                                  :type "jvm"}}
         resp (ok? (http :post "/actions" act-dflt-three))
         _ (assert (= (:last-processed-version resp) ring-ver))
         act-dflt-three (merge act-dflt-three (dissoc resp :result))
@@ -65,7 +68,8 @@
                        :operations [{:file "project.clj"
                                      :regex "hello"
                                      :replacement "world"}]
-                       :library "ring"}
+                       :library {:name "ring"
+                                 :type "jvm"}}
         resp (ok? (http :post "/actions" act-dflt-four))
         _ (assert (= (:last-processed-version resp) ring-ver))
         act-dflt-four (merge act-dflt-four (dissoc resp :result))
@@ -75,7 +79,8 @@
                      :type "email"
                      :subject "Subject foo single"
                      :body "Template foo single"
-                     :library "quil"}
+                     :library {:name "quil"
+                               :type "jvm"}}
         resp (ok? (http :post "/actions" act-foo-one))
         _ (assert (= (:last-processed-version resp) quil-ver))
         act-foo-one (merge act-foo-one (dissoc resp :result))
@@ -99,8 +104,9 @@
 
         ; Update action dflt-one. Change library and body.
         act-dflt-one (assoc act-dflt-one
-                       :library "ring"
-                       :body "Oh my new body")
+                            :library {:name "ring"
+                                      :type "jvm"}
+                            :body "Oh my new body")
         resp (->> (dissoc act-dflt-one :id :last-processed-version)
                   (http :put (str "/actions/" (:id act-dflt-one)))
                   ok?)
@@ -163,10 +169,15 @@
                :type "email"
                :subject "Subject dflt one"
                :body "Template dflt one"
-               :library "quil"}]
+               :library {:name "quil"
+                         :type "jvm"}}]
     (concat (without-each-key valid)
             (map #(merge valid %)
-                 [{:library "iDontExist"}
+                 [{:library "i am string"}
+                  {:library {:name "doN't exist"
+                             :type "jvm"}}
+                  {:library {:name "quil"
+                             :type "pascal"}} ; pascal is not supported
                   {:type "unknown"}
                   {:body long-string}
                   {:subject long-string}
@@ -174,7 +185,8 @@
 
 (defn make-invalid-github-issue-actions [proj-id]
   (let [valid {:project-id proj-id
-               :library "quil"
+               :library {:name "quil"
+                         :type "jvm"}
                :type "github-issue"
                :repo "nbeloglazov/hatnik"
                :title "Hello {{library}}"
@@ -187,7 +199,8 @@
 
 (defn make-invalid-github-pull-request-actions [proj-id]
   (let [valid {:project-id proj-id
-               :library "quil"
+               :library {:name "quil"
+                         :type "jvm"}
                :type "github-pull-request"
                :repo "nbeloglazov/hatnik"
                :title "Hello {{library}}"
@@ -209,9 +222,9 @@
                                  :replacement long-string}]}]))))
 
 (deftest test-api-invalid-requests
-  (let [quil-ver (-> (http :get "/library-version?library=quil")
+  (let [quil-ver (-> (http :get "/library-version?name=quil&type=jvm")
                      ok? :version)
-        ring-ver (-> (http :get "/library-version?library=ring")
+        ring-ver (-> (http :get "/library-version?name=ring&type=jvm")
                      ok? :version)
         email "me@email.com"
         proj-dflt-id (login-and-check-default-project-created email)
@@ -221,7 +234,8 @@
                       :type "email"
                       :subject "Subject dflt one"
                       :body "Template dflt one"
-                      :library "quil"}
+                      :library {:name "quil"
+                                :type "jvm"}}
         resp (ok? (http :post "/actions" act-dflt-one))
         _ (assert (= (:last-processed-version resp) quil-ver))
         act-dflt-one (merge act-dflt-one (dissoc resp :result))
@@ -255,16 +269,17 @@
         ; Build file actions cannot be created by users.
         build-file-action {:project-id proj-dflt-id
                            :type "build-file"
-                           :library "quil"}
+                           :library {:name "quil"
+                                     :type "jvm"}}
         _ (error? (http :post "/actions" build-file-action))
         _ (error? (http :put (str "/actions/" (:id act-dflt-one))
                         build-file-action))
         ]))
 
 (deftest test-api-access-to-other-users
-  (let [quil-ver (-> (http :get "/library-version?library=quil")
+  (let [quil-ver (-> (http :get "/library-version?name=quil&type=jvm")
                      ok? :version)
-        ring-ver (-> (http :get "/library-version?library=ring")
+        ring-ver (-> (http :get "/library-version?name=ring&type=jvm")
                      ok? :version)
         email "me@email.com"
         proj-id (login-and-check-default-project-created email)
@@ -274,7 +289,8 @@
                   :type "email"
                   :subject "Subject dflt one"
                   :body "Template dflt one"
-                  :library "quil"}
+                  :library {:name "quil"
+                            :type "jvm"}}
         resp (ok? (http :post "/actions" act-base))
         act-full (merge act-base (dissoc resp :result))
 
@@ -325,9 +341,9 @@
     (merge action (dissoc resp :result))))
 
 (deftest test-api-github-pull-request-actions
-  (let [quil-ver (-> (http :get "/library-version?library=quil")
+  (let [quil-ver (-> (http :get "/library-version?name=quil&type=jvm")
                      ok? :version)
-        ring-ver (-> (http :get "/library-version?library=ring")
+        ring-ver (-> (http :get "/library-version?name=ring&type=jvm")
                      ok? :version)
         email "me@email.com"
 
@@ -347,12 +363,14 @@
                     [{:file "project.clj"
                       :regex "hello"
                       :replacement "world"}]
-                    "ring"
+                    {:name "ring"
+                     :type "jvm"}
                     ring-ver)
         act-project-clj (create-github-pr-action
                          proj-id
                          "project.clj"
-                         "quil"
+                         {:name "quil"
+                          :type "jvm"}
                          quil-ver)
         expected [{:name "Default" :id proj-id :type "regular"
                    :actions (map-by-id [act-custom

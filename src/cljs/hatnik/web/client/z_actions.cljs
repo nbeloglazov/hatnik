@@ -171,5 +171,7 @@
 
 (defn get-library [library callback]
   (u/ajax
-   (str "/api/library-version?library=" library) "GET"
+   (str "/api/library-version?name=" (:name library)
+        "&type=" (:type library))
+   "GET"
    {} callback))

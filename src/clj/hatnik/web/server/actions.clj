@@ -75,7 +75,7 @@
                  "/test-action")
         data (assoc data
                :version "2.3.4"
-               :previous-version "1.2.3")
+               :last-processed-version "1.2.3")
         resp (->> {:form-params data
                    :content-type :json
                    :accept :json

@@ -14,19 +14,23 @@
         project-id (stg/create-project! db {:name "Default"
                                             :user-id user-id})]
     (stg/create-action! db user-id {:project-id project-id
-                                              :type "email"
-                                              :library "foo-library"
-                                              :last-processed-version "1.0.0"})
+                                    :type "email"
+                                    :library {:name "foo-library"
+                                              :type "jvm"}
+                                    :last-processed-version "1.0.0"})
     (stg/create-action! db user-id {:project-id project-id
-                                              :type "email"
-                                              :library "foo-library"
-                                              :last-processed-version "0.9.0"})
+                                    :type "email"
+                                    :library {:name "foo-library"
+                                              :type "jvm"}
+                                    :last-processed-version "0.9.0"})
     db))
 
 (deftest test-check-library-and-perform-actions-correct
   (let [db (get-db)]
-   (with-redefs [ver/latest-release (constantly "2.0.0")]
-     (check-library-and-perform-actions "foo-library" (stg/get-actions db)
+   (with-redefs [ver/latest-release-jvm (constantly "2.0.0")]
+     (check-library-and-perform-actions {:name  "foo-library"
+                                         :type "jvm"}
+                                        (stg/get-actions db)
                                         db perform-action-disabled {}))
    (doseq [action (stg/get-actions db)]
      (assert (= (:last-processed-version action) "2.0.0")))
@@ -38,8 +42,10 @@
         actions (stg/get-actions db)
         actions-by-id (into {}
                             (map #(vector (:id %) %) actions))]
-    (with-redefs [ver/latest-release (constantly "0.5.0")]
-      (check-library-and-perform-actions "foo-library" actions
+    (with-redefs [ver/latest-release-jvm (constantly "0.5.0")]
+      (check-library-and-perform-actions {:name "foo-library"
+                                          :type "jvm"}
+                                         actions
                                          db perform-action-disabled {}))
     (doseq [action (stg/get-actions db)]
       (assert (= (:last-processed-version action)
@@ -52,8 +58,9 @@
         actions (stg/get-actions db)
         actions-by-id (into {}
                             (map #(vector (:id %) %) actions))]
-    (with-redefs [ver/latest-release (constantly nil)]
-      (check-library-and-perform-actions "foo-library" actions
+    (with-redefs [ver/latest-release-jvm (constantly nil)]
+      (check-library-and-perform-actions {:name "foo-library"
+                                          :type "jvm"} actions
                                          db perform-action-disabled {}))
     (doseq [action (stg/get-actions db)]
       (assert (= (:last-processed-version action)

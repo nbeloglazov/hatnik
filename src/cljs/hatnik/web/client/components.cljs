@@ -62,8 +62,8 @@
                    (-> data :project :action :type)
                    (:type data))
             email (:user-email data)
-            library (:library data)
-            library-class (if (< (count library) 27)
+            library-name (-> data :library :name)
+            library-class (if (< (count library-name) 27)
                             "" ; regular class
                             "long-name")]
         (dom/div #js {:className (str "panel panel-default action "
@@ -76,8 +76,8 @@
                  (dom/div #js {:className "panel-body"}
                    (render-action-type type)
                    (dom/div #js {:className (str "library-name " library-class)
-                                 :title library}
-                            library)
+                                 :title library-name}
+                            library-name)
                    (dom/div #js {:className "version"}
                             (:last-processed-version data))))))))
 

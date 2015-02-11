@@ -52,9 +52,9 @@
 (defn build-variables-map
   "Builds map of variables that can be used in templates via {{variable}} syntax."
   [project action library-version]
-  (let [library (:library action)
-        [group-id artifact-id] (cstr/split library #"/")]
-    {:library library
+  (let [library-name (-> action :library :name)
+        [group-id artifact-id] (cstr/split library-name #"/")]
+    {:library library-name
      :group-id group-id
      ; some libraries have both artifact and group ids same. E.g. quil
      :artifact-id (or artifact-id group-id)
@@ -66,7 +66,7 @@
   "Retrieves latest version for given library and updates actions if they
   are outdated.
   Arguments:
-    library - name of library to check.
+    library - library to check.
     actions - collection of all actions for the library.
     db - storage.
     perform-action - function that peforms actions.

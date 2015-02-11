@@ -5,11 +5,15 @@
 (defn- snapshot? [version]
   (-> version .toLowerCase (.contains "snapshot")))
 
-(defn latest-release [library]
-  (->> (anc/versions! library)
+(defn latest-release-jvm [library-name]
+  (->> (anc/versions! library-name)
        (map :version-string)
        (remove snapshot?)
        first))
+
+(defn latest-release [library]
+  (case (:type library)
+    "jvm" (latest-release-jvm (:name library))))
 
 (defn first-newer? [version-a version-b]
   (= 1 (ver-comp/version-compare version-a version-b)))

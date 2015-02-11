@@ -22,7 +22,7 @@
    "github-pull-request" "Open test pull request"})
 
 (defn action-from-project? [data]
-  (= (:library data) (:project-id data) "none"))
+  (= (-> data :library :name) (:project-id data) "none"))
 
 (defn action-input-elements [data owner]
   (reify
@@ -85,7 +85,8 @@
                       "Test"))))))))
 
 (def default-state
-  {:library ""
+  {:library {:name ""
+             :type "jvm"}
    :library-version ""
    :body (str "{{library}} {{version}} has been released. "
               "Previous version was {{previous-version}}.")

@@ -48,7 +48,7 @@
 
 (use-fixtures :each file-server-fixture)
 
-(defn mock-latest-release-fn
+(defn mock-latest-release-jvm-fn
   "Create latest-release version which returns
   new version every time it called."
   [versions]
@@ -69,7 +69,8 @@
         :build-file (str "http://localhost:" file-server-port
                          "/project.clj")
         :action {:project-id "none"
-                 :library "none"
+                 :library {:name "none"
+                           :type "jvm"}
                  :type "email"
                  :subject (str "Build file subject {{library}} {{version}} "
                                "{{previous-version}} {{project}} "
@@ -88,11 +89,13 @@
                        :projects vals first :id)
           _ (ok? (http :post "/actions"
                        {:project-id proj1-id
-                        :library "lib-1"
+                        :library {:name "lib-1"
+                                  :type "jvm"}
                         :type "noop"}))
           _ (ok? (http :post "/actions"
                        {:project-id proj1-id
-                        :library "lib-2"
+                        :library {:name "lib-2"
+                                  :type "jvm"}
                         :type "email"
                         :subject (str "Subject {{library}} {{version}} "
                                       "{{previous-version}} {{project}} "
@@ -102,7 +105,8 @@
                                    "{{not-used}}")}))
           _ (ok? (http :post "/actions"
                        {:project-id proj1-id
-                        :library "lib-3"
+                        :library {:name "lib-3"
+                                  :type "jvm"}
                         :type "github-issue"
                         :repo "someone/cool-repo"
                         :title (str "Title {{library}} {{version}} "
@@ -119,7 +123,8 @@
                        :projects vals first :id)
           _ (ok? (http :post "/actions"
                        {:project-id proj2-id
-                        :library "lib-4"
+                        :library {:name "lib-4"
+                                  :type "jvm"}
                         :type "email"
                         :subject (str "Subject bar {{library}} {{version}} "
                                       "{{previous-version}} {{project}} "
@@ -246,7 +251,7 @@
           bar-actions (-> (http :get "/projects") ok?
                           :projects vals first :actions vals)]
       (assert (= (count foo-actions) 3))
-      (are [library version] (some #(and (= (:library %) library)
+      (are [library version] (some #(and (= (-> % :library :name) library)
                                          (= (:last-processed-version %) version))
                                    foo-actions)
            "lib-1" "3.0"
@@ -254,7 +259,7 @@
            "lib-3" "5.0")
 
       (assert (= (count bar-actions) 1))
-      (assert (and (= (:library (first bar-actions)) "lib-4")
+      (assert (and (= (-> bar-actions first :library :name) "lib-4")
                    (= (:last-processed-version (first bar-actions))
                       "6.0"))))))
 
@@ -271,7 +276,7 @@
                         "ring" 1})]
     (timbre/set-level! :info)
     (try
-      (with-redefs [ver/latest-release (mock-latest-release-fn versions)]
+      (with-redefs [ver/latest-release-jvm (mock-latest-release-jvm-fn versions)]
         (create-actions)
         (run-worker db versions)
         (assert-actions-updated))

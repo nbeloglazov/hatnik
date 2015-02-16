@@ -9,7 +9,7 @@
                  [ring/ring-json "0.3.1"]
                  [clj-http "1.0.1"]
                  [tentacles "0.3.0"]
-                 [com.taoensso/timbre "3.3.1"]
+                 [com.taoensso/timbre "3.4.0"]
                  [com.novemberain/monger "2.0.1"]
                  [ancient-clj "0.3.2"]
                  [com.draines/postal "1.11.3"]

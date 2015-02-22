@@ -15,10 +15,13 @@
                   "cur-actions" cur-actions)
 
     ; Delete actions that no longer present in build file.
-    (doseq [action old-actions
-            :when (not (contains? cur-libraries (:library action)))]
-      (timbre/debug "Deleting action" (:library action))
-      (stg/delete-action! db user-id (:id action)))
+    ; If cur-actions is empty, don't delete anything. It is probabaly
+    ; some error during retrieving current actions.
+    (when-not (empty? cur-actions)
+      (doseq [action old-actions
+              :when (not (contains? cur-libraries (:library action)))]
+        (timbre/debug "Deleting action" (:library action))
+        (stg/delete-action! db user-id (:id action))))
 
     ; Create new actions that were added to build-file since last sync.
     (doseq [action cur-actions
@@ -27,9 +30,13 @@
       (stg/create-action! db user-id (assoc action :project-id id)))))
 
 (defn sync-build-file-actions [db]
-  (let [actions-by-proj-id (->> (stg/get-actions db)
+  (let [projects (filter #(= (:type %) "build-file")
+                         (stg/get-projects db))
+        projects-empty-actions (zipmap (map :id projects) (repeat []))
+        actions-by-proj-id (->> (stg/get-actions db)
                                 (filter #(= (:type %) "build-file"))
-                                (group-by :project-id))]
+                                (group-by :project-id)
+                                (merge projects-empty-actions))]
     (timbre/debug "Total build-file projects" (count actions-by-proj-id))
     (doseq [[id actions] actions-by-proj-id]
       (sync-build-file-project db id actions))))

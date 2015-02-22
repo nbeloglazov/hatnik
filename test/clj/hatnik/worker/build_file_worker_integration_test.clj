@@ -79,9 +79,10 @@
                                (sort-by :library))) )]
       (while (not= actions (cur-actions))
         (when (> (System/currentTimeMillis) timeout-time)
-          (throw (ex-info "Actions don't match"
-                          {:expected-actions actions
-                           :actual-actions (cur-actions)})))
+          (throw (ex-info (str "Actions don't match. Expected "
+                               (pr-str actions) ", actual "
+                               (pr-str (cur-actions)))
+                          {})))
         (Thread/sleep 250)))))
 
 (defn create-project
@@ -127,6 +128,24 @@
       (create-project-clj ["quil" "ring"])
 
       (assert-actions [{:library "quil"
+                        :last-processed-version "0.3.2"}
+                       {:library "ring"
+                        :last-processed-version "0.3.2"}])
+
+      ; Remove all deps to simulate some error when no deps were returned.
+      ; Old actions should not be deleted.
+      (create-project-clj [])
+      (Thread/sleep 3000)
+      (assert-actions [{:library "quil"
+                        :last-processed-version "0.3.2"}
+                       {:library "ring"
+                        :last-processed-version "0.3.2"}])
+
+      ; Return deps back
+      (create-project-clj ["org.clojure/clojure" "quil" "ring"])
+      (assert-actions [{:library "org.clojure/clojure"
+                        :last-processed-version "0.2.2"}
+                       {:library "quil"
                         :last-processed-version "0.3.2"}
                        {:library "ring"
                         :last-processed-version "0.3.2"}])

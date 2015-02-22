@@ -71,6 +71,7 @@
 
 (comment
 
-  (actions-from-build-file "dev/build-files/project.clj")
+
+  (actions-from-build-file "nbeloglazov/hatnik")
   
   )

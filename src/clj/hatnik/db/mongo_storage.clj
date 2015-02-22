@@ -53,6 +53,10 @@
     (->> (mc/find-maps db projects {:user-id user-id})
          (map norm-id)))
 
+  (get-projects [storage]
+    (->> (mc/find-maps db projects {})
+         (map norm-id)))
+
   (get-project [storage id]
     (norm-id (mc/find-map-by-id db projects (to-object-id id))))
 

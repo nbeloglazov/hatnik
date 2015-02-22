@@ -69,19 +69,31 @@
                                         :user-id user2})]
 
     (assert (= (set (s/get-projects storage user1))
-           #{{:name "Foo project"
-              :user-id user1
-              :id id1}
-             {:name "Foo project 2"
-              :user-id user1
-              :id id2}})
+               #{{:name "Foo project"
+                  :user-id user1
+                  :id id1}
+                 {:name "Foo project 2"
+                  :user-id user1
+                  :id id2}})
         "Projects for user 1 should match")
 
     (assert (= (set (s/get-projects storage user2))
-           #{{:name "Bar project"
-              :user-id user2
-              :id id3}})
+               #{{:name "Bar project"
+                  :user-id user2
+                  :id id3}})
         "Projects for user 2 should match")
+
+    (assert (= (set (s/get-projects storage))
+               #{{:name "Foo project"
+                  :user-id user1
+                  :id id1}
+                 {:name "Foo project 2"
+                  :user-id user1
+                  :id id2}
+                 {:name "Bar project"
+                  :user-id user2
+                  :id id3}})
+        "All projects should match")
 
     ; Get by id
     (assert (= (s/get-project storage id1)
@@ -125,6 +137,8 @@
               :user-id user1
               :id id2}})
         "'Just project' should have been deleted")
+    (assert (= 2 (count (s/get-projects storage)))
+            "Total number of projects should be 2")
 
     ; Trying to delete someon elses project
     (s/delete-project! storage user1 id3)
@@ -132,7 +146,9 @@
            #{{:name "Bar project"
               :user-id user2
               :id id3}})
-        "Bar project should not change")))
+        "Bar project should not change")
+    (assert (= 2 (count (s/get-projects storage)))
+            "Total number of projects should be 2")))
 
 (defn test-action-storage [storage]
   (let [user1 (s/create-user! storage foo-user)

@@ -44,6 +44,9 @@
     (->> (:projects @atom)
          (filter #(= user-id (:user-id %)))))
 
+  (get-projects [storage]
+    (:projects @atom))
+
   (get-project [storage id]
     (->> (:projects @atom)
          (filter #(= id (:id %)))

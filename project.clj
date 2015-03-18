@@ -22,11 +22,11 @@
                  [commons-io "2.4"]
 
                  ; ClojureScript
-                 [org.clojure/clojurescript "0.0-3058"]
+                 [org.clojure/clojurescript "0.0-3123"]
                  [jayq "2.5.4"]
                  [org.omcljs/om "0.8.8"]]
 
-  :plugins [[lein-cljsbuild "1.0.4"]]
+  :plugins [[lein-cljsbuild "1.0.5"]]
 
   :main hatnik.system
   :source-paths ["src/clj" "target/gen/clj"]

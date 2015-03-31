@@ -41,7 +41,7 @@
   :profiles
   {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
                         [ring-mock "0.1.5"]
-                        [com.cemerick/piggieback "0.1.5"]
+                        [com.cemerick/piggieback "0.2.0"]
                         [org.seleniumhq.selenium/selenium-java "2.45.0"]
                         [org.seleniumhq.selenium/selenium-remote-driver "2.45.0"]
                         [org.seleniumhq.selenium/selenium-server "2.45.0"]]

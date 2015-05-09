@@ -4,7 +4,7 @@
   :dependencies [; Clojure
                  [org.clojure/clojure "1.7.0-beta2"]
                  [ring "1.4.0-beta1"]
-                 [compojure "1.3.3"]
+                 [compojure "1.3.4"]
                  [hiccup "1.0.5"]
                  [ring/ring-json "0.3.1"]
                  [clj-http "1.1.2"]

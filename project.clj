@@ -2,7 +2,7 @@
   :description "Web app for tracking library releases."
   :url "http://hatnik.com"
   :dependencies [; Clojure
-                 [org.clojure/clojure "1.7.0-beta2"]
+                 [org.clojure/clojure "1.7.0-beta3"]
                  [ring "1.4.0-beta2"]
                  [compojure "1.3.4"]
                  [hiccup "1.0.5"]

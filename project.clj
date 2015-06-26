@@ -8,7 +8,7 @@
                  [hiccup "1.0.5"]
                  [ring/ring-json "0.3.1"]
                  [clj-http "1.1.2"]
-                 [tentacles "0.3.0"]
+                 [tentacles "0.4.0"]
                  [com.taoensso/timbre "4.0.0"]
                  [com.novemberain/monger "3.0.0-rc1"]
                  [ancient-clj "0.3.9"]

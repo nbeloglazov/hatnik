@@ -3,7 +3,7 @@
   :url "http://hatnik.com"
   :dependencies [; Clojure
                  [org.clojure/clojure "1.7.0"]
-                 [ring "1.4.0-RC1"]
+                 [ring "1.4.0-RC2"]
                  [compojure "1.3.4"]
                  [hiccup "1.0.5"]
                  [ring/ring-json "0.3.1"]

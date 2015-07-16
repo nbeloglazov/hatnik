@@ -10,7 +10,7 @@
                  [clj-http "1.1.2"]
                  [tentacles "0.4.0"]
                  [com.taoensso/timbre "4.1.0-alpha1"]
-                 [com.novemberain/monger "3.0.0-rc2"]
+                 [com.novemberain/monger "3.0.0"]
                  [ancient-clj "0.3.9"]
                  [com.draines/postal "1.11.3"]
                  [version-clj "0.1.2"]

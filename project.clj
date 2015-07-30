@@ -6,7 +6,7 @@
                  [ring "1.4.0"]
                  [compojure "1.4.0"]
                  [hiccup "1.0.5"]
-                 [ring/ring-json "0.3.1"]
+                 [ring/ring-json "0.4.0"]
                  [clj-http "2.0.0"]
                  [tentacles "0.4.0"]
                  [com.taoensso/timbre "4.1.0-alpha2"]

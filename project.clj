@@ -6,12 +6,12 @@
                  [ring "1.4.0"]
                  [compojure "1.4.0"]
                  [hiccup "1.0.5"]
-                 [ring/ring-json "0.3.1"]
-                 [clj-http "1.1.2"]
+                 [ring/ring-json "0.4.0"]
+                 [clj-http "2.0.0"]
                  [tentacles "0.4.0"]
                  [com.taoensso/timbre "4.1.0-alpha2"]
                  [com.novemberain/monger "3.0.0"]
-                 [ancient-clj "0.3.9"]
+                 [ancient-clj "0.3.10"]
                  [com.draines/postal "1.11.3"]
                  [version-clj "0.1.2"]
                  [clojurewerkz/quartzite "2.0.0"]
@@ -22,7 +22,7 @@
                  [commons-io "2.4"]
 
                  ; ClojureScript
-                 [org.clojure/clojurescript "0.0-3308"]
+                 [org.clojure/clojurescript "1.7.28"]
                  [jayq "2.5.4"]
                  [org.omcljs/om "0.9.0"]]
 

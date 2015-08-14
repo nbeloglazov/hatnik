@@ -11,7 +11,7 @@
                  [tentacles "0.4.0"]
                  [com.taoensso/timbre "4.1.0"]
                  [com.novemberain/monger "3.0.0"]
-                 [ancient-clj "0.3.10"]
+                 [ancient-clj "0.3.11"]
                  [com.draines/postal "1.11.3"]
                  [version-clj "0.1.2"]
                  [clojurewerkz/quartzite "2.0.0"]

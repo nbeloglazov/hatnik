@@ -26,7 +26,7 @@
                  [jayq "2.5.4"]
                  [org.omcljs/om "0.9.0"]]
 
-  :plugins [[lein-cljsbuild "1.0.6"]]
+  :plugins [[lein-cljsbuild "1.1.0"]]
 
   :main hatnik.system
   :source-paths ["src/clj" "target/gen/clj"]

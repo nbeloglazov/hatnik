@@ -43,7 +43,7 @@
                         [ring-mock "0.1.5"]
                         [com.cemerick/piggieback "0.2.1"]
                         [org.seleniumhq.selenium/selenium-java "2.47.1"]
-                        [org.seleniumhq.selenium/selenium-remote-driver "2.47.1"]
+                        [org.seleniumhq.selenium/selenium-remote-driver "2.48.1"]
                         [org.seleniumhq.selenium/selenium-server "2.47.1"]]
 
          :plugins [[jonase/eastwood "0.2.1"]

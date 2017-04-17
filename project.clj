@@ -44,7 +44,7 @@
                         [com.cemerick/piggieback "0.2.1"]
                         [org.seleniumhq.selenium/selenium-java "2.47.1"]
                         [org.seleniumhq.selenium/selenium-remote-driver "2.47.1"]
-                        [org.seleniumhq.selenium/selenium-server "2.47.1"]]
+                        [org.seleniumhq.selenium/selenium-server "2.48.2"]]
 
          :plugins [[jonase/eastwood "0.2.2"]
                    [com.keminglabs/cljx "0.5.0" :exclusions [org.clojure/clojure]]]

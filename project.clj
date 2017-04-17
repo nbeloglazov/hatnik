@@ -12,7 +12,7 @@
                  [com.taoensso/timbre "4.1.4"]
                  [com.novemberain/monger "3.0.0"]
                  [ancient-clj "0.3.11"]
-                 [com.draines/postal "1.11.3"]
+                 [com.draines/postal "1.11.4"]
                  [version-clj "0.1.2"]
                  [clojurewerkz/quartzite "2.0.0"]
                  [prismatic/schema "1.0.1"]
